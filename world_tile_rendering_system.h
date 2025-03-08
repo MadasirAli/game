@@ -26,10 +26,8 @@ namespace game {
       uint32_t fillIndex = 0;
     };
     struct render_data_cbuffer {
-      uint32_t xInstanceOffset = 0;
-      uint32_t yInstanceOffset = 0;
-
-      float padding[2] = { 0 };
+      uint32_t instanceOffset[2] = {0};
+      uint32_t instanceFrustumSize[2] = { 0 };
     };
     struct instance_data_cbuffer {
       uint32_t worldWidth = 0;

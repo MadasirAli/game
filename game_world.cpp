@@ -15,6 +15,9 @@ void game_world::update(float deltaTime)
   if (_started == false) {
     _started = true;
 
+    std::array<float, 2> camStartPos = { _worldWidth * 0.5f, _worldHeight * 0.5f };
+    _rCamera.get().set_position(camStartPos);
+
     // creating arch type
     world_tile_component tile = { };
 

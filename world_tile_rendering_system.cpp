@@ -16,14 +16,15 @@ void world_tile_rendering_system::on_update(const world& query)
   const auto frustumSize = camera.get_size();
   const auto aspectRatio = camera.get_aspect_ratio();
 
-  int32_t xStartIndex = (int32_t)(((camPos[0] + (_worldWidth * 0.5f)) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - 2;
-  int32_t yStartIndex = (int32_t)(((camPos[1] + (_worldHeight * 0.5f)) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - 2;
+  int32_t xStartIndex = (int32_t)(((camPos[0]) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t yStartIndex = (int32_t)(((camPos[1]) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
 
-  xStartIndex += _worldWidth / 2;
-  yStartIndex += _worldHeight / 2;
+  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
+  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
 
-  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + 2;
-  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + 2;
+  ImGui::Text("X Cam : %f, Y Cam: %f", camPos[0], camPos[1]);
+
+  ImGui::Text("Before Clamping:");
 
   ImGui::Text("X Start : %d, Y Start: %d", xStartIndex, yStartIndex);
   ImGui::Text("X End: %d, Y End: %d", xEndIndex, yEndIndex);
@@ -44,8 +45,8 @@ void world_tile_rendering_system::on_update(const world& query)
   for (size_t i = yStartIndex; i < yEndIndex; ++i) {
     for (size_t j = xStartIndex; j < xEndIndex; ++j) {
 
-      const uint32_t x = j - (_worldWidth / 2);
-      const uint32_t y = i - (_worldHeight / 2);
+      const int32_t x = j - (_worldWidth / 2);
+      const int32_t y = i - (_worldHeight / 2);
       const uint32_t z = (i * _worldWidth) + j;
 
       const auto& tile = _pTiles[z];
@@ -176,11 +177,14 @@ void world_tile_rendering_system::on_update(const world& query)
   renderer.unmap_buffer(_instanceDataSBuffer);
 
   const int32_t drawCount = (xEndIndex - xStartIndex) * (yEndIndex - yStartIndex);
+  ImGui::Text("Draw Count: %d", drawCount);
 
   if (drawCount > 0) {
     render_data_cbuffer renderData = { 0 };
-    renderData.xInstanceOffset = xStartIndex;
-    renderData.yInstanceOffset = yStartIndex;
+    renderData.instanceOffset[0] = xStartIndex;
+    renderData.instanceOffset[1] = yStartIndex;
+    renderData.instanceFrustumSize[0] = xEndIndex - xStartIndex;
+    renderData.instanceFrustumSize[1] = yEndIndex - yStartIndex;
 
     renderer.map_buffer(_renderDataCBuffer, map);
     ((render_data_cbuffer*)(map.pData))[0] = renderData;
@@ -230,6 +234,7 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _mat.set_sbuffer("InstanceDataSBuffer", _instanceDataSBuffer);
 
   _mat.set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
+  _mat.set_cbuffer("RenderDataCBuffer", _renderDataCBuffer);
 
   _mat.set_texture("FillMapTextureArray", textures["tilemap_fillmap_array"], sampler_mode::undef);
   _mat.set_texture("TileEdgeTextureArray", textures["tilemap_maskmap_array"], sampler_mode::undef);
