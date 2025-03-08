@@ -24,23 +24,11 @@ void world_tile_rendering_system::on_update(const world& query)
   int32_t xEndIndex = xStartIndex + (int32_t)(std::sqrt(std::pow(frustumSize, 2)) * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
   int32_t yEndIndex = yStartIndex + (int32_t)(std::sqrt(std::pow(frustumSize, 2)) * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
 
-  ImGui::Text("X Cam : %f, Y Cam: %f", camPos[0], camPos[1]);
-
-  ImGui::Text("Before Clamping:");
-
-  ImGui::Text("X Start : %d, Y Start: %d", xStartIndex, yStartIndex);
-  ImGui::Text("X End: %d, Y End: %d", xEndIndex, yEndIndex);
-
   xStartIndex = xStartIndex < 0 ? 0 : xStartIndex;
   yStartIndex = yStartIndex < 0 ? 0 : yStartIndex;
 
   xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
-
-  ImGui::Text("After Clamping:-");
-  ImGui::Text("X Start : %d, Y Start: %d", xStartIndex, yStartIndex);
-  ImGui::Text("X End: %d, Y End: %d", xEndIndex, yEndIndex);
-
 
   D3D11_MAPPED_SUBRESOURCE map = { 0 };
   renderer.map_buffer(_instanceDataSBuffer, map);
