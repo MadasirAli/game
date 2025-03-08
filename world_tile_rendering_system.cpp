@@ -1,5 +1,7 @@
 #include "world_tile_rendering_system.h"
 
+#include <cmath>
+
 #include "world.h"
 #include "imgui.h"
 
@@ -16,11 +18,11 @@ void world_tile_rendering_system::on_update(const world& query)
   const auto frustumSize = camera.get_size();
   const auto aspectRatio = camera.get_aspect_ratio();
 
-  int32_t xStartIndex = (int32_t)(((camPos[0]) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
-  int32_t yStartIndex = (int32_t)(((camPos[1]) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t xStartIndex = (int32_t)(((camPos[0]) - (std::sqrt(std::pow(frustumSize * 0.5f, 2)) * (1.0 / aspectRatio))) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t yStartIndex = (int32_t)(((camPos[1]) - (std::sqrt(std::pow(frustumSize * 0.5f, 2)) * (1.0 / 1))) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
 
-  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
-  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
+  int32_t xEndIndex = xStartIndex + (int32_t)(std::sqrt(std::pow(frustumSize, 2)) * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
+  int32_t yEndIndex = yStartIndex + (int32_t)(std::sqrt(std::pow(frustumSize, 2)) * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
 
   ImGui::Text("X Cam : %f, Y Cam: %f", camPos[0], camPos[1]);
 
@@ -38,6 +40,7 @@ void world_tile_rendering_system::on_update(const world& query)
   ImGui::Text("After Clamping:-");
   ImGui::Text("X Start : %d, Y Start: %d", xStartIndex, yStartIndex);
   ImGui::Text("X End: %d, Y End: %d", xEndIndex, yEndIndex);
+
 
   D3D11_MAPPED_SUBRESOURCE map = { 0 };
   renderer.map_buffer(_instanceDataSBuffer, map);
