@@ -36,8 +36,13 @@ namespace game {
     void set_aspect_ratio(float ratio) {
       _aspectRatio = ratio;
     }
+    float get_aspect_ratio() const {
+      return _aspectRatio;
+    }
 
     void update();
+
+    bool is_in_view(float x, float y, float width, float height) const;
 
   private:
     void update_buffer() const;

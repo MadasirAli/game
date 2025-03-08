@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "shader_collection.h"
 #include "texture_collection.h"
+#include "world_tile_component.h"
 
 namespace game {
   class world_tile_rendering_system : public base::ecs::system {
@@ -24,17 +25,18 @@ namespace game {
       uint32_t edgeIndex = 0;
       uint32_t fillIndex = 0;
     };
+    struct render_data_cbuffer {
+      uint32_t xInstanceOffset = 0;
+      uint32_t yInstanceOffset = 0;
 
+      float padding[2] = { 0 };
+    };
     struct instance_data_cbuffer {
-      uint32_t instanceCount = 0;
-
       uint32_t worldWidth = 0;
       uint32_t worldHeight = 0;
       float tileSize = 0;
 
       uint32_t fillMapAreaTilesCount = 0;
-
-      float padding[3] = { 0 };
     };
 
   public:
@@ -49,7 +51,9 @@ namespace game {
 
   private:
     std::reference_wrapper<const base::graphics::d3d_renderer> _rRenderer;
+    std::reference_wrapper<const camera> _rCamera;
     base::graphics::d3d_buffer _instanceDataSBuffer;
+    base::graphics::d3d_buffer _renderDataCBuffer;
     base::graphics::d3d_buffer _instanceDataCBuffer;
 
     const uint32_t _worldWidth;
@@ -59,5 +63,7 @@ namespace game {
     base::graphics::d3d_material _mat;
 
     static constexpr const uint32_t _fillMapAreaTilesCount = 4;
+
+    world_tile_component* _pTiles = nullptr;
   };
 }

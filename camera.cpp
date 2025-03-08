@@ -6,9 +6,23 @@ using namespace game;
 
 void camera::update()
 {
-  ImGui::SliderFloat("Zoom", &_size, 0.5f, 100);
+  ImGui::SliderFloat("Zoom", &_size, 1.0f, 100);
 
   update_buffer();
+}
+
+bool camera::is_in_view(float x, float y, float width, float height) const
+{
+  // Check for non-overlapping conditions
+  if (x + width / 2 <= _position[0] - _size / 2 ||   // R1 is left of R2
+      _position[0] + _size / 2 <= x - width / 2 ||   // R1 is right of R2
+      y - height / 2 >= _position[1] + _size / 2 ||  // R1 is above R2
+      _position[1] - _size / 2 >= y + height / 2)    // R1 is below R2
+  {
+    return false; // No overlap
+  }
+
+  return true; // overlapping
 }
 
 void game::camera::update_buffer() const
@@ -38,13 +52,13 @@ void game::camera::update_buffer() const
 
   // Assuming _size, _aspectRatio, _near, and _far are provided
 
-  dataCBuffer.proj[0][0] = 2.0f * _aspectRatio / (2.0f * _size);  // x scale adjusted by aspect ratio
+  dataCBuffer.proj[0][0] = 2.0f * _aspectRatio / (_size);  // x scale adjusted by aspect ratio
   dataCBuffer.proj[1][0] = 0;                                      // x skew
   dataCBuffer.proj[2][0] = 0;                                      // x translation
   dataCBuffer.proj[3][0] = 0;                                      // x translation (centered)
 
   dataCBuffer.proj[0][1] = 0;                                      // y skew
-  dataCBuffer.proj[1][1] = 2.0f / (2.0f * _size);                  // y scale
+  dataCBuffer.proj[1][1] = 2.0f / (_size);                  // y scale
   dataCBuffer.proj[2][1] = 0;                                      // y translation
   dataCBuffer.proj[3][1] = 0;                                      // y translation (centered)
 
@@ -95,13 +109,13 @@ camera::camera(const base::graphics::d3d_renderer& renderer) :
 
   // Assuming _size, _aspectRatio, _near, and _far are provided
 
-  dataCBuffer.proj[0][0] = 2.0f * _aspectRatio / (2.0f * _size);  // x scale adjusted by aspect ratio
+  dataCBuffer.proj[0][0] = 2.0 * _aspectRatio / (_size);  // x scale adjusted by aspect ratio
   dataCBuffer.proj[1][0] = 0;                                      // x skew
   dataCBuffer.proj[2][0] = 0;                                      // x translation
   dataCBuffer.proj[3][0] = 0;                                      // x translation (centered)
 
   dataCBuffer.proj[0][1] = 0;                                      // y skew
-  dataCBuffer.proj[1][1] = 2.0f / (2.0f * _size);                  // y scale
+  dataCBuffer.proj[1][1] = 2.0 / (_size);                  // y scale
   dataCBuffer.proj[2][1] = 0;                                      // y translation
   dataCBuffer.proj[3][1] = 0;                                      // y translation (centered)
 

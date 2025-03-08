@@ -1,7 +1,6 @@
 #include "world_tile_rendering_system.h"
 
 #include "world.h"
-#include "world_tile_component.h"
 
 using namespace game;
 using namespace base::graphics;
@@ -10,21 +9,41 @@ using namespace base::ecs;
 void world_tile_rendering_system::on_update(const world& query)
 {
   const auto& renderer = _rRenderer.get();
+  const auto& camera = _rCamera.get();
+
+  const auto& camPos = camera.get_position();
+  const auto frustumSize = camera.get_size();
+  const auto aspectRatio = camera.get_aspect_ratio();
+
+  int32_t xStartIndex = (int32_t)((camPos[0] + (_worldWidth * 0.5f)) - (frustumSize * 0.5f)) - 2;
+  int32_t yStartIndex = (int32_t)((camPos[1] + (_worldHeight * 0.5f)) - (frustumSize * 0.5f)) - 2;
+
+  int32_t xEndIndex = xStartIndex + (int32_t)frustumSize + 2;
+  int32_t yEndIndex = yStartIndex + (int32_t)frustumSize + 2;
+
+  xStartIndex = xStartIndex < 0 ? 0 : xStartIndex;
+  yStartIndex = yStartIndex < 0 ? 0 : yStartIndex;
+
+  xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
+  yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
+
+  xStartIndex = 0;
+  yStartIndex = 0;
+  xEndIndex = _worldWidth;
+  yEndIndex = _worldHeight;
 
   D3D11_MAPPED_SUBRESOURCE map = { 0 };
   renderer.map_buffer(_instanceDataSBuffer, map);
 
-  auto archs = query.query<world_tile_component>();
-  for (auto& arch : archs) {
-    world_tile_component* pTiles = arch.get().get_array_pointer_of<world_tile_component>();
-    for (size_t i = 0; i < arch.get().get_entity_count(); ++i) {
+  for (size_t i = yStartIndex; i < yEndIndex; ++i) {
+    for (size_t j = xStartIndex; j < xStartIndex; ++j) {
 
-      uint32_t x = (uint32_t)i % _worldWidth;
-      uint32_t y = (uint32_t)i / _worldWidth;
+      const uint32_t x = j - (_worldWidth / 2);
+      const uint32_t y = i - (_worldHeight / 2);
+      const uint32_t z = (i * _worldWidth) + j;
 
-
-      const auto& tile = pTiles[i];
-      auto& data = ((instance_data_sbuffer*)(map.pData))[i];
+      const auto& tile = _pTiles[z];
+      auto& data = ((instance_data_sbuffer*)(map.pData))[z];
 
       float cull = 0;
       float edgeAngle = 0;
@@ -37,23 +56,24 @@ void world_tile_rendering_system::on_update(const world& query)
       edge_index edgeIndex = edge_index::none;
 
       if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::left)) {
+        (edges & (uint32_t)world_tile_edge_flag::bottom) &&
+        (edges & (uint32_t)world_tile_edge_flag::right) &&
+        (edges & (uint32_t)world_tile_edge_flag::left)) {
 
         edgeIndex = edge_index::quad;
 
-      } else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-                 (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-                 (edges & (uint32_t)world_tile_edge_flag::right)) {
+      }
+      else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+        (edges & (uint32_t)world_tile_edge_flag::bottom) &&
+        (edges & (uint32_t)world_tile_edge_flag::right)) {
 
         edgeIndex = edge_index::tree_side;
         edgeAngle = 90;
 
       }
       else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-               (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-               (edges & (uint32_t)world_tile_edge_flag::left)) {
+        (edges & (uint32_t)world_tile_edge_flag::bottom) &&
+        (edges & (uint32_t)world_tile_edge_flag::left)) {
 
         edgeIndex = edge_index::tree_side;
         edgeAngle = -90;
@@ -75,80 +95,99 @@ void world_tile_rendering_system::on_update(const world& query)
 
       }
       else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-                 (edges & (uint32_t)world_tile_edge_flag::top)) {
+        (edges & (uint32_t)world_tile_edge_flag::top)) {
 
         edgeIndex = edge_index::right_angle;
 
-      } else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-                 (edges & (uint32_t)world_tile_edge_flag::bottom)) {
+      }
+      else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
+        (edges & (uint32_t)world_tile_edge_flag::bottom)) {
 
         edgeIndex = edge_index::right_angle;
         edgeAngle = 90;
 
-      } else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
-                 (edges & (uint32_t)world_tile_edge_flag::top)) {
+      }
+      else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
+        (edges & (uint32_t)world_tile_edge_flag::top)) {
 
         edgeIndex = edge_index::right_angle;
         edgeAngle = -90;
 
-      } else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
-                 (edges & (uint32_t)world_tile_edge_flag::bottom)) {
+      }
+      else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
+        (edges & (uint32_t)world_tile_edge_flag::bottom)) {
 
         edgeIndex = edge_index::right_angle;
         edgeAngle = 180;
 
-      } else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+      }
+      else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
         (edges & (uint32_t)world_tile_edge_flag::bottom)) {
 
         edgeIndex = edge_index::up_down;
 
-      } else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
+      }
+      else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
         (edges & (uint32_t)world_tile_edge_flag::left)) {
 
         edgeIndex = edge_index::up_down;
         edgeAngle = -90;
 
-      } else if (edges & (uint32_t)world_tile_edge_flag::top) {
+      }
+      else if (edges & (uint32_t)world_tile_edge_flag::top) {
 
         edgeIndex = edge_index::upper;
 
-      } else if (edges & (uint32_t)world_tile_edge_flag::right) {
+      }
+      else if (edges & (uint32_t)world_tile_edge_flag::right) {
 
         edgeIndex = edge_index::upper;
         edgeAngle = 90;
 
-      } else if (edges & (uint32_t)world_tile_edge_flag::bottom) {
+      }
+      else if (edges & (uint32_t)world_tile_edge_flag::bottom) {
 
         edgeIndex = edge_index::upper;
         edgeAngle = 180;
 
-      } else if (edges & (uint32_t)world_tile_edge_flag::left) {
+      }
+      else if (edges & (uint32_t)world_tile_edge_flag::left) {
 
         edgeIndex = edge_index::upper;
         edgeAngle = -90;
       }
       else {
-       // assert(false);
+        // assert(false);
       }
 
       data.cull = cull;
-      data.fillIndex = (uint32_t)tile.type -1;
+      data.fillIndex = (uint32_t)tile.type - 1;
       data.edgeIndex = (uint32_t)edgeIndex;
       data.edgeMaskAngle = edgeAngle;
 
     }
   }
 
-
-
-
-
   renderer.unmap_buffer(_instanceDataSBuffer);
-  renderer.draw_quad_instanced(_mat, _worldHeight * _worldWidth);
+
+  render_data_cbuffer renderData = { 0 };
+  renderData.xInstanceOffset = xStartIndex;
+  renderData.yInstanceOffset = yStartIndex;
+
+  renderer.map_buffer(_renderDataCBuffer, map);
+  ((render_data_cbuffer*)(map.pData))[0] = renderData;
+  renderer.unmap_buffer(_renderDataCBuffer);
+
+  renderer.draw_quad_instanced(_mat, (xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
 }
 
 void world_tile_rendering_system::on_register(const world& query)
-{}
+{
+  auto archs = query.query<world_tile_component>();
+  assert(archs.size() == 1);
+
+  _pTiles = archs[0].get().get_array_pointer_of<world_tile_component>();
+}
 
 world_tile_rendering_system::world_tile_rendering_system(system_name name, 
   const d3d_renderer& renderer, const camera& camera, const shader_collection& shaders,
@@ -157,23 +196,26 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   :
   system(name),
   _rRenderer(renderer),
+  _rCamera(camera),
   _worldWidth(worldWidth),
   _worldHeight(worldHeight),
   _tileSize(tileSize),
   _mat(shaders["world_tile_shader.hlsl"])
 {
-  instance_data_cbuffer cData = { 0 };
-  cData.instanceCount = _worldWidth * _worldHeight;
-  cData.worldWidth = _worldWidth;
-  cData.worldHeight = _worldHeight;
-  cData.tileSize = _tileSize;
-  cData.fillMapAreaTilesCount = _fillMapAreaTilesCount;
+  instance_data_cbuffer instanceCData = { 0 };
+  instanceCData.worldWidth = _worldWidth;
+  instanceCData.worldHeight = _worldHeight;
+  instanceCData.tileSize = _tileSize;
+  instanceCData.fillMapAreaTilesCount = _fillMapAreaTilesCount;
 
-  _instanceDataCBuffer = _rRenderer.get().create_buffer((char*)&cData, sizeof(instance_data_cbuffer),
+  _instanceDataCBuffer = _rRenderer.get().create_buffer((char*)&instanceCData, sizeof(instance_data_cbuffer),
     buffer_type::constant, 1, access_mode::none);
 
   _instanceDataSBuffer = _rRenderer.get().create_buffer(nullptr, sizeof(instance_data_sbuffer),
     buffer_type::structured, _worldHeight * _worldWidth, access_mode::write);
+
+  _renderDataCBuffer = _rRenderer.get().create_buffer(nullptr, sizeof(render_data_cbuffer),
+    buffer_type::constant, 1, access_mode::write_discard);
 
   _mat.set_cbuffer("InstanceDataCBuffer", _instanceDataCBuffer);
   _mat.set_sbuffer("InstanceDataSBuffer", _instanceDataSBuffer);
