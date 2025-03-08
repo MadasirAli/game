@@ -20,5 +20,6 @@ namespace game {
   struct world_tile_component : public base::ecs::data_component {
     world_tile_type type = world_tile_type::empty;
     uint32_t edgeFlags = 0;
+    bool requiresGraphicsUpdate = false;
   };
 }

@@ -41,6 +41,7 @@ namespace game {
     camera _camera;
 
     float _deltaTime = 0;
+    bool _vsync = true;
     
     game_world _world;
     main_menu _main_menu;

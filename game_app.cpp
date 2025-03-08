@@ -23,7 +23,9 @@ void game_app::update()
   _renderer.imgui_new_frame();
 
   // draw calls.
-  ImGui::Text((std::string("Delta Time: ") + std::to_string(_deltaTime)).c_str());
+  ImGui::Text("FPS: %f", 1.0f / _deltaTime);
+  ImGui::Text("Delta Time: %f", _deltaTime);
+  ImGui::Checkbox("VSync", &_vsync);
 
   if (_main_menu.is_play_clicked() == false) {
     _main_menu.update();
@@ -37,7 +39,7 @@ void game_app::update()
 
   //
   _renderer.imgui_draw();
-  _renderer.present(true);
+  _renderer.present(_vsync);
 
   _keyBuf = input::key_buf{};
 

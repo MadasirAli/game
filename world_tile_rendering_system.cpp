@@ -40,7 +40,13 @@ void world_tile_rendering_system::on_update(const world& query)
       const int32_t y = i - (_worldHeight / 2);
       const uint32_t z = (i * _worldWidth) + j;
 
-      const auto& tile = _pTiles[z];
+      auto& tile = _pTiles[z];
+
+      if (tile.requiresGraphicsUpdate == false) {
+        continue;
+      }
+      tile.requiresGraphicsUpdate = false;
+
       auto& data = ((instance_data_sbuffer*)(map.pData))[z];
 
       float cull = 0;

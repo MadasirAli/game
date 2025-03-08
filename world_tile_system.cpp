@@ -64,6 +64,7 @@ void world_tile_system::on_register(const world& query)
     }
 
     tile.edgeFlags = edges;
+    tile.requiresGraphicsUpdate = true;
   }
 }
 
