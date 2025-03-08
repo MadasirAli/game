@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "system.h"
+#include "world_tile_component.h"
 
 namespace game {
   class world_tile_system : public base::ecs::system {
@@ -16,5 +17,8 @@ namespace game {
   private:
     const uint32_t _worldWidth;
     const uint32_t _worldHeight;
+
+    world_tile_component* _pTiles = nullptr;
+    const size_t _tileCount;
   };
 }

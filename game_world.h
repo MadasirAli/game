@@ -32,7 +32,7 @@ namespace game {
 
     static constexpr const uint32_t _worldWidth = 2;
     static constexpr const uint32_t _worldHeight = 2;
-    static constexpr const float _tileSize = 1;
+    static constexpr const float _tileSize = 0.5f;
 
     float _camMovSpeed = 2;
   };

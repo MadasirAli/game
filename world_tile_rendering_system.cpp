@@ -1,6 +1,7 @@
 #include "world_tile_rendering_system.h"
 
 #include "world.h"
+#include "imgui.h"
 
 using namespace game;
 using namespace base::graphics;
@@ -15,11 +16,17 @@ void world_tile_rendering_system::on_update(const world& query)
   const auto frustumSize = camera.get_size();
   const auto aspectRatio = camera.get_aspect_ratio();
 
-  int32_t xStartIndex = (int32_t)((camPos[0] + (_worldWidth * 0.5f)) - (frustumSize * 0.5f)) - 2;
-  int32_t yStartIndex = (int32_t)((camPos[1] + (_worldHeight * 0.5f)) - (frustumSize * 0.5f)) - 2;
+  int32_t xStartIndex = (int32_t)(((camPos[0] + (_worldWidth * 0.5f)) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - 2;
+  int32_t yStartIndex = (int32_t)(((camPos[1] + (_worldHeight * 0.5f)) - (frustumSize * 0.5f)) * (1.0f / _tileSize)) - 2;
 
-  int32_t xEndIndex = xStartIndex + (int32_t)frustumSize + 2;
-  int32_t yEndIndex = yStartIndex + (int32_t)frustumSize + 2;
+  xStartIndex += _worldWidth / 2;
+  yStartIndex += _worldHeight / 2;
+
+  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + 2;
+  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / _tileSize)) + 2;
+
+  ImGui::Text("X Start : %d, Y Start: %d", xStartIndex, yStartIndex);
+  ImGui::Text("X End: %d, Y End: %d", xEndIndex, yEndIndex);
 
   xStartIndex = xStartIndex < 0 ? 0 : xStartIndex;
   yStartIndex = yStartIndex < 0 ? 0 : yStartIndex;
@@ -27,16 +34,15 @@ void world_tile_rendering_system::on_update(const world& query)
   xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
 
-  xStartIndex = 0;
-  yStartIndex = 0;
-  xEndIndex = _worldWidth;
-  yEndIndex = _worldHeight;
+  ImGui::Text("After Clamping:-");
+  ImGui::Text("X Start : %d, Y Start: %d", xStartIndex, yStartIndex);
+  ImGui::Text("X End: %d, Y End: %d", xEndIndex, yEndIndex);
 
   D3D11_MAPPED_SUBRESOURCE map = { 0 };
   renderer.map_buffer(_instanceDataSBuffer, map);
 
   for (size_t i = yStartIndex; i < yEndIndex; ++i) {
-    for (size_t j = xStartIndex; j < xStartIndex; ++j) {
+    for (size_t j = xStartIndex; j < xEndIndex; ++j) {
 
       const uint32_t x = j - (_worldWidth / 2);
       const uint32_t y = i - (_worldHeight / 2);
@@ -164,21 +170,24 @@ void world_tile_rendering_system::on_update(const world& query)
       data.fillIndex = (uint32_t)tile.type - 1;
       data.edgeIndex = (uint32_t)edgeIndex;
       data.edgeMaskAngle = edgeAngle;
-
     }
   }
 
   renderer.unmap_buffer(_instanceDataSBuffer);
 
-  render_data_cbuffer renderData = { 0 };
-  renderData.xInstanceOffset = xStartIndex;
-  renderData.yInstanceOffset = yStartIndex;
+  const int32_t drawCount = (xEndIndex - xStartIndex) * (yEndIndex - yStartIndex);
 
-  renderer.map_buffer(_renderDataCBuffer, map);
-  ((render_data_cbuffer*)(map.pData))[0] = renderData;
-  renderer.unmap_buffer(_renderDataCBuffer);
+  if (drawCount > 0) {
+    render_data_cbuffer renderData = { 0 };
+    renderData.xInstanceOffset = xStartIndex;
+    renderData.yInstanceOffset = yStartIndex;
 
-  renderer.draw_quad_instanced(_mat, (xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
+    renderer.map_buffer(_renderDataCBuffer, map);
+    ((render_data_cbuffer*)(map.pData))[0] = renderData;
+    renderer.unmap_buffer(_renderDataCBuffer);
+
+    renderer.draw_quad_instanced(_mat, drawCount);
+  }
 }
 
 void world_tile_rendering_system::on_register(const world& query)
