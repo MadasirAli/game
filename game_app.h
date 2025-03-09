@@ -13,6 +13,7 @@
 #include "shader_collection.h"
 #include "texture_collection.h"
 #include "camera.h"
+#include "random.h"
 
 namespace game {
   class game_app : public base::win32_window
@@ -39,6 +40,8 @@ namespace game {
     shader_collection _shaders;
     texture_collection _textures;
     camera _camera;
+
+    random _random;
 
     float _deltaTime = 0;
     bool _vsync = true;

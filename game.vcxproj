@@ -206,6 +206,8 @@
     <ClInclude Include="game_app.h" />
     <ClInclude Include="game_world.h" />
     <ClInclude Include="main_menu.h" />
+    <ClInclude Include="map_generator.h" />
+    <ClInclude Include="random.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_collection.h" />
     <ClInclude Include="texture_collection.h" />
@@ -218,6 +220,8 @@
     <ClCompile Include="game_app.cpp" />
     <ClCompile Include="game_world.cpp" />
     <ClCompile Include="main_menu.cpp" />
+    <ClCompile Include="map_generator.cpp" />
+    <ClCompile Include="random.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="shader_collection.cpp" />
     <ClCompile Include="texture_collection.cpp" />
