@@ -18,11 +18,11 @@ void world_tile_rendering_system::on_update(const world& query)
   const auto frustumSize = camera.get_size();
   const auto aspectRatio = camera.get_aspect_ratio();
 
-  int32_t xStartIndex = (int32_t)(((camPos[0]) - (std::sqrt(std::pow(frustumSize * 0.5f, 2)) * (1.0 / aspectRatio))) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
-  int32_t yStartIndex = (int32_t)(((camPos[1]) - (std::sqrt(std::pow(frustumSize * 0.5f, 2)) * (1.0 / 1))) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t xStartIndex = (int32_t)(((camPos[0]) - (frustumSize * 0.5f) * (1.0 / aspectRatio)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t yStartIndex = (int32_t)(((camPos[1]) - (frustumSize * 0.5f) * (1.0 / 1)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
 
-  int32_t xEndIndex = xStartIndex + (int32_t)(std::sqrt(std::pow(frustumSize, 2)) * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
-  int32_t yEndIndex = yStartIndex + (int32_t)(std::sqrt(std::pow(frustumSize, 2)) * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
+  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
+  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
 
   xStartIndex = xStartIndex < 0 ? 0 : xStartIndex;
   yStartIndex = yStartIndex < 0 ? 0 : yStartIndex;
@@ -36,8 +36,8 @@ void world_tile_rendering_system::on_update(const world& query)
   for (size_t i = yStartIndex; i < yEndIndex; ++i) {
     for (size_t j = xStartIndex; j < xEndIndex; ++j) {
 
-      const int32_t x = j - (_worldWidth / 2);
-      const int32_t y = i - (_worldHeight / 2);
+      const int32_t x = j;
+      const int32_t y = i;
       const uint32_t z = (i * _worldWidth) + j;
 
       auto& tile = _pTiles[z];

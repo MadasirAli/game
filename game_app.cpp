@@ -63,6 +63,7 @@ game_app::game_app() :
   _renderer(p_hwnd),
   _shaders(_renderer),
   _textures(_renderer),
+  _random(0),
   _camera(_renderer),
   _world(_renderer, _shaders, _textures, _camera, _keyboard)
 {

@@ -2,8 +2,8 @@
 
 using namespace game;
 
-random::random() :
-  _generator(0)
+random::random(int seed) :
+  _generator(seed)
 {}
 
 int random::get_int(int min, int max)

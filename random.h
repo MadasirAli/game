@@ -7,7 +7,7 @@ namespace game {
   class random
   {
   public:
-    random();
+    random(int seed);
 
     int get_int(int min = INT_MIN, int max = INT_MAX);
 
