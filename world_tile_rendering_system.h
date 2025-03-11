@@ -11,19 +11,36 @@
 namespace game {
   class world_tile_rendering_system : public base::ecs::system {
   private:
-    enum edge_index {
+    enum class edge_index {
       none,
       quad,
       upper,
       up_down,
       right_angle,
-      tree_side
+      tree_side,
+      empty,
+      diagnal
+    };
+    enum class blend_index {
+      unit,
+      zero,
+      quad,
+      upper,
+      up_down,
+      diagnal,
+      right_angle
     };
     struct instance_data_sbuffer {
       float cull = 0;
       float edgeMaskAngle = 0;
       uint32_t edgeIndex = 0;
       uint32_t fillIndex = 0;
+
+      uint32_t innerEdgeMaskIndex = 0;
+      uint32_t innerEdgeBlendMaskIndex = 0;
+
+      uint32_t innerEdgesFillIndcies[4] = { 0 };
+      float innerEdgesAngles[4] = { 0 };
     };
     struct render_data_cbuffer {
       uint32_t instanceOffset[2] = {0};

@@ -23,10 +23,14 @@ void world_tile_system::on_register(const world& query)
 
     auto& tile = _pTiles[i];
     if ((x < 4 &&  y < 4) || (y > (_worldHeight - 4) && x >(_worldWidth - 4))) {
-      tile.type = world_tile_type::solid_rock;
+      tile.type = world_tile_type::coal;
     }
     else {
       tile.type = world_tile_type::sand;
+    }
+
+    if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
+      tile.type = world_tile_type::empty;
     }
   }
 
@@ -36,49 +40,94 @@ void world_tile_system::on_register(const world& query)
 
     auto& tile = _pTiles[i];
 
+    if (tile.type == world_tile_type::empty) {
+      continue;
+    }
+
     uint32_t edges = 0;
+    uint32_t innerEdges = 0;
+    world_tile_type neighbours[4] = { world_tile_type::empty };
     // edge detection
     if (x == 0) {
       edges |= (uint32_t)world_tile_edge_flag::left;
     }
     else {
-      //uint32_t index = (y * _worldWidth) + (x - 1);
-      //if (tile.type != _pTiles[index].type) {
-      //  edges |= (uint32_t)world_tile_edge_flag::left;
-      //}
+      uint32_t index = (y * _worldWidth) + (x - 1);
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::left;
+      }
+      neighbours[(uint32_t)world_tile_neighbour::left] = _pTiles[index].type;
     }
 
     if (y == 0) {
-      edges |= (uint32_t)world_tile_edge_flag::top;
+      edges |= (uint32_t)world_tile_edge_flag::bottom;
     }
     else {
-      //uint32_t index = ((y - 1) * _worldWidth) + x;
-      //if (tile.type != _pTiles[index].type) {
-      //  edges |= (uint32_t)world_tile_edge_flag::top;
-      //}
+      uint32_t index = ((y - 1) * _worldWidth) + x;
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::bottom;
+      }
+
+      neighbours[(uint32_t)world_tile_neighbour::bottom] = _pTiles[index].type;
     }
 
     if (x == _worldWidth - 1) {
       edges |= (uint32_t)world_tile_edge_flag::right;
     }
     else {
-      //uint32_t index = (y * _worldWidth) + (x + 1);
-      //if (tile.type != _pTiles[index].type) {
-      //  edges |= (uint32_t)world_tile_edge_flag::right;
-      //}
+      uint32_t index = (y * _worldWidth) + (x + 1);
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::right;
+      }
+      else if (tile.type != _pTiles[index].type) {
+        innerEdges |= (uint32_t)world_tile_edge_flag::right;
+      }
+
+      neighbours[(uint32_t)world_tile_neighbour::right] = _pTiles[index].type;
     }
 
     if (y == _worldHeight - 1) {
-      edges |= (uint32_t)world_tile_edge_flag::bottom;
+      edges |= (uint32_t)world_tile_edge_flag::top;
     }
     else {
-      //uint32_t index = ((y + 1) * _worldWidth) + x;
-      //if (tile.type != _pTiles[index].type) {
-      //  edges |= (uint32_t)world_tile_edge_flag::bottom;
-      //}
+      uint32_t index = ((y + 1) * _worldWidth) + x;
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::top;
+      }
+      else if (tile.type != _pTiles[index].type) {
+        innerEdges |= (uint32_t)world_tile_edge_flag::top;
+      }
+
+      neighbours[(uint32_t)world_tile_neighbour::top] = _pTiles[index].type;
+    }
+
+    if (x > 0 && y > 0) {
+      uint32_t index = ((y - 1) * _worldWidth) + (x - 1);
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::diagnal_bottom_left;
+      }
+    }
+    if (x < _worldWidth - 1 && y > 0) {
+      uint32_t index = ((y - 1) * _worldWidth) + (x + 1);
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::diagnal_bottom_right;
+      }
+    }
+    if (x > 0 && y < _worldHeight - 1) {
+      uint32_t index = ((y + 1) * _worldWidth) + (x - 1);
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::diagnal_top_left;
+      }
+    }
+    if (x < _worldWidth - 1 && y < _worldHeight - 1) {
+      uint32_t index = ((y + 1) * _worldWidth) + (x + 1);
+      if (_pTiles[index].type == world_tile_type::empty) {
+        edges |= (uint32_t)world_tile_edge_flag::diagnal_top_right;
+      }
     }
 
     tile.edgeFlags = edges;
+    tile.innerEdgeFlags = innerEdges;
     tile.requiresGraphicsUpdate = true;
   }
 }

@@ -30,153 +30,174 @@ void world_tile_rendering_system::on_update(const world& query)
   xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
 
-  D3D11_MAPPED_SUBRESOURCE map = { 0 };
-  renderer.map_buffer(_instanceDataSBuffer, map);
-
-  for (size_t i = yStartIndex; i < yEndIndex; ++i) {
-    for (size_t j = xStartIndex; j < xEndIndex; ++j) {
-
-      const int32_t x = j;
-      const int32_t y = i;
-      const uint32_t z = (i * _worldWidth) + j;
-
-      auto& tile = _pTiles[z];
-
-      if (tile.requiresGraphicsUpdate == false) {
-        continue;
-      }
-      tile.requiresGraphicsUpdate = false;
-
-      auto& data = ((instance_data_sbuffer*)(map.pData))[z];
-
-      float cull = 0;
-      float edgeAngle = 0;
-
-      if (tile.type != world_tile_type::empty) {
-        cull = 1;
-      }
-
-      const uint32_t edges = tile.edgeFlags;
-      edge_index edgeIndex = edge_index::none;
-
-      if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-        (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-        (edges & (uint32_t)world_tile_edge_flag::right) &&
-        (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-        edgeIndex = edge_index::quad;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-        (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-        (edges & (uint32_t)world_tile_edge_flag::right)) {
-
-        edgeIndex = edge_index::tree_side;
-        edgeAngle = 90;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-        (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-        (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-        edgeIndex = edge_index::tree_side;
-        edgeAngle = -90;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-        (edges & (uint32_t)world_tile_edge_flag::right) &&
-        (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-        edgeIndex = edge_index::tree_side;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::bottom) &&
-        (edges & (uint32_t)world_tile_edge_flag::right) &&
-        (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-        edgeIndex = edge_index::tree_side;
-        edgeAngle = 180;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-        (edges & (uint32_t)world_tile_edge_flag::top)) {
-
-        edgeIndex = edge_index::right_angle;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-        (edges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-        edgeIndex = edge_index::right_angle;
-        edgeAngle = 90;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
-        (edges & (uint32_t)world_tile_edge_flag::top)) {
-
-        edgeIndex = edge_index::right_angle;
-        edgeAngle = -90;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
-        (edges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-        edgeIndex = edge_index::right_angle;
-        edgeAngle = 180;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-        (edges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-        edgeIndex = edge_index::up_down;
-
-      }
-      else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-        (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-        edgeIndex = edge_index::up_down;
-        edgeAngle = -90;
-
-      }
-      else if (edges & (uint32_t)world_tile_edge_flag::top) {
-
-        edgeIndex = edge_index::upper;
-
-      }
-      else if (edges & (uint32_t)world_tile_edge_flag::right) {
-
-        edgeIndex = edge_index::upper;
-        edgeAngle = 90;
-
-      }
-      else if (edges & (uint32_t)world_tile_edge_flag::bottom) {
-
-        edgeIndex = edge_index::upper;
-        edgeAngle = 180;
-
-      }
-      else if (edges & (uint32_t)world_tile_edge_flag::left) {
-
-        edgeIndex = edge_index::upper;
-        edgeAngle = -90;
-      }
-      else {
-        // assert(false);
-      }
-
-      data.cull = cull;
-      data.fillIndex = (uint32_t)tile.type - 1;
-      data.edgeIndex = (uint32_t)edgeIndex;
-      data.edgeMaskAngle = edgeAngle;
-    }
-  }
-
-  renderer.unmap_buffer(_instanceDataSBuffer);
-
   const int32_t drawCount = (xEndIndex - xStartIndex) * (yEndIndex - yStartIndex);
-  ImGui::Text("Draw Count: %d", drawCount);
+
 
   if (drawCount > 0) {
+    D3D11_MAPPED_SUBRESOURCE map = { 0 };
+    renderer.map_buffer(_instanceDataSBuffer, map);
+
+    for (size_t i = yStartIndex; i < yEndIndex; ++i) {
+      for (size_t j = xStartIndex; j < xEndIndex; ++j) {
+
+        const int32_t x = j;
+        const int32_t y = i;
+        const uint32_t z = (i * _worldWidth) + j;
+
+        auto& tile = _pTiles[z];
+
+        if (tile.requiresGraphicsUpdate == false) {
+          continue;
+        }
+        tile.requiresGraphicsUpdate = false;
+
+        auto& data = ((instance_data_sbuffer*)(map.pData))[z];
+
+        float cull = 0;
+        float edgeAngle = 0;
+
+        if (tile.type != world_tile_type::empty) {
+          cull = 1;
+        }
+
+        const uint32_t edges = tile.edgeFlags;
+        edge_index edgeIndex = edge_index::none;
+
+        if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (edges & (uint32_t)world_tile_edge_flag::right) &&
+          (edges & (uint32_t)world_tile_edge_flag::left)) {
+
+          edgeIndex = edge_index::quad;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (edges & (uint32_t)world_tile_edge_flag::right)) {
+
+          edgeIndex = edge_index::tree_side;
+          edgeAngle = 90;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (edges & (uint32_t)world_tile_edge_flag::left)) {
+
+          edgeIndex = edge_index::tree_side;
+          edgeAngle = -90;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+          (edges & (uint32_t)world_tile_edge_flag::right) &&
+          (edges & (uint32_t)world_tile_edge_flag::left)) {
+
+          edgeIndex = edge_index::tree_side;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (edges & (uint32_t)world_tile_edge_flag::right) &&
+          (edges & (uint32_t)world_tile_edge_flag::left)) {
+
+          edgeIndex = edge_index::tree_side;
+          edgeAngle = 180;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
+          (edges & (uint32_t)world_tile_edge_flag::top)) {
+
+          edgeIndex = edge_index::right_angle;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
+          (edges & (uint32_t)world_tile_edge_flag::bottom)) {
+
+          edgeIndex = edge_index::right_angle;
+          edgeAngle = 90;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
+          (edges & (uint32_t)world_tile_edge_flag::top)) {
+
+          edgeIndex = edge_index::right_angle;
+          edgeAngle = -90;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
+          (edges & (uint32_t)world_tile_edge_flag::bottom)) {
+
+          edgeIndex = edge_index::right_angle;
+          edgeAngle = 180;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
+          (edges & (uint32_t)world_tile_edge_flag::bottom)) {
+
+          edgeIndex = edge_index::up_down;
+
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
+          (edges & (uint32_t)world_tile_edge_flag::left)) {
+
+          edgeIndex = edge_index::up_down;
+          edgeAngle = -90;
+
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::top) {
+
+          edgeIndex = edge_index::upper;
+
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::right) {
+
+          edgeIndex = edge_index::upper;
+          edgeAngle = 90;
+
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::bottom) {
+
+          edgeIndex = edge_index::upper;
+          edgeAngle = 180;
+
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::left) {
+
+          edgeIndex = edge_index::upper;
+          edgeAngle = -90;
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_top_right) {
+
+          edgeIndex = edge_index::diagnal;
+          edgeAngle = 90;
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_top_left) {
+
+          edgeIndex = edge_index::diagnal;
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_right) {
+
+          edgeIndex = edge_index::diagnal;
+          edgeAngle = 180;
+        }
+        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_left) {
+
+          edgeIndex = edge_index::diagnal;
+          edgeAngle = -90;
+        }
+        else {
+          // assert(false);
+        }
+
+        data.cull = cull;
+        data.fillIndex = (uint32_t)tile.type - 1;
+        data.edgeIndex = (uint32_t)edgeIndex;
+        data.edgeMaskAngle = edgeAngle;
+      }
+    }
+
+    renderer.unmap_buffer(_instanceDataSBuffer);
+
+    ImGui::Text("Draw Count: %d", drawCount);
+
     render_data_cbuffer renderData = { 0 };
     renderData.instanceOffset[0] = xStartIndex;
     renderData.instanceOffset[1] = yStartIndex;
