@@ -19,7 +19,8 @@ namespace game {
       right_angle,
       tree_side,
       empty,
-      diagnal
+      diagnal,
+      diagnal_double
     };
     enum class blend_index {
       zero,

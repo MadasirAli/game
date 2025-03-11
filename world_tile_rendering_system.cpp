@@ -343,6 +343,17 @@ void world_tile_rendering_system::on_update(const world& query)
           edgeIndex = edge_index::upper;
           edgeAngle = -90;
         }
+        else if ((edges & (uint32_t)world_tile_edge_flag::diagnal_top_left) &&
+                 (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_right)) {
+
+          edgeIndex = edge_index::diagnal_double;
+        }
+        else if ((edges & (uint32_t)world_tile_edge_flag::diagnal_top_right) &&
+                 (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_left)) {
+
+          edgeIndex = edge_index::diagnal_double;
+          edgeAngle = 90;
+        }
         else if (edges & (uint32_t)world_tile_edge_flag::diagnal_top_right) {
 
           edgeIndex = edge_index::diagnal;
