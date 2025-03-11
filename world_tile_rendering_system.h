@@ -22,8 +22,8 @@ namespace game {
       diagnal
     };
     enum class blend_index {
-      unit,
       zero,
+      unit,
       quad,
       upper,
       up_down,

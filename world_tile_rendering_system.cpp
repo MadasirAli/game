@@ -46,9 +46,9 @@ void world_tile_rendering_system::on_update(const world& query)
 
         auto& tile = _pTiles[z];
 
-        if (tile.requiresGraphicsUpdate == false) {
-          continue;
-        }
+        //if (tile.requiresGraphicsUpdate == false) {
+        //  continue;
+        //}
         tile.requiresGraphicsUpdate = false;
 
         auto& data = ((instance_data_sbuffer*)(map.pData))[z];
@@ -139,6 +139,7 @@ void world_tile_rendering_system::on_update(const world& query)
           (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
 
           blendIndex = blend_index::right_angle;
+
           blendAngle = 90;
 
           neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
@@ -232,6 +233,11 @@ void world_tile_rendering_system::on_update(const world& query)
         else {
           // assert(false);
         }
+
+
+
+
+
 
 
 
@@ -362,6 +368,7 @@ void world_tile_rendering_system::on_update(const world& query)
           // assert(false);
         }
 
+
         data.cull = cull;
         data.fillIndex = (uint32_t)tile.type;
         data.edgeIndex = (uint32_t)edgeIndex;
@@ -369,6 +376,7 @@ void world_tile_rendering_system::on_update(const world& query)
 
         data.blendIndex = (uint32_t)blendIndex;
         data.blendMaskAngle = blendAngle;
+
 
         data.neighbourFillIndcies[0] = (uint32_t)neighbourFills[0];
         data.neighbourFillIndcies[1] = (uint32_t)neighbourFills[1];
