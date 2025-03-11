@@ -68,6 +68,10 @@ void world_tile_rendering_system::on_update(const world& query)
         blend_index blendIndex = blend_index::zero;
 
         world_tile_type neighbourFills[4] = { world_tile_type::empty };
+        neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
+        neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
+        neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
+        neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
 
         if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
           (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
@@ -75,12 +79,6 @@ void world_tile_rendering_system::on_update(const world& query)
           (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
 
           blendIndex = blend_index::quad;
-
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
-
         }
         else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
           (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&

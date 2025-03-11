@@ -29,13 +29,15 @@ void world_tile_system::on_register(const world& query)
       tile.type = world_tile_type::sand;
     }
 
-    //if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
+    if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
+      tile.type = world_tile_type::empty;
+    }
+    //if (y == (_worldHeight / 2) && x > 0 && x < (_worldWidth - 1)) {
     //  tile.type = world_tile_type::dirt;
     //}
-    if (y == (_worldHeight / 2) && x > 0 && x < (_worldWidth - 1)) {
-      tile.type = world_tile_type::dirt;
-    }
   }
+
+
 
   for (size_t i = 0; i < _tileCount; ++i) {
     uint32_t x = (uint32_t)i % _worldWidth;
@@ -59,9 +61,9 @@ void world_tile_system::on_register(const world& query)
       if (_pTiles[index].type == world_tile_type::empty) {
         edges |= (uint32_t)world_tile_edge_flag::left;
       }
-      else if (tile.type != _pTiles[index].type) {
-        //edges |= (uint32_t)world_tile_edge_flag::left;
-        //innerEdges |= (uint32_t)world_tile_edge_flag::left;
+      else if ((int)tile.type > (int)_pTiles[index].type) {
+        edges |= (uint32_t)world_tile_edge_flag::left;
+        innerEdges |= (uint32_t)world_tile_edge_flag::left;
       }
 
       neighbours[(uint32_t)world_tile_neighbour::left] = _pTiles[index].type;
@@ -75,7 +77,7 @@ void world_tile_system::on_register(const world& query)
       if (_pTiles[index].type == world_tile_type::empty) {
         edges |= (uint32_t)world_tile_edge_flag::bottom;
       }
-      else if (tile.type != _pTiles[index].type) {
+      else if ((int)tile.type > (int)_pTiles[index].type) {
         edges |= (uint32_t)world_tile_edge_flag::bottom;
         innerEdges |= (uint32_t)world_tile_edge_flag::bottom;
       }
@@ -91,7 +93,7 @@ void world_tile_system::on_register(const world& query)
       if (_pTiles[index].type == world_tile_type::empty) {
         edges |= (uint32_t)world_tile_edge_flag::right;
       }
-      else if (tile.type != _pTiles[index].type) {
+      else if ((int)tile.type > (int)_pTiles[index].type) {
         edges |= (uint32_t)world_tile_edge_flag::right;
         innerEdges |= (uint32_t)world_tile_edge_flag::right;
       }
@@ -104,12 +106,13 @@ void world_tile_system::on_register(const world& query)
     }
     else {
       uint32_t index = ((y + 1) * _worldWidth) + x;
+
       if (_pTiles[index].type == world_tile_type::empty) {
         edges |= (uint32_t)world_tile_edge_flag::top;
       }
-      else if (tile.type != _pTiles[index].type) {
-        //edges |= (uint32_t)world_tile_edge_flag::top;
-        //innerEdges |= (uint32_t)world_tile_edge_flag::top;
+      else if ((int)tile.type > (int)_pTiles[index].type) {
+        edges |= (uint32_t)world_tile_edge_flag::top;
+        innerEdges |= (uint32_t)world_tile_edge_flag::top;
       }
 
       neighbours[(uint32_t)world_tile_neighbour::top] = _pTiles[index].type;
