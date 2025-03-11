@@ -55,13 +55,188 @@ void world_tile_rendering_system::on_update(const world& query)
 
         float cull = 0;
         float edgeAngle = 0;
+        float blendAngle = 0;
 
         if (tile.type != world_tile_type::empty) {
           cull = 1;
         }
 
         const uint32_t edges = tile.edgeFlags;
+        const uint32_t innerEdges = tile.innerEdgeFlags;
+
         edge_index edgeIndex = edge_index::none;
+        blend_index blendIndex = blend_index::zero;
+
+        world_tile_type neighbourFills[4] = { world_tile_type::empty };
+
+        if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::right) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
+
+          blendIndex = blend_index::quad;
+
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::right)) {
+
+          blendIndex = blend_index::tree_side;
+          blendAngle = 90;
+
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
+
+          blendIndex = blend_index::tree_side;
+          blendAngle = -90;
+
+          // Assuming the tile is rotated -90 degrees (counterclockwise)
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::right) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
+
+          blendIndex = blend_index::tree_side;
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::right) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
+
+          blendIndex = blend_index::tree_side;
+          blendAngle = 180;
+
+          // Assuming the tile is rotated 180 degrees
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Top becomes Bottom
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Right becomes Left
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Bottom becomes Top
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Left becomes Right
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::right) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::top)) {
+
+          blendIndex = blend_index::right_angle;
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::right) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
+
+          blendIndex = blend_index::right_angle;
+          blendAngle = 90;
+
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::left) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::top)) {
+
+          blendIndex = blend_index::right_angle;
+          blendAngle = -90;
+
+          // Assuming the tile is rotated -90 degrees (counterclockwise)
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::left) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
+
+          blendIndex = blend_index::right_angle;
+          blendAngle = 180;
+
+          // Assuming the tile is rotated 180 degrees
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Top becomes Bottom
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Right becomes Left
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Bottom becomes Top
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Left becomes Right
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
+
+          blendIndex = blend_index::up_down;
+
+        }
+        else if ((innerEdges & (uint32_t)world_tile_edge_flag::right) &&
+          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
+
+          blendIndex = blend_index::up_down;
+          blendAngle = -90;
+
+
+          // Assuming the tile is rotated -90 degrees (counterclockwise)
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
+
+        }
+        else if (innerEdges & (uint32_t)world_tile_edge_flag::top) {
+
+          blendIndex = blend_index::upper;
+
+        }
+        else if (innerEdges & (uint32_t)world_tile_edge_flag::right) {
+
+          blendIndex = blend_index::upper;
+          blendAngle = 90;
+
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
+        }
+        else if (innerEdges & (uint32_t)world_tile_edge_flag::bottom) {
+
+          blendIndex = blend_index::upper;
+          blendAngle = 180;
+
+          // Assuming the tile is rotated 180 degrees
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Top becomes Bottom
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Right becomes Left
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Bottom becomes Top
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Left becomes Right
+        }
+        else if (innerEdges & (uint32_t)world_tile_edge_flag::left) {
+
+          blendIndex = blend_index::upper;
+          blendAngle = -90;
+
+          // Assuming the tile is rotated -90 degrees (counterclockwise)
+          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
+          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
+          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
+          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
+        }
+        else {
+          // assert(false);
+        }
+
+
+
+
+
 
         if ((edges & (uint32_t)world_tile_edge_flag::top) &&
           (edges & (uint32_t)world_tile_edge_flag::bottom) &&
@@ -188,9 +363,17 @@ void world_tile_rendering_system::on_update(const world& query)
         }
 
         data.cull = cull;
-        data.fillIndex = (uint32_t)tile.type - 1;
+        data.fillIndex = (uint32_t)tile.type;
         data.edgeIndex = (uint32_t)edgeIndex;
         data.edgeMaskAngle = edgeAngle;
+
+        data.blendIndex = (uint32_t)blendIndex;
+        data.blendMaskAngle = blendAngle;
+
+        data.neighbourFillIndcies[0] = (uint32_t)neighbourFills[0];
+        data.neighbourFillIndcies[1] = (uint32_t)neighbourFills[1];
+        data.neighbourFillIndcies[2] = (uint32_t)neighbourFills[2];
+        data.neighbourFillIndcies[3] = (uint32_t)neighbourFills[3];
       }
     }
 
@@ -256,6 +439,7 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
 
   _mat.set_texture("FillMapTextureArray", textures["tilemap_fillmap_array"], sampler_mode::undef);
   _mat.set_texture("TileEdgeTextureArray", textures["tilemap_maskmap_array"], sampler_mode::undef);
+  _mat.set_texture("TileBlendMaskArray", textures["tilemap_blendmap_array"], sampler_mode::undef);
 
   _mat.set_blend(blend_mode::on);
 }

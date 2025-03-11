@@ -27,8 +27,8 @@ namespace game {
       quad,
       upper,
       up_down,
-      diagnal,
-      right_angle
+      right_angle,
+      tree_side
     };
     struct instance_data_sbuffer {
       float cull = 0;
@@ -36,11 +36,9 @@ namespace game {
       uint32_t edgeIndex = 0;
       uint32_t fillIndex = 0;
 
-      uint32_t innerEdgeMaskIndex = 0;
-      uint32_t innerEdgeBlendMaskIndex = 0;
-
-      uint32_t innerEdgesFillIndcies[4] = { 0 };
-      float innerEdgesAngles[4] = { 0 };
+      uint32_t blendIndex;
+      float blendMaskAngle = 0;
+      uint32_t neighbourFillIndcies[4] = { 0 };
     };
     struct render_data_cbuffer {
       uint32_t instanceOffset[2] = {0};
