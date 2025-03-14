@@ -30,9 +30,10 @@ namespace game {
 
     bool _started = false;
 
-    static constexpr const uint32_t _worldWidth = 2;
-    static constexpr const uint32_t _worldHeight = 2;
+    static constexpr const uint32_t _worldWidth = 3;
+    static constexpr const uint32_t _worldHeight = 3;
     static constexpr const float _tileSize = 0.5f;
+
 
     float _camMovSpeed = 2;
   };

@@ -7,7 +7,6 @@
 #include "shader_collection.h"
 #include "texture_collection.h"
 #include "world_tile_component.h"
-#include "world_tile_graphics_component.h"
 
 namespace game {
   class world_tile_rendering_system : public base::ecs::system {

@@ -212,7 +212,6 @@
     <ClInclude Include="shader_collection.h" />
     <ClInclude Include="texture_collection.h" />
     <ClInclude Include="world_tile_component.h" />
-    <ClInclude Include="world_tile_graphics_component.h" />
     <ClInclude Include="world_tile_system.h" />
   </ItemGroup>
   <ItemGroup>

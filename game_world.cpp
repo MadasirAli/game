@@ -4,7 +4,6 @@
 #include "world_tile_component.h"
 #include "world_tile_rendering_system.h"
 #include "world_tile_system.h"
-#include "world_tile_graphics_component.h"
 
 using namespace game;
 

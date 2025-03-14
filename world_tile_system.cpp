@@ -22,16 +22,18 @@ void world_tile_system::on_register(const world& query)
     uint32_t y = (uint32_t)i / _worldWidth;
 
     auto& tile = _pTiles[i];
+
+    tile.type = world_tile_type::sand;
     //if ((x < 4 &&  y < 4) || (y > (_worldHeight - 4) && x >(_worldWidth - 4))) {
     //  tile.type = world_tile_type::sand;
     //}
     //else {
-    //  tile.type = world_tile_type::sand;
+    //  tile.type = world_tile_type::coal;
     //}
 
-    //if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
-    //  tile.type = world_tile_type::sand;
-    //}
+    if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
+      tile.type = world_tile_type::coal;
+    }
     //if (y == (_worldHeight / 2) && x > 0 && x < (_worldWidth - 1)) {
     //  tile.type = world_tile_type::dirt;
     //}
@@ -44,8 +46,6 @@ void world_tile_system::on_register(const world& query)
     //else if (x == 3) {
     //  tile.type = world_tile_type::dirt;
     //}
-
-    tile.type = world_tile_type::sand;
   }
 }
 

@@ -34,9 +34,12 @@ void world_tile_rendering_system::on_update(const world& query)
 
 
   if (drawCount > 0) {
-    D3D11_MAPPED_SUBRESOURCE map = { 0 };
-    renderer.map_buffer(_instanceDataSBuffer, map);
+    ImGui::Text("Tiles Draw Count: %d", drawCount);
+
     for (size_t t = 0; t < world_tile_component::maxTypes; ++t) {
+      D3D11_MAPPED_SUBRESOURCE map = { 0 };
+      renderer.map_buffer(_instanceDataSBuffer, map);
+
       for (size_t i = yStartIndex; i < yEndIndex; ++i) {
         for (size_t j = xStartIndex; j < xEndIndex; ++j) {
 
@@ -49,40 +52,53 @@ void world_tile_rendering_system::on_update(const world& query)
           //if (tile.requiresGraphicsUpdate == false) {
           //  continue;
           //}
+
           tile.requiresGraphicsUpdate = false;
 
+          /// mask calculation here
           const float xInc = (1 / (float)_renderWorldWidth) * 0.5f;
           const float yInc = (1 / (float)_renderWorldHeight) * 0.5f;
 
-          const float normX = ((x / (float)_renderWorldWidth)) + ((1 / (float)_renderWorldWidth) * 1.0f)   ;
-          const float normY = ((y / (float)_renderWorldHeight)) + ((1 / (float)_renderWorldHeight) * 1.0f) ;
+          const float normX = ((x / (float)_renderWorldWidth)) + ((1 / (float)_renderWorldWidth) * 1.0f);
+          const float normY = ((y / (float)_renderWorldHeight)) + ((1 / (float)_renderWorldHeight) * 1.0f);
 
-
-          /// mask calculation here
-          int32_t topLeftDataIndex      = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
-          int32_t topRightDataIndex     = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
-          int32_t bottomLeftDataIndex   = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
-          int32_t bottomRightDataIndex  = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
-
-          //topLeftDataIndex = topLeftDataIndex < 0 ? 0 : topLeftDataIndex;
-          //topRightDataIndex = topRightDataIndex < 0 ? 0 : topRightDataIndex;
-          //bottomLeftDataIndex = bottomLeftDataIndex < 0 ? 0 : bottomLeftDataIndex;
-          //bottomRightDataIndex = bottomRightDataIndex < 0 ? 0 : bottomRightDataIndex;
-
-          //topLeftDataIndex = topLeftDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : topLeftDataIndex;
-          //topRightDataIndex = topRightDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : topRightDataIndex;
-          //bottomLeftDataIndex = bottomLeftDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : bottomLeftDataIndex;
-          //bottomRightDataIndex = bottomRightDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : bottomRightDataIndex;
+          int32_t topLeftDataIndex = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
+          int32_t topRightDataIndex = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
+          int32_t bottomLeftDataIndex = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
+          int32_t bottomRightDataIndex = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
 
           auto& topLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
           auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topRightDataIndex];
           auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[bottomLeftDataIndex];
           auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[bottomRightDataIndex];
 
-          topLeftData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::bottom_right;
-          topRightData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::bottom_left;
-          bottomLeftData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::top_right;
-          bottomRightData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::top_left;
+          if ((uint32_t)tile.type == t) {
+            topLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_right);  // Set the bit
+          }
+          else {
+            topLeftData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::bottom_right); // Clear the bit
+          }
+
+          if ((uint32_t)tile.type == t) {
+            topRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_left);  // Set the bit
+          }
+          else {
+            topRightData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::bottom_left); // Clear the bit
+          }
+
+          if ((uint32_t)tile.type == t) {
+            bottomLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_right);  // Set the bit
+          }
+          else {
+            bottomLeftData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::top_right); // Clear the bit
+          }
+
+          if ((uint32_t)tile.type == t) {
+            bottomRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_left);  // Set the bit
+          }
+          else {
+            bottomRightData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::top_left); // Clear the bit
+          }
 
           topLeftData.fillIndex = (uint32_t)tile.type;
           topRightData.fillIndex = (uint32_t)tile.type;
@@ -92,27 +108,22 @@ void world_tile_rendering_system::on_update(const world& query)
         }
       }
 
+
+
+      renderer.unmap_buffer(_instanceDataSBuffer);
+
+      render_data_cbuffer renderData = { 0 };
+      renderData.instanceOffset[0] = 0;
+      renderData.instanceOffset[1] = 0;
+      renderData.instanceFrustumSize[0] = _renderWorldWidth;
+      renderData.instanceFrustumSize[1] = _renderWorldHeight;
+
+      renderer.map_buffer(_renderDataCBuffer, map);
+      ((render_data_cbuffer*)(map.pData))[0] = renderData;
+      renderer.unmap_buffer(_renderDataCBuffer);
+
+      renderer.draw_quad_instanced(_mat, _renderWorldWidth * _renderWorldHeight);
     }
-
-
-
-
-
-    renderer.unmap_buffer(_instanceDataSBuffer);
-
-    ImGui::Text("Tiles Draw Count: %d", drawCount);
-
-    render_data_cbuffer renderData = { 0 };
-    renderData.instanceOffset[0] = 0;
-    renderData.instanceOffset[1] = 0;
-    renderData.instanceFrustumSize[0] = _renderWorldWidth;
-    renderData.instanceFrustumSize[1] = _renderWorldHeight;
-
-    renderer.map_buffer(_renderDataCBuffer, map);
-    ((render_data_cbuffer*)(map.pData))[0] = renderData;
-    renderer.unmap_buffer(_renderDataCBuffer);
-
-    renderer.draw_quad_instanced(_mat, _renderWorldWidth * _renderWorldHeight);
   }
 }
 
