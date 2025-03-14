@@ -1,6 +1,7 @@
 #include "world_tile_rendering_system.h"
 
 #include <cmath>
+#include <algorithm>
 
 #include "world.h"
 #include "imgui.h"
@@ -36,367 +37,55 @@ void world_tile_rendering_system::on_update(const world& query)
   if (drawCount > 0) {
     D3D11_MAPPED_SUBRESOURCE map = { 0 };
     renderer.map_buffer(_instanceDataSBuffer, map);
+    for (size_t t = 0; t < world_tile_component::maxTypes; ++t) {
+      for (size_t i = yStartIndex; i < yEndIndex; ++i) {
+        for (size_t j = xStartIndex; j < xEndIndex; ++j) {
 
-    for (size_t i = yStartIndex; i < yEndIndex; ++i) {
-      for (size_t j = xStartIndex; j < xEndIndex; ++j) {
+          const int32_t x = j;
+          const int32_t y = i;
+          const uint32_t z = (i * _worldWidth) + j;
 
-        const int32_t x = j;
-        const int32_t y = i;
-        const uint32_t z = (i * _worldWidth) + j;
+          auto& tile = _pTiles[z];
+          
+          // one tile type at a time.
+          if ((uint32_t)tile.type != t) {
+            continue;
+          }
 
-        auto& tile = _pTiles[z];
+          //if (tile.requiresGraphicsUpdate == false) {
+          //  continue;
+          //}
+          tile.requiresGraphicsUpdate = false;
 
-        //if (tile.requiresGraphicsUpdate == false) {
-        //  continue;
-        //}
-        tile.requiresGraphicsUpdate = false;
+          /// mask calculation here
 
-        auto& data = ((instance_data_sbuffer*)(map.pData))[z];
+          const uint32_t topLeftDataIndex = std::clamp(((y + 1) * _worldWidth) + x - 1, 0u, _renderWorldHeight * _renderWorldWidth);
+          const uint32_t topRightDataIndex = std::clamp(((y + 1) * _worldWidth) + x + 1, 0u, _renderWorldHeight * _renderWorldWidth);
+          const uint32_t bottomLeftDataIndex = std::clamp(((y - 1) * _worldWidth) + x - 1, 0u, _renderWorldHeight * _renderWorldWidth);
+          const uint32_t bottomRightDataIndex = std::clamp(((y - 1) * _worldWidth) + x + 1, 0u, _renderWorldHeight * _renderWorldWidth);
 
-        float cull = 0;
-        float edgeAngle = 0;
-        float blendAngle = 0;
+          auto& topLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
+          auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
+          auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
+          auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
 
-        if (tile.type != world_tile_type::empty) {
-          cull = 1;
+          topLeftData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::bottom_right;
+          topRightData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::bottom_left;
+          bottomLeftData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::top_right;
+          bottomRightData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::top_left;
+
+          topLeftData.fillIndex = (uint32_t)tile.type;
+          topRightData.fillIndex = (uint32_t)tile.type;
+          bottomLeftData.fillIndex = (uint32_t)tile.type;
+          bottomRightData.fillIndex = (uint32_t)tile.type;
+          // ----------------------------------
         }
-
-        const uint32_t edges = tile.edgeFlags;
-        const uint32_t innerEdges = tile.innerEdgeFlags;
-
-        edge_index edgeIndex = edge_index::none;
-        blend_index blendIndex = blend_index::zero;
-
-        world_tile_type neighbourFills[4] = { world_tile_type::empty };
-        neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
-        neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
-        neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
-        neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
-
-        if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::right) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
-
-          blendIndex = blend_index::quad;
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::right)) {
-
-          blendIndex = blend_index::tree_side;
-          blendAngle = 90;
-
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
-
-          blendIndex = blend_index::tree_side;
-          blendAngle = -90;
-
-          // Assuming the tile is rotated -90 degrees (counterclockwise)
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::right) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
-
-          blendIndex = blend_index::tree_side;
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::right) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
-
-          blendIndex = blend_index::tree_side;
-          blendAngle = 180;
-
-          // Assuming the tile is rotated 180 degrees
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Top becomes Bottom
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Right becomes Left
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Bottom becomes Top
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Left becomes Right
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::right) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::top)) {
-
-          blendIndex = blend_index::right_angle;
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::right) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-          blendIndex = blend_index::right_angle;
-
-          blendAngle = 90;
-
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::left) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::top)) {
-
-          blendIndex = blend_index::right_angle;
-          blendAngle = -90;
-
-          // Assuming the tile is rotated -90 degrees (counterclockwise)
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::left) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-          blendIndex = blend_index::right_angle;
-          blendAngle = 180;
-
-          // Assuming the tile is rotated 180 degrees
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Top becomes Bottom
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Right becomes Left
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Bottom becomes Top
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Left becomes Right
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::top) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-          blendIndex = blend_index::up_down;
-
-        }
-        else if ((innerEdges & (uint32_t)world_tile_edge_flag::right) &&
-          (innerEdges & (uint32_t)world_tile_edge_flag::left)) {
-
-          blendIndex = blend_index::up_down;
-          blendAngle = -90;
-
-
-          // Assuming the tile is rotated -90 degrees (counterclockwise)
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
-
-        }
-        else if (innerEdges & (uint32_t)world_tile_edge_flag::top) {
-
-          blendIndex = blend_index::upper;
-
-        }
-        else if (innerEdges & (uint32_t)world_tile_edge_flag::right) {
-
-          blendIndex = blend_index::upper;
-          blendAngle = 90;
-
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::right];
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::left];
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::top];
-        }
-        else if (innerEdges & (uint32_t)world_tile_edge_flag::bottom) {
-
-          blendIndex = blend_index::upper;
-          blendAngle = 180;
-
-          // Assuming the tile is rotated 180 degrees
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Top becomes Bottom
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Right becomes Left
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Bottom becomes Top
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Left becomes Right
-        }
-        else if (innerEdges & (uint32_t)world_tile_edge_flag::left) {
-
-          blendIndex = blend_index::upper;
-          blendAngle = -90;
-
-          // Assuming the tile is rotated -90 degrees (counterclockwise)
-          neighbourFills[0] = tile.neighbours[(uint32_t)world_tile_neighbour::left];    // Top becomes Left
-          neighbourFills[1] = tile.neighbours[(uint32_t)world_tile_neighbour::top];     // Right becomes Top
-          neighbourFills[2] = tile.neighbours[(uint32_t)world_tile_neighbour::right];   // Bottom becomes Right
-          neighbourFills[3] = tile.neighbours[(uint32_t)world_tile_neighbour::bottom];  // Left becomes Bottom
-        }
-        else {
-          // assert(false);
-        }
-
-
-
-
-
-
-
-
-
-
-
-        if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-          edgeIndex = edge_index::quad;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (edges & (uint32_t)world_tile_edge_flag::right)) {
-
-          edgeIndex = edge_index::tree_side;
-          edgeAngle = 90;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-          edgeIndex = edge_index::tree_side;
-          edgeAngle = -90;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-          (edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-          edgeIndex = edge_index::tree_side;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::bottom) &&
-          (edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-          edgeIndex = edge_index::tree_side;
-          edgeAngle = 180;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::top)) {
-
-          edgeIndex = edge_index::right_angle;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-          edgeIndex = edge_index::right_angle;
-          edgeAngle = 90;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
-          (edges & (uint32_t)world_tile_edge_flag::top)) {
-
-          edgeIndex = edge_index::right_angle;
-          edgeAngle = -90;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::left) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-          edgeIndex = edge_index::right_angle;
-          edgeAngle = 180;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::top) &&
-          (edges & (uint32_t)world_tile_edge_flag::bottom)) {
-
-          edgeIndex = edge_index::up_down;
-
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::right) &&
-          (edges & (uint32_t)world_tile_edge_flag::left)) {
-
-          edgeIndex = edge_index::up_down;
-          edgeAngle = -90;
-
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::top) {
-
-          edgeIndex = edge_index::upper;
-
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::right) {
-
-          edgeIndex = edge_index::upper;
-          edgeAngle = 90;
-
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::bottom) {
-
-          edgeIndex = edge_index::upper;
-          edgeAngle = 180;
-
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::left) {
-
-          edgeIndex = edge_index::upper;
-          edgeAngle = -90;
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::diagnal_top_left) &&
-                 (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_right)) {
-
-          edgeIndex = edge_index::diagnal_double;
-        }
-        else if ((edges & (uint32_t)world_tile_edge_flag::diagnal_top_right) &&
-                 (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_left)) {
-
-          edgeIndex = edge_index::diagnal_double;
-          edgeAngle = 90;
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_top_right) {
-
-          edgeIndex = edge_index::diagnal;
-          edgeAngle = 90;
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_top_left) {
-
-          edgeIndex = edge_index::diagnal;
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_right) {
-
-          edgeIndex = edge_index::diagnal;
-          edgeAngle = 180;
-        }
-        else if (edges & (uint32_t)world_tile_edge_flag::diagnal_bottom_left) {
-
-          edgeIndex = edge_index::diagnal;
-          edgeAngle = -90;
-        }
-        else {
-          // assert(false);
-        }
-
-
-        data.cull = cull;
-        data.fillIndex = (uint32_t)tile.type;
-        data.edgeIndex = (uint32_t)edgeIndex;
-        data.edgeMaskAngle = edgeAngle;
-
-        data.blendIndex = (uint32_t)blendIndex;
-        data.blendMaskAngle = blendAngle;
-
-
-        data.neighbourFillIndcies[0] = (uint32_t)neighbourFills[0];
-        data.neighbourFillIndcies[1] = (uint32_t)neighbourFills[1];
-        data.neighbourFillIndcies[2] = (uint32_t)neighbourFills[2];
-        data.neighbourFillIndcies[3] = (uint32_t)neighbourFills[3];
       }
     }
 
     renderer.unmap_buffer(_instanceDataSBuffer);
 
-    ImGui::Text("Draw Count: %d", drawCount);
+    ImGui::Text("Tiles Draw Count: %d", drawCount);
 
     render_data_cbuffer renderData = { 0 };
     renderData.instanceOffset[0] = xStartIndex;
@@ -414,10 +103,11 @@ void world_tile_rendering_system::on_update(const world& query)
 
 void world_tile_rendering_system::on_register(const world& query)
 {
-  auto archs = query.query<world_tile_component>();
+  auto archs = query.query<world_tile_component, world_tile_graphics_component>();
   assert(archs.size() == 1);
 
   _pTiles = archs[0].get().get_array_pointer_of<world_tile_component>();
+  _pGraphics = archs[0].get().get_array_pointer_of<world_tile_graphics_component>();
 }
 
 world_tile_rendering_system::world_tile_rendering_system(system_name name, 
@@ -430,20 +120,26 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _rCamera(camera),
   _worldWidth(worldWidth),
   _worldHeight(worldHeight),
+  _renderWorldWidth(worldWidth + 1),
+  _renderWorldHeight(worldHeight + 1),
+  _renderWorldOffsetX(tileSize * -0.5f),
+  _renderWorldOffsetY(tileSize * -0.5f),
   _tileSize(tileSize),
   _mat(shaders["world_tile_shader.hlsl"])
 {
   instance_data_cbuffer instanceCData = { 0 };
-  instanceCData.worldWidth = _worldWidth;
-  instanceCData.worldHeight = _worldHeight;
+  instanceCData.worldWidth = _renderWorldWidth;
+  instanceCData.worldHeight = _renderWorldHeight;
   instanceCData.tileSize = _tileSize;
+  instanceCData.offset[0] = _renderWorldOffsetX;
+  instanceCData.offset[1] = _renderWorldOffsetY;
   instanceCData.fillMapAreaTilesCount = _fillMapAreaTilesCount;
 
   _instanceDataCBuffer = _rRenderer.get().create_buffer((char*)&instanceCData, sizeof(instance_data_cbuffer),
     buffer_type::constant, 1, access_mode::none);
 
   _instanceDataSBuffer = _rRenderer.get().create_buffer(nullptr, sizeof(instance_data_sbuffer),
-    buffer_type::structured, _worldHeight * _worldWidth, access_mode::write);
+    buffer_type::structured, _renderWorldHeight * _renderWorldWidth, access_mode::write);
 
   _renderDataCBuffer = _rRenderer.get().create_buffer(nullptr, sizeof(render_data_cbuffer),
     buffer_type::constant, 1, access_mode::write_discard);
@@ -454,9 +150,8 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _mat.set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
   _mat.set_cbuffer("RenderDataCBuffer", _renderDataCBuffer);
 
-  _mat.set_texture("FillMapTextureArray", textures["tilemap_fillmap_array"], sampler_mode::undef);
-  _mat.set_texture("TileEdgeTextureArray", textures["tilemap_maskmap_array"], sampler_mode::undef);
-  _mat.set_texture("TileBlendMaskArray", textures["tilemap_blendmap_array"], sampler_mode::undef);
+  _mat.set_texture("FillMapsArray", textures["tilemap_fillmap_array"], sampler_mode::undef);
+  _mat.set_texture("TileMasksArray", textures["tilemap_maskmap_array"], sampler_mode::undef);
 
   _mat.set_blend(blend_mode::on);
 }
