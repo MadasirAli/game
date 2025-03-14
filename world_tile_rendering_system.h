@@ -13,10 +13,10 @@ namespace game {
   class world_tile_rendering_system : public base::ecs::system {
   private:
     enum class corner_bit_index {
-      top_left,
-      top_right,
+      bottom_left,
       bottom_right,
-      bottom_left
+      top_right,
+      top_left
     };
     struct instance_data_sbuffer {
       uint32_t maskIndex = 0;
@@ -60,8 +60,6 @@ namespace game {
 
     const uint32_t _renderWorldWidth;
     const uint32_t _renderWorldHeight;
-    const uint32_t _renderWorldOffsetX;
-    const uint32_t _renderWorldOffsetY;
 
     const float _tileSize;
 
@@ -70,6 +68,5 @@ namespace game {
     static constexpr const uint32_t _fillMapAreaTilesCount = 4;
 
     world_tile_component* _pTiles = nullptr;
-    world_tile_graphics_component* _pGraphics = nullptr;
   };
 }

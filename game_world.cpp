@@ -25,9 +25,8 @@ void game_world::update(float deltaTime)
 
     // creating arch type
     world_tile_component tile = { };
-    world_tile_graphics_component graphics = { };
 
-    _world.create_archtype<world_tile_component, world_tile_graphics_component>(_worldHeight * _worldWidth, tile, graphics);
+    _world.create_archtype<world_tile_component>(_worldHeight * _worldWidth, tile);
 
     _world.register_system<world_tile_system>(base::ecs::system_name ::world_tile_system,
       _worldWidth, _worldHeight);

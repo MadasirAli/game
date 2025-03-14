@@ -1,7 +1,6 @@
 #include "world_tile_rendering_system.h"
 
 #include <cmath>
-#include <algorithm>
 
 #include "world.h"
 #include "imgui.h"
@@ -46,28 +45,39 @@ void world_tile_rendering_system::on_update(const world& query)
           const uint32_t z = (i * _worldWidth) + j;
 
           auto& tile = _pTiles[z];
-          
-          // one tile type at a time.
-          if ((uint32_t)tile.type != t) {
-            continue;
-          }
 
           //if (tile.requiresGraphicsUpdate == false) {
           //  continue;
           //}
           tile.requiresGraphicsUpdate = false;
 
-          /// mask calculation here
+          const float xInc = (1 / (float)_renderWorldWidth) * 0.5f;
+          const float yInc = (1 / (float)_renderWorldHeight) * 0.5f;
 
-          const uint32_t topLeftDataIndex = std::clamp(((y + 1) * _worldWidth) + x - 1, 0u, _renderWorldHeight * _renderWorldWidth);
-          const uint32_t topRightDataIndex = std::clamp(((y + 1) * _worldWidth) + x + 1, 0u, _renderWorldHeight * _renderWorldWidth);
-          const uint32_t bottomLeftDataIndex = std::clamp(((y - 1) * _worldWidth) + x - 1, 0u, _renderWorldHeight * _renderWorldWidth);
-          const uint32_t bottomRightDataIndex = std::clamp(((y - 1) * _worldWidth) + x + 1, 0u, _renderWorldHeight * _renderWorldWidth);
+          const float normX = ((x / (float)_renderWorldWidth)) + ((1 / (float)_renderWorldWidth) * 1.0f)   ;
+          const float normY = ((y / (float)_renderWorldHeight)) + ((1 / (float)_renderWorldHeight) * 1.0f) ;
+
+
+          /// mask calculation here
+          int32_t topLeftDataIndex      = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
+          int32_t topRightDataIndex     = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
+          int32_t bottomLeftDataIndex   = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
+          int32_t bottomRightDataIndex  = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
+
+          //topLeftDataIndex = topLeftDataIndex < 0 ? 0 : topLeftDataIndex;
+          //topRightDataIndex = topRightDataIndex < 0 ? 0 : topRightDataIndex;
+          //bottomLeftDataIndex = bottomLeftDataIndex < 0 ? 0 : bottomLeftDataIndex;
+          //bottomRightDataIndex = bottomRightDataIndex < 0 ? 0 : bottomRightDataIndex;
+
+          //topLeftDataIndex = topLeftDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : topLeftDataIndex;
+          //topRightDataIndex = topRightDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : topRightDataIndex;
+          //bottomLeftDataIndex = bottomLeftDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : bottomLeftDataIndex;
+          //bottomRightDataIndex = bottomRightDataIndex >= _renderWorldWidth * _renderWorldHeight ? _renderWorldWidth * _renderWorldHeight - 1 : bottomRightDataIndex;
 
           auto& topLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
-          auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
-          auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
-          auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
+          auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topRightDataIndex];
+          auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[bottomLeftDataIndex];
+          auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[bottomRightDataIndex];
 
           topLeftData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::bottom_right;
           topRightData.maskIndex |= ((uint32_t)tile.type == t) << (uint32_t)corner_bit_index::bottom_left;
@@ -81,33 +91,37 @@ void world_tile_rendering_system::on_update(const world& query)
           // ----------------------------------
         }
       }
+
     }
+
+
+
+
 
     renderer.unmap_buffer(_instanceDataSBuffer);
 
     ImGui::Text("Tiles Draw Count: %d", drawCount);
 
     render_data_cbuffer renderData = { 0 };
-    renderData.instanceOffset[0] = xStartIndex;
-    renderData.instanceOffset[1] = yStartIndex;
-    renderData.instanceFrustumSize[0] = xEndIndex - xStartIndex;
-    renderData.instanceFrustumSize[1] = yEndIndex - yStartIndex;
+    renderData.instanceOffset[0] = 0;
+    renderData.instanceOffset[1] = 0;
+    renderData.instanceFrustumSize[0] = _renderWorldWidth;
+    renderData.instanceFrustumSize[1] = _renderWorldHeight;
 
     renderer.map_buffer(_renderDataCBuffer, map);
     ((render_data_cbuffer*)(map.pData))[0] = renderData;
     renderer.unmap_buffer(_renderDataCBuffer);
 
-    renderer.draw_quad_instanced(_mat, drawCount);
+    renderer.draw_quad_instanced(_mat, _renderWorldWidth * _renderWorldHeight);
   }
 }
 
 void world_tile_rendering_system::on_register(const world& query)
 {
-  auto archs = query.query<world_tile_component, world_tile_graphics_component>();
+  auto archs = query.query<world_tile_component>();
   assert(archs.size() == 1);
 
   _pTiles = archs[0].get().get_array_pointer_of<world_tile_component>();
-  _pGraphics = archs[0].get().get_array_pointer_of<world_tile_graphics_component>();
 }
 
 world_tile_rendering_system::world_tile_rendering_system(system_name name, 
@@ -122,8 +136,6 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _worldHeight(worldHeight),
   _renderWorldWidth(worldWidth + 1),
   _renderWorldHeight(worldHeight + 1),
-  _renderWorldOffsetX(tileSize * -0.5f),
-  _renderWorldOffsetY(tileSize * -0.5f),
   _tileSize(tileSize),
   _mat(shaders["world_tile_shader.hlsl"])
 {
@@ -131,9 +143,10 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   instanceCData.worldWidth = _renderWorldWidth;
   instanceCData.worldHeight = _renderWorldHeight;
   instanceCData.tileSize = _tileSize;
-  instanceCData.offset[0] = _renderWorldOffsetX;
-  instanceCData.offset[1] = _renderWorldOffsetY;
+  instanceCData.offset[0] = 0;
+  instanceCData.offset[1] = 0;
   instanceCData.fillMapAreaTilesCount = _fillMapAreaTilesCount;
+
 
   _instanceDataCBuffer = _rRenderer.get().create_buffer((char*)&instanceCData, sizeof(instance_data_cbuffer),
     buffer_type::constant, 1, access_mode::none);
@@ -151,7 +164,7 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _mat.set_cbuffer("RenderDataCBuffer", _renderDataCBuffer);
 
   _mat.set_texture("FillMapsArray", textures["tilemap_fillmap_array"], sampler_mode::undef);
-  _mat.set_texture("TileMasksArray", textures["tilemap_maskmap_array"], sampler_mode::undef);
+  _mat.set_texture("TileMasksArray", textures["tilemap_mask_array"], sampler_mode::undef);
 
   _mat.set_blend(blend_mode::on);
 }
