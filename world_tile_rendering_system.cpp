@@ -31,11 +31,11 @@ void world_tile_rendering_system::on_update(const world& query)
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
 
 
-
+  const int32_t tilesInView = ((xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
   const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
 
   ImGui::Text("Tiles Draw Count: %d", drawCount);
-  if (drawCount > 0)
+  if (tilesInView > 0)
   {
     for (size_t t = 1; t < (uint32_t)world_tile_type::Count; ++t) {
       D3D11_MAPPED_SUBRESOURCE map = { 0 };

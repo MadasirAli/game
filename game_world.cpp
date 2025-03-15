@@ -1,5 +1,7 @@
 #include "game_world.h"
 
+#include <algorithm>
+
 #include "imgui.h"
 #include "world_tile_component.h"
 #include "world_tile_rendering_system.h"
@@ -67,6 +69,9 @@ void game_world::update(const world_per_tick_data& data)
   if (keyboard.get(key::DownArrow) == key_state::hold) {
     newPos[1] = newPos[1] - (_camMovSpeed * deltaTime);
   }
+  const auto size = camera.get_size();
+  newPos[0] = std::clamp<float>(newPos[0], 0 - (size * 0.5f), (_worldWidth * _tileSize) + (size * 0.5f));
+  newPos[1] = std::clamp<float>(newPos[1], 0 - (size * 0.5f), (_worldHeight * _tileSize) + (size * 0.5f));
   camera.set_position(newPos);
 
   ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 20);
