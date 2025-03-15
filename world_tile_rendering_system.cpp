@@ -12,7 +12,7 @@ using namespace base::ecs;
 void world_tile_rendering_system::on_update(const world& query)
 {
   const auto& renderer = _rRenderer.get();
-  for (size_t t = 0; t < 1; ++t) {
+  for (size_t t = 0; t < (uint32_t)world_tile_type::Count; ++t) {
     D3D11_MAPPED_SUBRESOURCE map = { 0 };
     renderer.map_buffer(_instanceDataSBuffer, map);
 
@@ -41,22 +41,22 @@ void world_tile_rendering_system::on_update(const world& query)
         auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[bottomLeftDataIndex];
         auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[bottomRightDataIndex];
 
-        if (tile.type != world_tile_type::empty) {
+        if ((uint32_t)tile.type == t) {
           topLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_right);  // Set the bit
           topLeftData.fillIndex = (uint32_t)tile.type;
         }
 
-        if (tile.type != world_tile_type::empty) {
+        if ((uint32_t)tile.type == t) {
           topRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_left);  // Set the bit
           topRightData.fillIndex = (uint32_t)tile.type;
         }
 
-        if (tile.type != world_tile_type::empty) {
+        if ((uint32_t)tile.type == t) {
           bottomLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_right);  // Set the bit
           bottomLeftData.fillIndex = (uint32_t)tile.type;
         }
 
-        if (tile.type != world_tile_type::empty) {
+        if ((uint32_t)tile.type == t) {
           bottomRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_left);  // Set the bit
           bottomRightData.fillIndex = (uint32_t)tile.type;
         }
