@@ -4,6 +4,7 @@
 
 #include "imgui.h"
 #include "world_per_tick_data.h"
+#include "key.h"
 
 using namespace game;
 
@@ -122,7 +123,7 @@ LRESULT game_app::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     _cursorPos.y = HIWORD(lParam);
   }
 
-  if (msg == WM_SIZE) {
+  if (msg == WM_EXITSIZEMOVE) {
     RECT rect = { 0 };
     auto result = GetClientRect(p_hwnd, &rect);
     _width = rect.right - rect.left;
@@ -134,6 +135,7 @@ LRESULT game_app::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
     _logger.get().log(std::to_string(_width));
   }
+
 
   return win32_window::HandleMessage(hwnd, msg, wParam, lParam);
 }

@@ -62,6 +62,7 @@ void game_world::update(const world_per_tick_data& data)
 
   // system ticks
   _world.tick(base::ecs::system_name::world_tile_system);
+
 }
 
 void game_world::render(const world_per_tick_data& data)
