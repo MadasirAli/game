@@ -48,7 +48,7 @@
     <ClInclude Include="texture_collection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="world_tile_system.h">
+    <ClInclude Include="world_sim_system.h">
       <Filter>systems</Filter>
     </ClInclude>
     <ClInclude Include="map_generator.h">
@@ -92,7 +92,7 @@
     <ClCompile Include="texture_collection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="world_tile_system.cpp">
+    <ClCompile Include="world_sim_system.cpp">
       <Filter>systems</Filter>
     </ClCompile>
     <ClCompile Include="map_generator.cpp">

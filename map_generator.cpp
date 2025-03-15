@@ -5,6 +5,11 @@ using namespace game;
 void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint32_t height)
 {
   // generate noises here
+  float* pBaseNoise = nullptr;
+  float* pHeightNoise = nullptr;
+
+
+  //
   for (uint32_t i = 0; i < height; ++i) {
     for (uint32_t j = 0; j < width; ++j) {
       //   psedudo

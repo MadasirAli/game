@@ -5,7 +5,7 @@
 #include "imgui.h"
 #include "world_tile_component.h"
 #include "world_tile_rendering_system.h"
-#include "world_tile_system.h"
+#include "world_sim_system.h"
 #include "map_generator.h"
 
 using namespace game;
@@ -30,7 +30,7 @@ void game_world::update(const world_per_tick_data& data)
 
     _world.create_archtype<world_tile_component>(_worldHeight * _worldWidth, tile);
 
-    _world.register_system<world_tile_system>(base::ecs::system_name ::world_tile_system,
+    _world.register_system<world_sim_system>(base::ecs::system_name ::world_sim_system,
       _worldWidth, _worldHeight);
     _world.register_system<world_tile_rendering_system>(base::ecs::system_name::world_tile_rendering_system,
       _rRenderer, _rCamera, _rShaders, _rTextures,
@@ -78,7 +78,7 @@ void game_world::update(const world_per_tick_data& data)
   ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y);
 
   // system ticks
-  _world.tick(base::ecs::system_name::world_tile_system);
+  _world.tick(base::ecs::system_name::world_sim_system);
 
 }
 
