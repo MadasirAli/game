@@ -211,6 +211,7 @@
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_collection.h" />
     <ClInclude Include="texture_collection.h" />
+    <ClInclude Include="world_per_tick_data.h" />
     <ClInclude Include="world_tile_component.h" />
     <ClInclude Include="world_tile_system.h" />
   </ItemGroup>

@@ -28,6 +28,9 @@ namespace game {
     LRESULT HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 
   private:
+    uint32_t _width;
+    uint32_t _height;
+
     std::reference_wrapper<const base::logger> _logger;
     base::graphics::d3d_renderer _renderer;
     base::input::keyboard _keyboard;

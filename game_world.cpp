@@ -7,7 +7,7 @@
 
 using namespace game;
 
-void game_world::update(float deltaTime)
+void game_world::update(const world_per_tick_data& data)
 {
   ImGui::Text("Game");
   ImGui::Text("Playing...");
@@ -37,7 +37,9 @@ void game_world::update(float deltaTime)
   using namespace base::input;
 
   const auto& keyboard = _rKeyboard.get();
+  const auto& mouse = _rMouse.get();
   auto& camera = _rCamera.get();
+  const auto deltaTime = data.deltaTime;
 
   std::array<float, 2> newPos = camera.get_position();
   // camera movement
@@ -56,21 +58,24 @@ void game_world::update(float deltaTime)
   camera.set_position(newPos);
 
   ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 20);
+  ImGui::Text("X: %d, Y: %d", mouse.get_pos().x, mouse.get_pos().y);
 
+  // system ticks
   _world.tick(base::ecs::system_name::world_tile_system);
 }
 
-void game_world::render()
+void game_world::render(const world_per_tick_data& data)
 {
   _world.tick(base::ecs::system_name::world_tile_rendering_system);
 }
 
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
   const texture_collection& textures,
-  camera& camera, const base::input::keyboard& keyboard) :
+  camera& camera, const base::input::keyboard& keyboard, const base::input::mouse& mouse) :
   _rRenderer(renderer),
   _rShaders(shaders),
   _rTextures(textures),
   _rCamera(camera),
-  _rKeyboard(keyboard)
+  _rKeyboard(keyboard),
+  _rMouse(mouse)
 {}

@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "imgui.h"
+#include "world_per_tick_data.h"
 
 using namespace game;
 
@@ -31,10 +32,15 @@ void game_app::update()
     _main_menu.update();
   }
   else {
-    _world.update(_deltaTime);
+    world_per_tick_data worldPerTickData{};
+    worldPerTickData.deltaTime = _deltaTime;
+    worldPerTickData.windowWidth = _width;
+    worldPerTickData.windowHeight = _height;
+
+    _world.update(worldPerTickData);
 
     _camera.update();
-    _world.render();
+    _world.render(worldPerTickData);
   }
 
   //
@@ -59,15 +65,17 @@ void game_app::quit()
 
 game_app::game_app() :
   win32_window(L"Oxygen is Included", 1280, 720),
+  _width(1280),
+  _height(720),
   _logger(base::logger::get_instance()),
   _renderer(p_hwnd),
   _shaders(_renderer),
   _textures(_renderer),
   _random(0),
   _camera(_renderer),
-  _world(_renderer, _shaders, _textures, _camera, _keyboard)
+  _world(_renderer, _shaders, _textures, _camera, _keyboard, _mouse)
 {
-  _camera.set_aspect_ratio(720.0f / 1280.0f);
+  _camera.set_aspect_ratio(_height / (float)_width);
 }
 
 LRESULT game_app::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -112,6 +120,19 @@ LRESULT game_app::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
   else if (msg == WM_MOUSEMOVE) {
     _cursorPos.x = LOWORD(lParam);
     _cursorPos.y = HIWORD(lParam);
+  }
+
+  if (msg == WM_SIZE) {
+    RECT rect = { 0 };
+    auto result = GetClientRect(p_hwnd, &rect);
+    _width = rect.right - rect.left;
+    _height = rect.bottom - rect.top;
+    assert(result == true);
+
+    _renderer.resize(_width, _height);
+    _camera.set_aspect_ratio(_height / (float)_width);
+
+    _logger.get().log(std::to_string(_width));
   }
 
   return win32_window::HandleMessage(hwnd, msg, wParam, lParam);
