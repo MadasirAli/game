@@ -28,6 +28,9 @@ namespace game {
     LRESULT HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 
   private:
+    void resize();
+
+  private:
     uint32_t _width;
     uint32_t _height;
 
@@ -51,6 +54,8 @@ namespace game {
     
     game_world _world;
     main_menu _main_menu;
+
+    bool _culled = false;
   };
 }
 

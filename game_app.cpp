@@ -41,12 +41,16 @@ void game_app::update()
     _world.update(worldPerTickData);
 
     _camera.update();
-    _world.render(worldPerTickData);
+    if (_culled == false) {
+      _world.render(worldPerTickData);
+    }
   }
 
   //
   _renderer.imgui_draw();
-  _renderer.present(_vsync);
+  if (_culled == false) {
+    _renderer.present(_vsync);
+  }
 
   _keyBuf = input::key_buf{};
 
@@ -124,18 +128,34 @@ LRESULT game_app::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
   }
 
   if (msg == WM_EXITSIZEMOVE) {
-    RECT rect = { 0 };
-    auto result = GetClientRect(p_hwnd, &rect);
-    _width = rect.right - rect.left;
-    _height = rect.bottom - rect.top;
-    assert(result == true);
-
-    _renderer.resize(_width, _height);
-    _camera.set_aspect_ratio(_height / (float)_width);
-
-    _logger.get().log(std::to_string(_width));
+    resize();
+  }
+  else if (msg == WM_SIZE) {
+    if (wParam == SIZE_MINIMIZED) {
+      _culled = true;
+    }
+    else if (wParam == SIZE_MAXIMIZED) {
+      resize();
+    }
+    else if(wParam == SIZE_RESTORED) {
+      resize();
+    }
   }
 
 
   return win32_window::HandleMessage(hwnd, msg, wParam, lParam);
+}
+
+void game_app::resize()
+{
+  _culled = false;
+
+  RECT rect = { 0 };
+  auto result = GetClientRect(p_hwnd, &rect);
+  _width = rect.right - rect.left;
+  _height = rect.bottom - rect.top;
+  assert(result == true);
+
+  _renderer.resize(_width, _height);
+  _camera.set_aspect_ratio(_height / (float)_width);
 }
