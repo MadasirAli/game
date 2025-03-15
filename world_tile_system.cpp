@@ -31,8 +31,12 @@ void world_tile_system::on_register(const world& query)
     //  tile.type = world_tile_type::coal;
     //}
 
+    //if (y == 0 && x == 1) {
+    // tile.type = world_tile_type::empty;
+    //}
+
     if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
-      tile.type = world_tile_type::coal;
+      tile.type = world_tile_type::empty;
     }
     //if (y == (_worldHeight / 2) && x > 0 && x < (_worldWidth - 1)) {
     //  tile.type = world_tile_type::dirt;

@@ -12,9 +12,14 @@ using namespace base::ecs;
 void world_tile_rendering_system::on_update(const world& query)
 {
   const auto& renderer = _rRenderer.get();
-  for (size_t t = 0; t < world_tile_component::maxTypes; ++t) {
+  for (size_t t = 0; t < 1; ++t) {
     D3D11_MAPPED_SUBRESOURCE map = { 0 };
     renderer.map_buffer(_instanceDataSBuffer, map);
+
+    for (size_t i = 0; i < (_renderWorldHeight * _renderWorldWidth); ++i) {
+      ((instance_data_sbuffer*)(map.pData))[i].fillIndex = 0;
+      ((instance_data_sbuffer*)(map.pData))[i].maskIndex = 0;
+    }
 
     for (size_t i = 0; i < _worldHeight; ++i) {
       for (size_t j = 0; j < _worldWidth; ++j) {
@@ -26,57 +31,39 @@ void world_tile_rendering_system::on_update(const world& query)
         auto& tile = _pTiles[z];
 
         /// mask calculation here
-        const float xInc = (1 / (float)_renderWorldWidth) * 0.5f;
-        const float yInc = (1 / (float)_renderWorldHeight) * 0.5f;
-
-        const float normX = ((x / (float)_renderWorldWidth)) + ((1 / (float)_renderWorldWidth) * 1.0f);
-        const float normY = ((y / (float)_renderWorldHeight)) + ((1 / (float)_renderWorldHeight) * 1.0f);
-
-        int32_t topLeftDataIndex = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
-        int32_t topRightDataIndex = ((int32_t)(((normY + yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
-        int32_t bottomLeftDataIndex = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX - xInc + 0) - 0) * _renderWorldWidth);
-        int32_t bottomRightDataIndex = ((int32_t)(((normY - yInc + 0) * _renderWorldHeight) - 0) * _renderWorldWidth) + (int32_t)(((normX + xInc + 0) - 0) * _renderWorldWidth);
+        int32_t topLeftDataIndex = ((y+1) * _renderWorldWidth) + (x);
+        int32_t topRightDataIndex = ((y+1) * _renderWorldWidth) + (x+1);
+        int32_t bottomLeftDataIndex = ((y) * _renderWorldWidth) + (x);
+        int32_t bottomRightDataIndex = ((y) * _renderWorldWidth) + (x+1);
 
         auto& topLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
         auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topRightDataIndex];
         auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[bottomLeftDataIndex];
         auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[bottomRightDataIndex];
 
-        if ((uint32_t)tile.type == t) {
+        if (tile.type != world_tile_type::empty) {
           topLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_right);  // Set the bit
-        }
-        else {
-          topLeftData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::bottom_right); // Clear the bit
+          topLeftData.fillIndex = (uint32_t)tile.type;
         }
 
-        if ((uint32_t)tile.type == t) {
+        if (tile.type != world_tile_type::empty) {
           topRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_left);  // Set the bit
-        }
-        else {
-          topRightData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::bottom_left); // Clear the bit
+          topRightData.fillIndex = (uint32_t)tile.type;
         }
 
-        if ((uint32_t)tile.type == t) {
+        if (tile.type != world_tile_type::empty) {
           bottomLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_right);  // Set the bit
-        }
-        else {
-          bottomLeftData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::top_right); // Clear the bit
+          bottomLeftData.fillIndex = (uint32_t)tile.type;
         }
 
-        if ((uint32_t)tile.type == t) {
+        if (tile.type != world_tile_type::empty) {
           bottomRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_left);  // Set the bit
+          bottomRightData.fillIndex = (uint32_t)tile.type;
         }
-        else {
-          bottomRightData.maskIndex &= ~(1 << (uint32_t)corner_bit_index::top_left); // Clear the bit
-        }
-
-        topLeftData.fillIndex = (uint32_t)tile.type;
-        topRightData.fillIndex = (uint32_t)tile.type;
-        bottomLeftData.fillIndex = (uint32_t)tile.type;
-        bottomRightData.fillIndex = (uint32_t)tile.type;
         // ----------------------------------
       }
     }
+
 
     renderer.unmap_buffer(_instanceDataSBuffer);
 
