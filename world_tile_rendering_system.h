@@ -11,35 +11,15 @@
 namespace game {
   class world_tile_rendering_system : public base::ecs::system {
   private:
-    enum class edge_index {
-      none,
-      quad,
-      upper,
-      up_down,
-      right_angle,
-      tree_side,
-      empty,
-      diagnal,
-      diagnal_double
-    };
-    enum class blend_index {
-      zero,
-      unit,
-      quad,
-      upper,
-      up_down,
-      right_angle,
-      tree_side
+    enum class corner_bit_index {
+      bottom_left,
+      bottom_right,
+      top_right,
+      top_left
     };
     struct instance_data_sbuffer {
-      float cull = 0;
-      float edgeMaskAngle = 0;
-      uint32_t edgeIndex = 0;
+      uint32_t maskIndex = 0;
       uint32_t fillIndex = 0;
-
-      uint32_t blendIndex;
-      float blendMaskAngle = 0;
-      uint32_t neighbourFillIndcies[4] = { 0 };
     };
     struct render_data_cbuffer {
       uint32_t instanceOffset[2] = {0};
@@ -51,6 +31,10 @@ namespace game {
       float tileSize = 0;
 
       uint32_t fillMapAreaTilesCount = 0;
+
+      float offset[2] = { 0 };
+
+      float __padding[2] = { 0 };
     };
 
   public:
@@ -72,6 +56,10 @@ namespace game {
 
     const uint32_t _worldWidth;
     const uint32_t _worldHeight;
+
+    const uint32_t _renderWorldWidth;
+    const uint32_t _renderWorldHeight;
+
     const float _tileSize;
 
     base::graphics::d3d_material _mat;
