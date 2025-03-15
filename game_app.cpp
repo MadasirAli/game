@@ -78,7 +78,7 @@ game_app::game_app() :
   _textures(_renderer),
   _random(0),
   _camera(_renderer),
-  _world(_renderer, _shaders, _textures, _camera, _keyboard, _mouse)
+  _world(_renderer, _shaders, _textures, _camera, _keyboard, _mouse, _random)
 {
   _camera.set_aspect_ratio(_height / (float)_width);
 }

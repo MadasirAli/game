@@ -11,20 +11,6 @@ void camera::update()
   update_buffer();
 }
 
-bool camera::is_in_view(float x, float y, float width, float height) const
-{
-  // Check for non-overlapping conditions
-  if (x + width / 2 <= _position[0] - _size / 2 ||   // R1 is left of R2
-      _position[0] + _size / 2 <= x - width / 2 ||   // R1 is right of R2
-      y - height / 2 >= _position[1] + _size / 2 ||  // R1 is above R2
-      _position[1] - _size / 2 >= y + height / 2)    // R1 is below R2
-  {
-    return false; // No overlap
-  }
-
-  return true; // overlapping
-}
-
 void game::camera::update_buffer() const
 {
   cam_data_cbuffer dataCBuffer = { 0 };

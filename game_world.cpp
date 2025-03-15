@@ -4,6 +4,7 @@
 #include "world_tile_component.h"
 #include "world_tile_rendering_system.h"
 #include "world_tile_system.h"
+#include "map_generator.h"
 
 using namespace game;
 
@@ -30,8 +31,19 @@ void game_world::update(const world_per_tick_data& data)
     _world.register_system<world_tile_system>(base::ecs::system_name ::world_tile_system,
       _worldWidth, _worldHeight);
     _world.register_system<world_tile_rendering_system>(base::ecs::system_name::world_tile_rendering_system,
-      _rRenderer.get(), _rCamera.get(), _rShaders.get(), _rTextures.get(),
+      _rRenderer, _rCamera, _rShaders, _rTextures,
       _worldWidth, _worldHeight, _tileSize);
+
+    // generating map
+    {
+      map_generator gen{ _rRandom };
+
+      auto query = _world.query<world_tile_component>();
+      assert(query.size() == 1);
+
+      gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
+        _worldWidth, _worldHeight);
+    }
   }
 
   using namespace base::input;
@@ -58,7 +70,7 @@ void game_world::update(const world_per_tick_data& data)
   camera.set_position(newPos);
 
   ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 20);
-  ImGui::Text("X: %d, Y: %d", mouse.get_pos().x, mouse.get_pos().y);
+  ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y);
 
   // system ticks
   _world.tick(base::ecs::system_name::world_tile_system);
@@ -72,11 +84,13 @@ void game_world::render(const world_per_tick_data& data)
 
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
   const texture_collection& textures,
-  camera& camera, const base::input::keyboard& keyboard, const base::input::mouse& mouse) :
+  camera& camera, const base::input::keyboard& keyboard, const base::input::mouse& mouse,
+  const random& rand) :
   _rRenderer(renderer),
   _rShaders(shaders),
   _rTextures(textures),
   _rCamera(camera),
   _rKeyboard(keyboard),
-  _rMouse(mouse)
+  _rMouse(mouse),
+  _rRandom(rand)
 {}

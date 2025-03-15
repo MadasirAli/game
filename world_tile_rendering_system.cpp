@@ -30,11 +30,13 @@ void world_tile_rendering_system::on_update(const world& query)
   xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
 
+
+
   const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
 
+  ImGui::Text("Tiles Draw Count: %d", drawCount);
   if (drawCount > 0)
   {
-    ImGui::Text("Tiles Draw Count: %d", drawCount);
     for (size_t t = 1; t < (uint32_t)world_tile_type::Count; ++t) {
       D3D11_MAPPED_SUBRESOURCE map = { 0 };
       renderer.map_buffer(_instanceDataSBuffer, map);

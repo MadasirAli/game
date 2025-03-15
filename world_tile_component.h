@@ -12,10 +12,6 @@ namespace game {
     Count
   };
   struct world_tile_component : public base::ecs::data_component {
-    static constexpr const size_t maxTypes = 5;
-
     world_tile_type type = world_tile_type::empty;
-
-    bool requiresGraphicsUpdate = false;
   };
 }

@@ -16,20 +16,6 @@ void world_tile_system::on_register(const world& query)
   assert(archs.size() == 1);
 
   _pTiles = archs[0].get().get_array_pointer_of<world_tile_component>();
-
-  for (size_t i = 0; i < _tileCount; ++i) {
-    uint32_t x = (uint32_t)i % _worldWidth;
-    uint32_t y = (uint32_t)i / _worldWidth;
-
-    auto& tile = _pTiles[i];
-
-    if ((x < 4 &&  y < 4) || (y > (_worldHeight - 4) && x >(_worldWidth - 4))) {
-      tile.type = world_tile_type::sand;
-    }
-    else {
-      tile.type = world_tile_type::coal;
-    }
-  }
 }
 
 world_tile_system::world_tile_system(system_name name, uint32_t worldWidth, uint32_t worldHeight) :
