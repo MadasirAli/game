@@ -12,72 +12,96 @@ using namespace base::ecs;
 void world_tile_rendering_system::on_update(const world& query)
 {
   const auto& renderer = _rRenderer.get();
-  for (size_t t = 0; t < (uint32_t)world_tile_type::Count; ++t) {
-    D3D11_MAPPED_SUBRESOURCE map = { 0 };
-    renderer.map_buffer(_instanceDataSBuffer, map);
+  const auto& camera = _rCamera.get();
 
-    for (size_t i = 0; i < (_renderWorldHeight * _renderWorldWidth); ++i) {
-      ((instance_data_sbuffer*)(map.pData))[i].fillIndex = 0;
-      ((instance_data_sbuffer*)(map.pData))[i].maskIndex = 0;
-    }
+  const auto& camPos = camera.get_position();
+  const auto frustumSize = camera.get_size();
+  const auto aspectRatio = camera.get_aspect_ratio();
 
-    for (size_t i = 0; i < _worldHeight; ++i) {
-      for (size_t j = 0; j < _worldWidth; ++j) {
+  int32_t xStartIndex = (int32_t)(((camPos[0]) - (frustumSize * 0.5f) * (1.0 / aspectRatio)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t yStartIndex = (int32_t)(((camPos[1]) - (frustumSize * 0.5f) * (1.0 / 1)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
 
-        const int32_t x = j;
-        const int32_t y = i;
-        const uint32_t z = (i * _worldWidth) + j;
+  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
+  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
 
-        auto& tile = _pTiles[z];
+  xStartIndex = xStartIndex < 0 ? 0 : xStartIndex;
+  yStartIndex = yStartIndex < 0 ? 0 : yStartIndex;
 
-        /// mask calculation here
-        int32_t topLeftDataIndex = ((y+1) * _renderWorldWidth) + (x);
-        int32_t topRightDataIndex = ((y+1) * _renderWorldWidth) + (x+1);
-        int32_t bottomLeftDataIndex = ((y) * _renderWorldWidth) + (x);
-        int32_t bottomRightDataIndex = ((y) * _renderWorldWidth) + (x+1);
+  xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
+  yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
 
-        auto& topLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
-        auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topRightDataIndex];
-        auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[bottomLeftDataIndex];
-        auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[bottomRightDataIndex];
+  const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
 
-        if ((uint32_t)tile.type == t) {
-          topLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_right);  // Set the bit
-          topLeftData.fillIndex = (uint32_t)tile.type;
+  if (drawCount > 0)
+  {
+    ImGui::Text("Tiles Draw Count: %d", drawCount);
+    for (size_t t = 0; t < (uint32_t)world_tile_type::Count; ++t) {
+      D3D11_MAPPED_SUBRESOURCE map = { 0 };
+      renderer.map_buffer(_instanceDataSBuffer, map);
+
+      for (size_t i = yStartIndex; i < (size_t)yEndIndex +1; ++i) {
+        for (size_t j = xStartIndex; j < (size_t)xEndIndex +1; ++j) {
+          ((instance_data_sbuffer*)(map.pData))[(i * _renderWorldHeight) + j] = instance_data_sbuffer{};
         }
-
-        if ((uint32_t)tile.type == t) {
-          topRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_left);  // Set the bit
-          topRightData.fillIndex = (uint32_t)tile.type;
-        }
-
-        if ((uint32_t)tile.type == t) {
-          bottomLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_right);  // Set the bit
-          bottomLeftData.fillIndex = (uint32_t)tile.type;
-        }
-
-        if ((uint32_t)tile.type == t) {
-          bottomRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_left);  // Set the bit
-          bottomRightData.fillIndex = (uint32_t)tile.type;
-        }
-        // ----------------------------------
       }
+
+      for (size_t i = yStartIndex; i < yEndIndex; ++i) {
+        for (size_t j = xStartIndex; j < xEndIndex; ++j) {
+
+          const int32_t x = j;
+          const int32_t y = i;
+          const uint32_t z = (i * _worldWidth) + j;
+
+          auto& tile = _pTiles[z];
+
+          /// mask calculation here
+          int32_t topLeftDataIndex = ((y + 1) * _renderWorldWidth) + (x);
+          int32_t topRightDataIndex = ((y + 1) * _renderWorldWidth) + (x + 1);
+          int32_t bottomLeftDataIndex = ((y)*_renderWorldWidth) + (x);
+          int32_t bottomRightDataIndex = ((y)*_renderWorldWidth) + (x + 1);
+
+          auto& topLeftData = ((instance_data_sbuffer*)(map.pData))[topLeftDataIndex];
+          auto& topRightData = ((instance_data_sbuffer*)(map.pData))[topRightDataIndex];
+          auto& bottomLeftData = ((instance_data_sbuffer*)(map.pData))[bottomLeftDataIndex];
+          auto& bottomRightData = ((instance_data_sbuffer*)(map.pData))[bottomRightDataIndex];
+
+          if ((uint32_t)tile.type == t) {
+            topLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_right);  // Set the bit
+            topLeftData.fillIndex = (uint32_t)tile.type;
+          }
+
+          if ((uint32_t)tile.type == t) {
+            topRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::bottom_left);  // Set the bit
+            topRightData.fillIndex = (uint32_t)tile.type;
+          }
+
+          if ((uint32_t)tile.type == t) {
+            bottomLeftData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_right);  // Set the bit
+            bottomLeftData.fillIndex = (uint32_t)tile.type;
+          }
+
+          if ((uint32_t)tile.type == t) {
+            bottomRightData.maskIndex |= (1 << (uint32_t)corner_bit_index::top_left);  // Set the bit
+            bottomRightData.fillIndex = (uint32_t)tile.type;
+          }
+          // ----------------------------------
+        }
+      }
+
+      renderer.unmap_buffer(_instanceDataSBuffer);
+
+      render_data_cbuffer renderData = { 0 };
+      renderData.instanceOffset[0] = xStartIndex;
+      renderData.instanceOffset[1] = yStartIndex;
+      renderData.instanceFrustumSize[0] = (xEndIndex - xStartIndex) +1;
+      renderData.instanceFrustumSize[1] = (yEndIndex - yStartIndex) +1;
+
+      renderer.map_buffer(_renderDataCBuffer, map);
+      ((render_data_cbuffer*)(map.pData))[0] = renderData;
+      renderer.unmap_buffer(_renderDataCBuffer);
+
+      renderer.draw_quad_instanced(_mat, drawCount);
     }
-
-
-    renderer.unmap_buffer(_instanceDataSBuffer);
-
-    render_data_cbuffer renderData = { 0 };
-    renderData.instanceOffset[0] = 0;
-    renderData.instanceOffset[1] = 0;
-    renderData.instanceFrustumSize[0] = _renderWorldWidth;
-    renderData.instanceFrustumSize[1] = _renderWorldHeight;
-
-    renderer.map_buffer(_renderDataCBuffer, map);
-    ((render_data_cbuffer*)(map.pData))[0] = renderData;
-    renderer.unmap_buffer(_renderDataCBuffer);
-
-    renderer.draw_quad_instanced(_mat, _renderWorldWidth * _renderWorldHeight);
   }
 }
 

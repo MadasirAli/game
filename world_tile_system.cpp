@@ -23,13 +23,13 @@ void world_tile_system::on_register(const world& query)
 
     auto& tile = _pTiles[i];
 
-    tile.type = world_tile_type::sand;
-    //if ((x < 4 &&  y < 4) || (y > (_worldHeight - 4) && x >(_worldWidth - 4))) {
-    //  tile.type = world_tile_type::sand;
-    //}
-    //else {
-    //  tile.type = world_tile_type::coal;
-    //}
+   //tile.type = world_tile_type::sand;
+    if ((x < 4 &&  y < 4) || (y > (_worldHeight - 4) && x >(_worldWidth - 4))) {
+      tile.type = world_tile_type::sand;
+    }
+    else {
+      tile.type = world_tile_type::coal;
+    }
 
     //if (y == 0 && x == 1) {
     // tile.type = world_tile_type::empty;
@@ -38,18 +38,18 @@ void world_tile_system::on_register(const world& query)
     if (y == (_worldHeight / 2) && x == (_worldWidth / 2)) {
       tile.type = world_tile_type::coal;
     }
-    //if (y == (_worldHeight / 2) && x > 0 && x < (_worldWidth - 1)) {
-    //  tile.type = world_tile_type::dirt;
-    //}
-    //if (x == 1) {
-    //  tile.type = world_tile_type::solid_rock;
-    //}
-    //else if (x == 2) {
-    //  tile.type = world_tile_type::sand;
-    //}
-    //else if (x == 3) {
-    //  tile.type = world_tile_type::dirt;
-    //}
+    if (y == (_worldHeight / 2) && x > 0 && x < (_worldWidth - 1)) {
+      tile.type = world_tile_type::dirt;
+    }
+    if (x == 1) {
+      tile.type = world_tile_type::solid_rock;
+    }
+    else if (x == 2) {
+      tile.type = world_tile_type::sand;
+    }
+    else if (x == 3) {
+      tile.type = world_tile_type::dirt;
+    }
   }
 }
 
