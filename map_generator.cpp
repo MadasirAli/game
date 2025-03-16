@@ -22,10 +22,10 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
 
       float altitude = i / (float)height;
       if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
-        pTiles[z].type = (world_tile_type)(((uint32_t)world_tile_type::Count - 1) - ((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1)));
+        pTiles[z].type = (world_tile_type)((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1));
       }
       else {
-        pTiles[z].type = world_tile_type::sand;
+        pTiles[z].type = world_tile_type::empty;
       }
       //pTiles[z].type = world_tile_type::sand;
     }
