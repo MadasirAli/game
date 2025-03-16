@@ -13,7 +13,7 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
   for (uint32_t i = 0; i < height; ++i) {
     for (uint32_t j = 0; j < width; ++j) {
       //   psedudo
-      const const uint32_t z = (i * height) + j;
+      const uint32_t z = (i * height) + j;
 
       pTiles[z].type = world_tile_type::sand;
     }
