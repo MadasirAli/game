@@ -187,6 +187,9 @@
     <ProjectReference Include="..\netcode\netcode.vcxproj">
       <Project>{103ffef2-fe3e-4af0-8863-617b1c04d640}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\physics\physics.vcxproj">
+      <Project>{b146e3f6-1b42-4b77-9e6c-3b0ad9c707a0}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\resource_std\resource_std.vcxproj">
       <Project>{0deba5b7-fe90-499c-9c10-c8c5e21aaa7f}</Project>
     </ProjectReference>
