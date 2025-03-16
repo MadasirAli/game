@@ -12,6 +12,7 @@ using namespace base::ecs;
 void world_tile_rendering_system::on_update(const world& query)
 {
 
+
   const auto& renderer = _rRenderer.get();
   const auto& camera = _rCamera.get();
 
@@ -30,7 +31,6 @@ void world_tile_rendering_system::on_update(const world& query)
 
   xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
-
 
   const int32_t tilesInView = ((xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
   const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
@@ -131,6 +131,7 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _tileSize(tileSize),
   _mat(shaders["world_tile_shader.hlsl"])
 {
+
   instance_data_cbuffer instanceCData = { 0 };
   instanceCData.worldWidth = _renderWorldWidth;
   instanceCData.worldHeight = _renderWorldHeight;

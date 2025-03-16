@@ -83,8 +83,10 @@ void game_world::update(const world_per_tick_data& data)
   newPos[0] = std::clamp<float>(newPos[0], 0 - (size * 0.5f), (_worldWidth * _tileSize) + (size * 0.5f));
   newPos[1] = std::clamp<float>(newPos[1], 0 - (size * 0.5f), (_worldHeight * _tileSize) + (size * 0.5f));
   camera.set_position(newPos);
+  camera.set_size(_camZoom);
 
   ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 200);
+  ImGui::SliderFloat("Zoom", &_camZoom, 5.0f, 1000.0f);
   ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y);
 
   // system ticks

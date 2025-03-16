@@ -36,11 +36,12 @@ namespace game {
 
     bool _started = false;
 
-    static constexpr const uint32_t _worldWidth = 256;
-    static constexpr const uint32_t _worldHeight = 256;
-    static constexpr const float _tileSize = 1.0f;
+    static constexpr const uint32_t _worldWidth = 32;
+    static constexpr const uint32_t _worldHeight = 32;
+    static constexpr const float _tileSize = 0.5f;
 
     float _camMovSpeed = 4;
+    float _camZoom = 10;
   };
 }
 

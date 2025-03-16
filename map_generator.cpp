@@ -10,8 +10,8 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
   // generate noises here
   sim::noise_gen noise_gen{};
 
-  auto perlin = noise_gen.perlin(width, height, 10, _rRandom);
-  auto fractal = noise_gen.fractal(width, height, 10, 8, 0.5f, _rRandom);
+  auto perlin = noise_gen.perlin(width, height, (width / (float) 128) * 20, _rRandom);
+  auto fractal = noise_gen.fractal(width, height, (height / (float)128) * 10, 32, 0.5f, _rRandom);
   auto altitudes = noise_gen.perlin(width, 1, 1, _rRandom);
 
   //
@@ -21,12 +21,13 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
       const uint32_t z = (i * height) + j;
 
       float altitude = i / (float)height;
-      if (altitude < (altitudes[z] + 1.0f) * 0.5f) {
-        pTiles[z].type = (world_tile_type)(((fractal[z] + 1.0f) * 0.5f) * ((uint32_t)world_tile_type::Count) - 1);
+      if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
+        pTiles[z].type = (world_tile_type)(((uint32_t)world_tile_type::Count - 1) - ((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1)));
       }
       else {
-        pTiles[z].type = world_tile_type::empty;
+        pTiles[z].type = world_tile_type::sand;
       }
+      //pTiles[z].type = world_tile_type::sand;
     }
   }
 }
