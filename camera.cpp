@@ -6,7 +6,7 @@ using namespace game;
 
 void camera::update()
 {
-  ImGui::SliderFloat("Zoom", &_size, 1.0f, 100);
+  ImGui::SliderFloat("Zoom", &_size, 1.0f, 1000.0f);
 
   update_buffer();
 }

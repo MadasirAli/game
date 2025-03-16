@@ -48,6 +48,16 @@ void game_world::update(const world_per_tick_data& data)
     }
   }
 
+  if (ImGui::Button("Regenerate Map:")) {
+    map_generator gen{ _rRandom };
+
+    auto query = _world.query<world_tile_component>();
+    assert(query.size() == 1);
+
+    gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
+      _worldWidth, _worldHeight);
+  }
+
   using namespace base::input;
 
   const auto& keyboard = _rKeyboard.get();
@@ -74,7 +84,7 @@ void game_world::update(const world_per_tick_data& data)
   newPos[1] = std::clamp<float>(newPos[1], 0 - (size * 0.5f), (_worldHeight * _tileSize) + (size * 0.5f));
   camera.set_position(newPos);
 
-  ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 20);
+  ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 200);
   ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y);
 
   // system ticks
@@ -90,7 +100,7 @@ void game_world::render(const world_per_tick_data& data)
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
   const texture_collection& textures,
   camera& camera, const base::input::keyboard& keyboard, const base::input::mouse& mouse,
-  const base::random& rand) :
+  base::random& rand) :
   _rRenderer(renderer),
   _rShaders(shaders),
   _rTextures(textures),
