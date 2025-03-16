@@ -154,7 +154,7 @@ void game_app::resize()
   auto result = GetClientRect(p_hwnd, &rect);
   _width = rect.right - rect.left;
   _height = rect.bottom - rect.top;
-  assert(result == true);
+  assert(result == TRUE);
 
   _renderer.resize(_width, _height);
   _camera.set_aspect_ratio(_height / (float)_width);

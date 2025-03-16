@@ -19,7 +19,7 @@ namespace game {
     game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
       const texture_collection& textures,
       camera& camera, const base::input::keyboard& keyboard, const base::input::mouse& mouse,
-      const random& rand);
+      const base::random& rand);
     void update(const world_per_tick_data& data);
     void render(const world_per_tick_data& data);
 
@@ -30,7 +30,7 @@ namespace game {
     std::reference_wrapper<camera> _rCamera;
     std::reference_wrapper<const base::input::keyboard> _rKeyboard;
     std::reference_wrapper<const base::input::mouse> _rMouse;
-    std::reference_wrapper<const random> _rRandom;
+    std::reference_wrapper<const base::random> _rRandom;
 
     base::ecs::world _world;
 
@@ -40,7 +40,7 @@ namespace game {
     static constexpr const uint32_t _worldHeight = 8;
     static constexpr const float _tileSize = 1.0f;
 
-    float _camMovSpeed = 2;
+    float _camMovSpeed = 4;
   };
 }
 

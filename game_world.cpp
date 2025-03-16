@@ -90,7 +90,7 @@ void game_world::render(const world_per_tick_data& data)
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
   const texture_collection& textures,
   camera& camera, const base::input::keyboard& keyboard, const base::input::mouse& mouse,
-  const random& rand) :
+  const base::random& rand) :
   _rRenderer(renderer),
   _rShaders(shaders),
   _rTextures(textures),

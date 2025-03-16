@@ -20,6 +20,6 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
   }
 }
 
-map_generator::map_generator(const random& rand):
+map_generator::map_generator(const base::random& rand):
   _rRandom(rand)
 {}

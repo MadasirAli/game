@@ -11,6 +11,7 @@ using namespace base::ecs;
 
 void world_tile_rendering_system::on_update(const world& query)
 {
+
   const auto& renderer = _rRenderer.get();
   const auto& camera = _rCamera.get();
 

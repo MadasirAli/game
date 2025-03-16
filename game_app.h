@@ -47,7 +47,7 @@ namespace game {
     texture_collection _textures;
     camera _camera;
 
-    random _random;
+    base::random _random;
 
     float _deltaTime = 0;
     bool _vsync = true;
