@@ -32,6 +32,11 @@ void world_tile_rendering_system::on_update(const world& query)
   xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
   yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
 
+  xStartIndex = 0;
+  yStartIndex = 0;
+  xEndIndex = _worldWidth;
+  yEndIndex = _worldHeight;
+
   const int32_t tilesInView = ((xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
   const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
 
@@ -56,6 +61,10 @@ void world_tile_rendering_system::on_update(const world& query)
           const uint32_t z = (i * _worldWidth) + j;
 
           auto& tile = _pTiles[z];
+
+          if ((uint32_t)tile.type != t) {
+            continue;
+          }
 
           /// mask calculation here
           int32_t topLeftDataIndex = ((y + 1) * _renderWorldWidth) + (x);
