@@ -7,6 +7,9 @@
 #include "world_tile_rendering_system.h"
 #include "world_sim_system.h"
 #include "map_generator.h"
+#include "dupe_component.h"
+#include "dupe_rendering_system.h"
+#include "dupe_system.h"
 
 using namespace game;
 
@@ -26,38 +29,44 @@ void game_world::update(const world_per_tick_data& data)
     _rCamera.get().set_position(camStartPos);
 
     // creating arch type
-    world_tile_component tile = { };
+    world_tile_component tile = {};
+    dupe_component dupe = {};
 
-    _world.create_archtype<world_tile_component>(_worldHeight * _worldWidth, tile);
+    _world.create_archtype<world_tile_component>((size_t)_worldHeight * _worldWidth, tile);
+    _world.create_archtype<dupe_component>(maxDupes, dupe);
 
-    _world.register_system<world_sim_system>(base::ecs::system_name ::world_sim_system,
+    using namespace base::ecs;
+
+    _world.register_system<world_sim_system>(system_name ::world_sim_system,
       _worldWidth, _worldHeight);
-    _world.register_system<world_tile_rendering_system>(base::ecs::system_name::world_tile_rendering_system,
+    _world.register_system<world_tile_rendering_system>(system_name::world_tile_rendering_system,
       _rRenderer, _rCamera, _rShaders, _rTextures,
+      _worldWidth, _worldHeight, _tileSize);
+    _world.register_system<dupe_rendering_system>(system_name::dupe_rendering_system, _rCamera,
+      _rRenderer, _rShaders, _rTextures, _worldWidth, _worldHeight, _tileSize);
+    _world.register_system<dupe_system>(system_name::dupe_system, _rCamera,
       _worldWidth, _worldHeight, _tileSize);
 
     // generating map
     {
-      map_generator gen{ _rRandom };
-
       auto query = _world.query<world_tile_component>();
       assert(query.size() == 1);
 
-      gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
+      _map_gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
         _worldWidth, _worldHeight);
     }
   }
 
+  // remap generation
   if (ImGui::Button("Regenerate Map:")) {
-    map_generator gen{ _rRandom };
-
     auto query = _world.query<world_tile_component>();
     assert(query.size() == 1);
 
-    gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
+    _map_gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
       _worldWidth, _worldHeight);
   }
 
+  // controls
   using namespace base::input;
 
   const auto& keyboard = _rKeyboard.get();
@@ -80,8 +89,8 @@ void game_world::update(const world_per_tick_data& data)
     newPos[1] = newPos[1] - (_camMovSpeed * deltaTime);
   }
   const auto size = camera.get_size();
-  newPos[0] = std::clamp<float>(newPos[0], 0 - (size * 0.5f), (_worldWidth * _tileSize) + (size * 0.5f));
-  newPos[1] = std::clamp<float>(newPos[1], 0 - (size * 0.5f), (_worldHeight * _tileSize) + (size * 0.5f));
+  newPos[0] = std::clamp<float>(newPos[0], 0 - (size * 0.0f), (_worldWidth * _tileSize) + (size * 0.0f));
+  newPos[1] = std::clamp<float>(newPos[1], 0 - (size * 0.0f), (_worldHeight * _tileSize) - (size * 0.0f));
   camera.set_position(newPos);
   camera.set_size(_camZoom);
 
@@ -90,13 +99,14 @@ void game_world::update(const world_per_tick_data& data)
   ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y);
 
   // system ticks
-  _world.tick(base::ecs::system_name::world_sim_system);
-
+  _world.tick(data, base::ecs::system_name::world_sim_system);
+  _world.tick(data, base::ecs::system_name::dupe_system);
 }
 
 void game_world::render(const world_per_tick_data& data)
 {
-  _world.tick(base::ecs::system_name::world_tile_rendering_system);
+  _world.tick(data, base::ecs::system_name::world_tile_rendering_system);
+  _world.tick(data, base::ecs::system_name::dupe_rendering_system);
 }
 
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
@@ -109,5 +119,6 @@ game_world::game_world(const base::graphics::d3d_renderer& renderer, const shade
   _rCamera(camera),
   _rKeyboard(keyboard),
   _rMouse(mouse),
-  _rRandom(rand)
+  _rRandom(rand),
+  _map_gen(_rRandom)
 {}

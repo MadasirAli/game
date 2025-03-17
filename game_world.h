@@ -11,6 +11,7 @@
 #include "mouse.h"
 #include "world_per_tick_data.h"
 #include "random.h"
+#include "map_generator.h"
 
 namespace game {
   class game_world
@@ -32,7 +33,8 @@ namespace game {
     std::reference_wrapper<const base::input::mouse> _rMouse;
     std::reference_wrapper<base::random> _rRandom;
 
-    base::ecs::world _world;
+    base::ecs::world<world_per_tick_data> _world;
+    map_generator _map_gen;
 
     bool _started = false;
 
@@ -42,6 +44,9 @@ namespace game {
 
     float _camMovSpeed = 4;
     float _camZoom = 10;
+
+  public:
+    static constexpr const uint32_t maxDupes = 1;
   };
 }
 

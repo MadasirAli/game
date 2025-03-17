@@ -8,9 +8,10 @@
 #include "shader_collection.h"
 #include "texture_collection.h"
 #include "world_tile_component.h"
+#include "world_per_tick_data.h"
 
 namespace game {
-  class world_tile_rendering_system : public base::ecs::system {
+  class world_tile_rendering_system : public base::ecs::system<world_per_tick_data> {
   private:
     enum class corner_bit_index {
       bottom_left,
@@ -45,8 +46,8 @@ namespace game {
 
     virtual ~world_tile_rendering_system() override = default;
    
-    void on_update(const base::ecs::world& query) override;
-    void on_register(const base::ecs::world& query) override;
+    void on_update(const base::ecs::world<world_per_tick_data>& query, const world_per_tick_data& perTickData) override;
+    void on_register(const base::ecs::world<world_per_tick_data>& query) override;
 
   private:
     std::reference_wrapper<const base::graphics::d3d_renderer> _rRenderer;

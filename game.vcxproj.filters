@@ -57,6 +57,15 @@
     <ClInclude Include="world_per_tick_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dupe_rendering_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dupe_component.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="dupe_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game_app.cpp">
@@ -93,6 +102,12 @@
       <Filter>systems</Filter>
     </ClCompile>
     <ClCompile Include="map_generator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dupe_rendering_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dupe_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

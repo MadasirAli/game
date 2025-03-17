@@ -9,7 +9,7 @@ using namespace game;
 using namespace base::graphics;
 using namespace base::ecs;
 
-void world_tile_rendering_system::on_update(const world& query)
+void world_tile_rendering_system::on_update(const world<world_per_tick_data>& query, const world_per_tick_data& perTickData)
 {
 
 
@@ -117,7 +117,7 @@ void world_tile_rendering_system::on_update(const world& query)
   }
 }
 
-void world_tile_rendering_system::on_register(const world& query)
+void world_tile_rendering_system::on_register(const world<world_per_tick_data>& query)
 {
   auto archs = query.query<world_tile_component>();
   assert(archs.size() == 1);
