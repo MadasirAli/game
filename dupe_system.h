@@ -5,6 +5,7 @@
 #include "system.h"
 #include "camera.h"
 #include "dupe_component.h"
+#include "world_tile_component.h"
 #include "world_per_tick_data.h"
 
 namespace game {
@@ -22,6 +23,7 @@ namespace game {
     std::reference_wrapper<const game::camera> _rCamera;
 
     dupe_component* _pDupes = nullptr;
+    world_tile_component* _pTiles = nullptr;
 
     const uint32_t _worldWidth;
     const uint32_t _worldHeight;

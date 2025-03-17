@@ -3,6 +3,8 @@
 #include "world.h"
 #include "game_world.h"
 
+#include "imgui.h"
+
 using namespace game;
 
 void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, const world_per_tick_data& perTickData)
@@ -19,6 +21,32 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       dupe.y = _worldHeight * _tileSize;
     }
 
+    const float worldMaxYPos = _worldHeight * _tileSize;
+    const float worldMaxXPos = _worldWidth * _tileSize;
+
+    const float normYPos = dupe.y / worldMaxYPos;
+    const float normXPos = dupe.x / worldMaxXPos;
+
+    const uint32_t YPosTileIndex = (uint32_t)(normYPos * _worldHeight);
+    const uint32_t XPosTileIndex = (uint32_t)(normXPos * _worldWidth);
+
+    const float tileSurfaceYPos = YPosTileIndex + _tileSize;
+    const float tileSurfaceXPos = XPosTileIndex + _tileSize;
+
+    const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth-1)) + XPosTileIndex];
+
+    if (tile.type == world_tile_type::empty) {
+      dupe.y -= perTickData.deltaTime;
+    }
+    else if (dupe.y > tileSurfaceYPos) {
+      dupe.y -= perTickData.deltaTime;
+    }
+
+    dupe.y = dupe.y < 0 ? 0 : dupe.y;
+
+    ImGui::Text("X Index: %d, Y Index: %d", XPosTileIndex, YPosTileIndex);
+    ImGui::Text("Tile Type: %d", (int32_t)tile.type);
+
     // dupes working here
   }
 }
@@ -28,9 +56,18 @@ void dupe_system::on_register(const base::ecs::world<world_per_tick_data>& query
   auto arches = query.query<dupe_component>();
   assert(arches.size() == 1);
 
-  auto& arch = arches[0].get();
+  {
+    auto& arch = arches[0].get();
+    _pDupes = arch.get_array_pointer_of<dupe_component>();
+  }
+  
+  arches = query.query<world_tile_component>();
+  assert(arches.size() == 1);
 
-  _pDupes = arch.get_array_pointer_of<dupe_component>();
+  {
+    auto& arch = arches[0].get();
+    _pTiles = arch.get_array_pointer_of<world_tile_component>();
+  }
 }
 
 dupe_system::dupe_system(base::ecs::system_name name, const game::camera& camera,
