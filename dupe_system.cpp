@@ -19,7 +19,7 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       dupe.init = true;
 
       dupe.y = _worldHeight * _tileSize;
-      dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
+      //dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
       
     }
 
@@ -43,7 +43,7 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     else if (dupe.y > tileSurfaceYPos) {
       dupe.y -= perTickData.deltaTime * 3;
     }
-
+    dupe.y -= perTickData.deltaTime * 3;
     dupe.y = dupe.y < 0 ? 0 : dupe.y;
 
     ImGui::Text("X Index: %d, Y Index: %d", XPosTileIndex, YPosTileIndex);

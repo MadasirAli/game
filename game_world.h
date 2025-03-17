@@ -22,6 +22,9 @@ namespace game {
       uint32_t height = 0;
       float cellSize = 0;
       float stroke = 0;
+
+      float offset[2] = { 0 };
+      float color[2] = { 0 };
     };
   public:
     game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
@@ -52,8 +55,10 @@ namespace game {
     float _camMovSpeed = 4;
     float _camZoom = 10;
 
-    base::graphics::d3d_buffer _gridDataCBuffer;
-    base::graphics::d3d_material _gridMat;
+    base::graphics::d3d_buffer _worldGridDataCBuffer;
+    base::graphics::d3d_material _worldGridMat;
+    base::graphics::d3d_buffer _renderGridDataCBuffer;
+    base::graphics::d3d_material _renderGridMat;
 
   public:
     static constexpr const uint32_t maxDupes = 1;

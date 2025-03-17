@@ -110,8 +110,9 @@ void game_world::render(const world_per_tick_data& data)
   _world.tick(data, base::ecs::system_name::world_tile_rendering_system);
   _world.tick(data, base::ecs::system_name::dupe_rendering_system);
 
-  // rendering world grid
-  renderer.draw_quad(_gridMat);
+  // rendering grids
+  renderer.draw_quad(_worldGridMat);
+  renderer.draw_quad(_renderGridMat);
 }
 
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
@@ -126,7 +127,8 @@ game_world::game_world(const base::graphics::d3d_renderer& renderer, const shade
   _rMouse(mouse),
   _rRandom(rand),
   _map_gen(_rRandom),
-  _gridMat(shaders["world_grid_shader.hlsl"])
+  _worldGridMat(shaders["world_grid_shader.hlsl"]),
+  _renderGridMat(shaders["world_grid_shader.hlsl"])
 {
   // creating buffers
   grid_data_cbuffer gridDataCBuffer = { 0 };
@@ -134,10 +136,30 @@ game_world::game_world(const base::graphics::d3d_renderer& renderer, const shade
   gridDataCBuffer.height = _worldHeight;
   gridDataCBuffer.cellSize = _tileSize;
   gridDataCBuffer.stroke = 16;
-  _gridDataCBuffer = renderer.create_buffer((char*)&gridDataCBuffer, sizeof(grid_data_cbuffer), 
+
+  gridDataCBuffer.offset[0] = 0;
+  gridDataCBuffer.offset[1] = 0;
+  gridDataCBuffer.color[0] = 0;
+  gridDataCBuffer.color[1] = 1;
+
+  _worldGridDataCBuffer = renderer.create_buffer((char*)&gridDataCBuffer, sizeof(grid_data_cbuffer), 
     base::graphics::buffer_type::constant, 1, base::graphics::access_mode::none);
 
-  _gridMat.set_cbuffer("GridDataCBuffer", _gridDataCBuffer);
-  _gridMat.set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
-  _gridMat.set_blend(base::graphics::blend_mode::on);
+  _worldGridMat.set_cbuffer("GridDataCBuffer", _worldGridDataCBuffer);
+  _worldGridMat.set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
+  _worldGridMat.set_blend(base::graphics::blend_mode::on);
+
+  gridDataCBuffer.width += 1;
+  gridDataCBuffer.height += 1;
+  gridDataCBuffer.offset[0] = -0.5f;
+  gridDataCBuffer.offset[1] = -0.5f;
+  gridDataCBuffer.color[0] = 1;
+  gridDataCBuffer.color[1] = 0;
+
+  _renderGridDataCBuffer = renderer.create_buffer((char*)&gridDataCBuffer, sizeof(grid_data_cbuffer),
+    base::graphics::buffer_type::constant, 1, base::graphics::access_mode::none);
+
+  _renderGridMat.set_cbuffer("GridDataCBuffer", _renderGridDataCBuffer);
+  _renderGridMat.set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
+  _renderGridMat.set_blend(base::graphics::blend_mode::on);
 }
