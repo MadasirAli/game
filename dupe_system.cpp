@@ -19,6 +19,8 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       dupe.init = true;
 
       dupe.y = _worldHeight * _tileSize;
+      dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
+      
     }
 
     const float worldMaxYPos = _worldHeight * _tileSize;
@@ -36,10 +38,10 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth-1)) + XPosTileIndex];
 
     if (tile.type == world_tile_type::empty) {
-      dupe.y -= perTickData.deltaTime;
+      dupe.y -= perTickData.deltaTime * 3;
     }
     else if (dupe.y > tileSurfaceYPos) {
-      dupe.y -= perTickData.deltaTime;
+      dupe.y -= perTickData.deltaTime * 3;
     }
 
     dupe.y = dupe.y < 0 ? 0 : dupe.y;

@@ -138,7 +138,6 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   _tileSize(tileSize),
   _mat(shaders["world_tile_shader.hlsl"])
 {
-
   instance_data_cbuffer instanceCData = { 0 };
   instanceCData.worldWidth = _renderWorldWidth;
   instanceCData.worldHeight = _renderWorldHeight;
@@ -146,7 +145,6 @@ world_tile_rendering_system::world_tile_rendering_system(system_name name,
   instanceCData.offset[0] = 0;
   instanceCData.offset[1] = 0;
   instanceCData.fillMapAreaTilesCount = _fillMapAreaTilesCount;
-
 
   _instanceDataCBuffer = _rRenderer.get().create_buffer((char*)&instanceCData, sizeof(instance_data_cbuffer),
     buffer_type::constant, 1, access_mode::none);

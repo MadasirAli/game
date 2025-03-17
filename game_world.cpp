@@ -105,8 +105,13 @@ void game_world::update(const world_per_tick_data& data)
 
 void game_world::render(const world_per_tick_data& data)
 {
+  const auto& renderer = _rRenderer.get();
+
   _world.tick(data, base::ecs::system_name::world_tile_rendering_system);
   _world.tick(data, base::ecs::system_name::dupe_rendering_system);
+
+  // rendering world grid
+  renderer.draw_quad(_gridMat);
 }
 
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
@@ -120,5 +125,19 @@ game_world::game_world(const base::graphics::d3d_renderer& renderer, const shade
   _rKeyboard(keyboard),
   _rMouse(mouse),
   _rRandom(rand),
-  _map_gen(_rRandom)
-{}
+  _map_gen(_rRandom),
+  _gridMat(shaders["world_grid_shader.hlsl"])
+{
+  // creating buffers
+  grid_data_cbuffer gridDataCBuffer = { 0 };
+  gridDataCBuffer.width = _worldWidth;
+  gridDataCBuffer.height = _worldHeight;
+  gridDataCBuffer.cellSize = _tileSize;
+  gridDataCBuffer.stroke = 16;
+  _gridDataCBuffer = renderer.create_buffer((char*)&gridDataCBuffer, sizeof(grid_data_cbuffer), 
+    base::graphics::buffer_type::constant, 1, base::graphics::access_mode::none);
+
+  _gridMat.set_cbuffer("GridDataCBuffer", _gridDataCBuffer);
+  _gridMat.set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
+  _gridMat.set_blend(base::graphics::blend_mode::on);
+}

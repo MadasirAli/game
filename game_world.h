@@ -16,6 +16,13 @@
 namespace game {
   class game_world
   {
+  private:
+    struct grid_data_cbuffer {
+      uint32_t width = 0;
+      uint32_t height = 0;
+      float cellSize = 0;
+      float stroke = 0;
+    };
   public:
     game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,
       const texture_collection& textures,
@@ -38,12 +45,15 @@ namespace game {
 
     bool _started = false;
 
-    static constexpr const uint32_t _worldWidth = 32;
-    static constexpr const uint32_t _worldHeight = 32;
-    static constexpr const float _tileSize = 0.5f;
+    static constexpr const uint32_t _worldWidth = 16;
+    static constexpr const uint32_t _worldHeight = 16;
+    static constexpr const float _tileSize = 1;
 
     float _camMovSpeed = 4;
     float _camZoom = 10;
+
+    base::graphics::d3d_buffer _gridDataCBuffer;
+    base::graphics::d3d_material _gridMat;
 
   public:
     static constexpr const uint32_t maxDupes = 1;

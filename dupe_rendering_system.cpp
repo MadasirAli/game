@@ -18,7 +18,6 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
       continue;
     }
 
-
     // updating buffers here?
     renderer.map_buffer(_dupeDataCBuffers[i], map);
 

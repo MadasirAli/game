@@ -8,5 +8,6 @@ namespace game {
     float y = 0;
 
     bool init = false;
+    bool active = false;
   };
 }
