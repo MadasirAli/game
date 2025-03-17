@@ -151,8 +151,8 @@ game_world::game_world(const base::graphics::d3d_renderer& renderer, const shade
 
   gridDataCBuffer.width += 1;
   gridDataCBuffer.height += 1;
-  gridDataCBuffer.offset[0] = -0.5f;
-  gridDataCBuffer.offset[1] = -0.5f;
+  gridDataCBuffer.offset[0] = _tileSize * -0.5f;
+  gridDataCBuffer.offset[1] = _tileSize * -0.5f;
   gridDataCBuffer.color[0] = 1;
   gridDataCBuffer.color[1] = 0;
 

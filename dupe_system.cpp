@@ -19,18 +19,17 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       dupe.init = true;
 
       dupe.y = _worldHeight * _tileSize;
-      //dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
-      
+      dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
     }
 
-    const float worldMaxYPos = _worldHeight * _tileSize;
+    const float worldMaxYPos = (_worldHeight - 0.5f) * _tileSize;
     const float worldMaxXPos = _worldWidth * _tileSize;
 
-    const float normYPos = dupe.y / worldMaxYPos;
+    const float normYPos = (dupe.y) / worldMaxYPos;
     const float normXPos = dupe.x / worldMaxXPos;
 
-    const uint32_t YPosTileIndex = (uint32_t)(normYPos * _worldHeight);
-    const uint32_t XPosTileIndex = (uint32_t)(normXPos * _worldWidth);
+    const uint32_t YPosTileIndex = (uint32_t)(dupe.y);
+    const uint32_t XPosTileIndex = (uint32_t)(dupe.x);
 
     const float tileSurfaceYPos = YPosTileIndex + _tileSize;
     const float tileSurfaceXPos = XPosTileIndex + _tileSize;
@@ -38,14 +37,16 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth-1)) + XPosTileIndex];
 
     if (tile.type == world_tile_type::empty) {
-      dupe.y -= perTickData.deltaTime * 3;
+     // dupe.y -= perTickData.deltaTime * 3;
     }
-    else if (dupe.y > tileSurfaceYPos) {
-      dupe.y -= perTickData.deltaTime * 3;
-    }
-    dupe.y -= perTickData.deltaTime * 3;
-    dupe.y = dupe.y < 0 ? 0 : dupe.y;
 
+
+    //dupe.y -= perTickData.deltaTime * 3;
+    //dupe.y = dupe.y < 1.5 ? 1.5 : dupe.y;
+    ImGui::SliderFloat("Dupe Y:", &dupe.y, 0, worldMaxYPos);
+    //dupe.y = _worldHeight * _tileSize;
+
+    ImGui::Text("Dupe Y Pos: %f", dupe.y);
     ImGui::Text("X Index: %d, Y Index: %d", XPosTileIndex, YPosTileIndex);
     ImGui::Text("Tile Type: %d", (int32_t)tile.type);
 

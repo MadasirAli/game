@@ -18,12 +18,13 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
       continue;
     }
 
+
     // updating buffers here?
     renderer.map_buffer(_dupeDataCBuffers[i], map);
 
     auto& data = ((dupe_data_cbuffer*)map.pData)[0];
     data.pos[0] = dupe.x;
-    data.pos[1] = dupe.y;
+    data.pos[1] = dupe.y + 0.5f;
 
     renderer.unmap_buffer(_dupeDataCBuffers[i]);
 
@@ -68,5 +69,6 @@ dupe_rendering_system::dupe_rendering_system(base::ecs::system_name name,
 
     _mats[i].set_cbuffer("CameraDataCBuffer", _rCamera.get().get_data_cbuffer());
     _mats[i].set_cbuffer("DupeDataCBuffer", _dupeDataCBuffers[i]);
+    _mats[i].set_blend(blend_mode::on);
   }
 }
