@@ -34,10 +34,10 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     const float tileSurfaceYPos = YPosTileIndex + _tileSize;
     const float tileSurfaceXPos = XPosTileIndex + _tileSize;
 
-    const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth-1)) + XPosTileIndex];
+    const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth)) + XPosTileIndex];
 
     if (tile.type == world_tile_type::empty) {
-     // dupe.y -= perTickData.deltaTime * 3;
+      dupe.y -= perTickData.deltaTime * 3;
     }
 
 
