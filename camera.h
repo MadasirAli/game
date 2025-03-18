@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "vector_2.h"
+#include "vector2.h"
 #include "d3d_renderer.h"
 
 namespace game {
@@ -20,10 +20,10 @@ namespace game {
       return _datacBuffer;
     }
 
-    void set_position(const vector_2& pos) {
+    void set_position(const vector2& pos) {
       _position = pos;
     }
-    vector_2 get_position() const {
+    vector2 get_position() const {
       return _position;
     }
 
@@ -49,7 +49,7 @@ namespace game {
     std::reference_wrapper<const base::graphics::d3d_renderer> _rRenderer;
     base::graphics::d3d_buffer _datacBuffer;
 
-    vector_2 _position = { 0, 0 };
+    vector2 _position = { 0, 0 };
 
     float _aspectRatio = 1;
     float _size = 10;

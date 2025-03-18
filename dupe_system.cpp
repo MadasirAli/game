@@ -2,14 +2,16 @@
 
 #include "world.h"
 #include "game_world.h"
-
-#include "imgui.h"
+#include "imgui_inc.h"
+#include "tilemap_ops.h"
+#include "vector2.h"
 
 using namespace game;
 
 void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, const world_per_tick_data& perTickData)
 {
   constexpr const auto maxDupes = game_world::maxDupes;
+  tilemap_ops tilemap_ops{};
 
   for (uint32_t i = 0; i < maxDupes; ++i) {
     auto& dupe = _pDupes[i];
@@ -22,19 +24,10 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
     }
 
-    const float worldMaxYPos = (_worldHeight - 0.5f) * _tileSize;
-    const float worldMaxXPos = _worldWidth * _tileSize;
+    const auto tilemapPos = tilemap_ops.world_to_tilemap(vector2(dupe.x, dupe.y));
+    const auto tileIndex = tilemap_ops.world_2d_to_1d(tilemapPos, _worldWidth);
 
-    const float normYPos = (dupe.y) / worldMaxYPos;
-    const float normXPos = dupe.x / worldMaxXPos;
-
-    const uint32_t YPosTileIndex = (uint32_t)(dupe.y);
-    const uint32_t XPosTileIndex = (uint32_t)(dupe.x);
-
-    const float tileSurfaceYPos = YPosTileIndex + _tileSize;
-    const float tileSurfaceXPos = XPosTileIndex + _tileSize;
-
-    const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth)) + XPosTileIndex];
+    const auto& tile = _pTiles[tileIndex];
 
     // dupe gravity
     if (tile.type == world_tile_type::empty) {
