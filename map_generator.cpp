@@ -21,23 +21,23 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
       const uint32_t z = (i * height) + j;
 
       float altitude = i / (float)height;
-      //if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
-      //  pTiles[z].type = (world_tile_type)((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1));
-      //  pTiles[z].type = (world_tile_type)((uint32_t)world_tile_type::Count - (uint32_t)pTiles[z].type);
-      //}
-      //else {
-      //  pTiles[z].type = world_tile_type::empty;
-      //}
+      if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
+        pTiles[z].type = (world_tile_type)((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1));
+        pTiles[z].type = (world_tile_type)((uint32_t)world_tile_type::Count - (uint32_t)pTiles[z].type);
+      }
+      else {
+        pTiles[z].type = world_tile_type::empty;
+      }
 
-      if (i == 0) {
-        pTiles[z].type = world_tile_type::sand;
-      }
-      else if (i == 1) {
-        pTiles[z].type = world_tile_type::dirt;
-      }
-      else if(i == 2){
-        pTiles[z].type = world_tile_type::coal;
-      }
+      //if (i == 0) {
+      //  pTiles[z].type = world_tile_type::sand;
+      //}
+      //else if (i == 1) {
+      //  pTiles[z].type = world_tile_type::dirt;
+      //}
+      //else if(i == 2){
+      //  pTiles[z].type = world_tile_type::coal;
+      //}
     }
   }
 }

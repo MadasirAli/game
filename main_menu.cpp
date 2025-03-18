@@ -1,11 +1,13 @@
 #include "main_menu.h"
 
-#include "imgui.h"
+#include "imgui_inc.h"
 
 using namespace game;
 
 void main_menu::update()
 {
-  ImGui::Text("Main Menu");
-  _play_clicked = ImGui::Button("Play");
+  IMGUI_CALL(
+  ImGui::Text("Main Menu"));
+  IMGUI_CALL(
+  _play_clicked = ImGui::Button("Play"));
 }

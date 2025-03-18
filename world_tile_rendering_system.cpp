@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include "world.h"
-#include "imgui.h"
+#include "imgui_inc.h"
 
 using namespace game;
 using namespace base::graphics;
@@ -18,8 +18,8 @@ void world_tile_rendering_system::on_update(const world<world_per_tick_data>& qu
   const auto frustumSize = camera.get_size();
   const auto aspectRatio = camera.get_aspect_ratio();
 
-  int32_t xStartIndex = (int32_t)(((camPos[0]) - (frustumSize * 0.5f) * (1.0 / aspectRatio)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
-  int32_t yStartIndex = (int32_t)(((camPos[1]) - (frustumSize * 0.5f) * (1.0 / 1)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t xStartIndex = (int32_t)(((camPos.x) - (frustumSize * 0.5f) * (1.0 / aspectRatio)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
+  int32_t yStartIndex = (int32_t)(((camPos.y) - (frustumSize * 0.5f) * (1.0 / 1)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
 
   int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
   int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
@@ -38,7 +38,8 @@ void world_tile_rendering_system::on_update(const world<world_per_tick_data>& qu
   const int32_t tilesInView = ((xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
   const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
 
-  ImGui::Text("Tiles Draw Count: %d", drawCount);
+  IMGUI_CALL(
+  ImGui::Text("Tiles Draw Count: %d", drawCount));
   if (tilesInView > 0)
   {
     for (size_t t = 1; t < (uint32_t)world_tile_type::Count; ++t) {

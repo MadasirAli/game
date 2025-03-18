@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "imgui.h"
+#include "imgui_inc.h"
 #include "world_tile_component.h"
 #include "world_tile_rendering_system.h"
 #include "world_sim_system.h"
@@ -15,17 +15,17 @@ using namespace game;
 
 void game_world::update(const world_per_tick_data& data)
 {
-  ImGui::Text("Game");
-  ImGui::Text("Playing...");
+  IMGUI_CALL(
+  ImGui::Text("Game"));
+  IMGUI_CALL(
+  ImGui::Text("Playing..."));
 
   if (_started == false) {
     _started = true;
 
-    std::array<float, 2> camStartPos = 
-    { 
-      (_worldWidth * 0.5f) * _tileSize,
-      (_worldHeight * 0.5f) * _tileSize
-    };
+    vector_2 camStartPos = 
+    { (_worldWidth * 0.5f) * _tileSize,
+      (_worldHeight * 0.5f) * _tileSize };
     _rCamera.get().set_position(camStartPos);
 
     // creating arch type
@@ -58,13 +58,14 @@ void game_world::update(const world_per_tick_data& data)
   }
 
   // remap generation
-  if (ImGui::Button("Regenerate Map:")) {
-    auto query = _world.query<world_tile_component>();
-    assert(query.size() == 1);
+  IMGUI_CALL(
+    if (ImGui::Button("Regenerate Map:")) {
+      auto query = _world.query<world_tile_component>();
+      assert(query.size() == 1);
 
-    _map_gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
-      _worldWidth, _worldHeight);
-  }
+      _map_gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
+        _worldWidth, _worldHeight);
+    });
 
   // controls
   using namespace base::input;
@@ -74,29 +75,32 @@ void game_world::update(const world_per_tick_data& data)
   auto& camera = _rCamera.get();
   const auto deltaTime = data.deltaTime;
 
-  std::array<float, 2> newPos = camera.get_position();
+  vector_2 newPos = camera.get_position();
   // camera movement
   if (keyboard.get(key::RightArrow) == key_state::hold) {
-    newPos[0] = newPos[0] + (_camMovSpeed * deltaTime);
+    newPos.x = newPos.x + (_camMovSpeed * deltaTime);
   }
   if (keyboard.get(key::LeftArrow) == key_state::hold) {
-    newPos[0] = newPos[0] - (_camMovSpeed * deltaTime);
+    newPos.x = newPos.x - (_camMovSpeed * deltaTime);
   }
   if (keyboard.get(key::UpArrow) == key_state::hold) {
-    newPos[1] = newPos[1] + (_camMovSpeed * deltaTime);
+    newPos.y = newPos.y + (_camMovSpeed * deltaTime);
   }
   if (keyboard.get(key::DownArrow) == key_state::hold) {
-    newPos[1] = newPos[1] - (_camMovSpeed * deltaTime);
+    newPos.y = newPos.y - (_camMovSpeed * deltaTime);
   }
   const auto size = camera.get_size();
-  newPos[0] = std::clamp<float>(newPos[0], 0 - (size * 0.0f), (_worldWidth * _tileSize) + (size * 0.0f));
-  newPos[1] = std::clamp<float>(newPos[1], 0 - (size * 0.0f), (_worldHeight * _tileSize) - (size * 0.0f));
+  newPos.x = std::clamp<float>(newPos.x, 0 - (size * 0.0f), (_worldWidth * _tileSize) + (size * 0.0f));
+  newPos.y = std::clamp<float>(newPos.y, 0 - (size * 0.0f), (_worldHeight * _tileSize) - (size * 0.0f));
   camera.set_position(newPos);
   camera.set_size(_camZoom);
 
-  ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 200);
-  ImGui::SliderFloat("Zoom", &_camZoom, 5.0f, 1000.0f);
-  ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y);
+  IMGUI_CALL(
+  ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 200));
+  IMGUI_CALL(
+  ImGui::SliderFloat("Zoom", &_camZoom, 5.0f, 1000.0f));
+  IMGUI_CALL(
+  ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y));
 
   // system ticks
   _world.tick(data, base::ecs::system_name::world_sim_system);

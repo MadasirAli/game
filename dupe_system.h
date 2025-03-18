@@ -28,5 +28,7 @@ namespace game {
     const uint32_t _worldWidth;
     const uint32_t _worldHeight;
     const float _tileSize;
+
+    static constexpr const float _gravity = -9.8f;
   };
 }

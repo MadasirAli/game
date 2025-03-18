@@ -18,7 +18,7 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     if (dupe.init == false) {
       dupe.init = true;
 
-      dupe.y = _worldHeight * _tileSize;
+      dupe.y = _worldHeight * _tileSize - 0.5f;
       dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
     }
 
@@ -36,19 +36,10 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
 
     const auto& tile = _pTiles[(YPosTileIndex * (_worldWidth)) + XPosTileIndex];
 
+    // dupe gravity
     if (tile.type == world_tile_type::empty) {
-      dupe.y -= perTickData.deltaTime * 3;
+      dupe.y += perTickData.deltaTime * _gravity;
     }
-
-
-    //dupe.y -= perTickData.deltaTime * 3;
-    //dupe.y = dupe.y < 1.5 ? 1.5 : dupe.y;
-    ImGui::SliderFloat("Dupe Y:", &dupe.y, 0, worldMaxYPos);
-    //dupe.y = _worldHeight * _tileSize;
-
-    ImGui::Text("Dupe Y Pos: %f", dupe.y);
-    ImGui::Text("X Index: %d, Y Index: %d", XPosTileIndex, YPosTileIndex);
-    ImGui::Text("Tile Type: %d", (int32_t)tile.type);
 
     // dupes working here
   }

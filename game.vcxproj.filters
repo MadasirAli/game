@@ -66,6 +66,15 @@
     <ClInclude Include="dupe_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tilemap_ops.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game_app.cpp">
@@ -108,6 +117,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dupe_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tilemap_ops.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
