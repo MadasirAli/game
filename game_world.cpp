@@ -98,7 +98,7 @@ void game_world::update(const world_per_tick_data& data)
   IMGUI_CALL(
   ImGui::SliderFloat("Speed", &_camMovSpeed, 1, 200));
   IMGUI_CALL(
-  ImGui::SliderFloat("Zoom", &_camZoom, 5.0f, 1000.0f));
+  ImGui::SliderFloat("Zoom", &_camZoom, 5.0f, maxZoom));
   IMGUI_CALL(
   ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y));
 

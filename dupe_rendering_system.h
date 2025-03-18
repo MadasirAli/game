@@ -16,9 +16,25 @@ namespace game {
   class dupe_rendering_system : public base::ecs::system<world_per_tick_data>
   {
   private:
-    struct dupe_data_cbuffer {
-      float pos[2] = { 0 };
-      float __padding[2] = { 0 };
+    struct instance_data_sbuffer {
+      float position[2] = { 0 };
+
+      uint32_t legsIndex = 0;
+      uint32_t chestIndex = 0;
+      uint32_t handsIndex = 0;
+      uint32_t headIndex = 0;
+
+      uint32_t legFrameIndex;
+      uint32_t chestFrameIndex;
+      uint32_t handFrameIndex;
+      uint32_t headFrameIndex;
+    };
+    struct render_data_cbuffer {
+      uint32_t offset[2] = { 0 };
+      uint32_t frustumSize[2] = { 0 };
+    };
+    struct constant_data_cbuffer {
+
     };
 
   public:
@@ -35,13 +51,25 @@ namespace game {
     std::reference_wrapper<const base::graphics::d3d_renderer> _rRenderer;
     std::reference_wrapper<const camera> _rCamera;
 
-    std::vector<base::graphics::d3d_buffer> _dupeDataCBuffers;
-    std::vector<base::graphics::d3d_material> _mats;
+    base::graphics::d3d_buffer _instanceDataSBuffer;
+    base::graphics::d3d_buffer _renderDataCBuffer;
+    base::graphics::d3d_buffer _constantDataCBuffer;
 
-    dupe_component* _pDupes = nullptr;    
+    base::graphics::d3d_material _legsMat;
+    base::graphics::d3d_material _chestMat;
+    base::graphics::d3d_material _handsMat;
+    base::graphics::d3d_material _headMat;
+    base::graphics::d3d_material _faceMat;
+
+    dupe_component* _pDupes = nullptr;
 
     const uint32_t _worldWidth;
     const uint32_t _worldHeight;
     const float _tileSize;
+
+    static constexpr const float legsAnimation = 0;
+
+  public:
+    static constexpr const uint32_t dupePartsCount = 5;
   };
 }

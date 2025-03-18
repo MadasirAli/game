@@ -2,6 +2,7 @@
 
 #include "world.h"
 #include "game_world.h"
+#include "dupe_instance_cull_sbuffer.h"
 
 using namespace game;
 
@@ -49,6 +50,7 @@ dupe_rendering_system::dupe_rendering_system(base::ecs::system_name name,
   system(name),
   _rRenderer(renderer),
   _rCamera(camera),
+  _legsMat(shaders["dupe_shader.hlsl"]),
   _worldWidth(worldWidth),
   _worldHeight(worldHeight),
   _tileSize(tileSize)
@@ -56,19 +58,18 @@ dupe_rendering_system::dupe_rendering_system(base::ecs::system_name name,
   using namespace base::graphics;
   constexpr const auto maxDupes = game_world::maxDupes;
 
-  _dupeDataCBuffers.reserve(maxDupes);
-  _mats.reserve(maxDupes);
+  instance_data_sbuffer instanceData{};
+  _instanceDataSBuffer = renderer.create_buffer((char*)&instanceData, sizeof(instance_data_sbuffer),
+    buffer_type::structured, maxDupes, access_mode::write);
 
-  // creating buffers and materials
-  dupe_data_cbuffer data = { 0 };
-  for (uint32_t i = 0; i < maxDupes; ++i) {
-    _mats.emplace_back(shaders["dupe_shader.hlsl"]);
+  _renderDataCBuffer = renderer.create_buffer(nullptr, sizeof(render_data_cbuffer),
+    buffer_type::constant, 1, access_mode::write_discard);
 
-    _dupeDataCBuffers.emplace_back(renderer.create_buffer((char*)&data, sizeof(dupe_data_cbuffer),
-      buffer_type::constant, 1, access_mode::write_discard));
+  constant_data_cbuffer constantData{};
+  _constantDataCBuffer = renderer.create_buffer(nullptr, sizeof(constant_data_cbuffer),
+    buffer_type::constant, 1, access_mode::none);
 
-    _mats[i].set_cbuffer("CameraDataCBuffer", _rCamera.get().get_data_cbuffer());
-    _mats[i].set_cbuffer("DupeDataCBuffer", _dupeDataCBuffers[i]);
-    _mats[i].set_blend(blend_mode::on);
-  }
+  _legsMat.set_cbuffer("RenderDataCBuffer", _renderDataCBuffer);
+  _legsMat.set_sbuffer("InstanceDataSBuffer", _instanceDataSBuffer);
+  _legsMat.set_cbuffer("ConstantDataCBuffer", _constantDataCBuffer);
 }

@@ -62,6 +62,7 @@ namespace game {
 
   public:
     static constexpr const uint32_t maxDupes = 1;
+    static constexpr const float maxZoom = 100;
   };
 }
 
