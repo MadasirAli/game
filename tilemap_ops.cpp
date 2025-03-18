@@ -7,6 +7,8 @@ rect tilemap_ops::get_map_view_box(const camera& cam, uint32_t worldWidth, uint3
   rect result = { 0 };
 
   // calculation // culling here
+  result.width = worldWidth;
+  result.height = worldHeight;
 
   return result;
 }

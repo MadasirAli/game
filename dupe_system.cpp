@@ -11,7 +11,7 @@ using namespace game;
 void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, const world_per_tick_data& perTickData)
 {
   constexpr const auto maxDupes = game_world::maxDupes;
-  tilemap_ops tilemap_ops{};
+  const tilemap_ops tilemap_ops{};
 
   for (uint32_t i = 0; i < maxDupes; ++i) {
     auto& dupe = _pDupes[i];

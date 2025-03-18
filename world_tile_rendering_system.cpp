@@ -4,6 +4,7 @@
 
 #include "world.h"
 #include "imgui_inc.h"
+#include "tilemap_ops.h"
 
 using namespace game;
 using namespace base::graphics;
@@ -13,47 +14,29 @@ void world_tile_rendering_system::on_update(const world<world_per_tick_data>& qu
 {
   const auto& renderer = _rRenderer.get();
   const auto& camera = _rCamera.get();
+  const tilemap_ops tilemap_ops{};
 
-  const auto& camPos = camera.get_position();
-  const auto frustumSize = camera.get_size();
-  const auto aspectRatio = camera.get_aspect_ratio();
+  const auto view = tilemap_ops.get_map_view_box(camera, _worldWidth, _worldHeight);
 
-  int32_t xStartIndex = (int32_t)(((camPos.x) - (frustumSize * 0.5f) * (1.0 / aspectRatio)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
-  int32_t yStartIndex = (int32_t)(((camPos.y) - (frustumSize * 0.5f) * (1.0 / 1)) * (1.0f / _tileSize)) - (2 * (1.0f / _tileSize));
-
-  int32_t xEndIndex = xStartIndex + (int32_t)(frustumSize * (1.0 / aspectRatio) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
-  int32_t yEndIndex = yStartIndex + (int32_t)(frustumSize * (1.0 / 1) * (1.0 / _tileSize)) + (4 * (1.0f / _tileSize));
-
-  xStartIndex = xStartIndex < 0 ? 0 : xStartIndex;
-  yStartIndex = yStartIndex < 0 ? 0 : yStartIndex;
-
-  xEndIndex = xEndIndex > _worldWidth ? _worldWidth : xEndIndex;
-  yEndIndex = yEndIndex > _worldHeight ? _worldHeight : yEndIndex;
-
-  xStartIndex = 0;
-  yStartIndex = 0;
-  xEndIndex = _worldWidth;
-  yEndIndex = _worldHeight;
-
-  const int32_t tilesInView = ((xEndIndex - xStartIndex) * (yEndIndex - yStartIndex));
-  const int32_t drawCount = (xEndIndex - xStartIndex +1) * (yEndIndex - yStartIndex+1);
+  const int32_t tilesInView = ((view.width - view.x) * (view.height - view.y));
+  const int32_t drawCount = ((view.width - view.x + 1) * (view.height - view.y + 1));;
 
   IMGUI_CALL(
   ImGui::Text("Tiles Draw Count: %d", drawCount));
   if (tilesInView > 0)
   {
-    for (size_t t = 1; t < (uint32_t)world_tile_type::Count; ++t) {
+    for (uint32_t t = 1; t < (uint32_t)world_tile_type::Count; ++t) {
       D3D11_MAPPED_SUBRESOURCE map = { 0 };
       renderer.map_buffer(_instanceDataSBuffer, map);
 
-      for (size_t i = yStartIndex; i < (size_t)yEndIndex +1; ++i) {
-        for (size_t j = xStartIndex; j < (size_t)xEndIndex +1; ++j) {
+      for (uint32_t i = view.y; i < (uint32_t)view.height +1; ++i) {
+        for (uint32_t j = view.x; j < (uint32_t)view.width +1; ++j) {
           ((instance_data_sbuffer*)(map.pData))[(i * _renderWorldHeight) + j] = instance_data_sbuffer{};
         }
       }
 
-      for (size_t i = yStartIndex; i < yEndIndex; ++i) {
-        for (size_t j = xStartIndex; j < xEndIndex; ++j) {
+      for (uint32_t i = view.y; i < (uint32_t)view.height; ++i) {
+        for (uint32_t j = view.x; j < (uint32_t)view.width; ++j) {
 
           const int32_t x = j;
           const int32_t y = i;
@@ -102,10 +85,10 @@ void world_tile_rendering_system::on_update(const world<world_per_tick_data>& qu
       renderer.unmap_buffer(_instanceDataSBuffer);
 
       render_data_cbuffer renderData = { 0 };
-      renderData.instanceOffset[0] = xStartIndex;
-      renderData.instanceOffset[1] = yStartIndex;
-      renderData.instanceFrustumSize[0] = (xEndIndex - xStartIndex) +1;
-      renderData.instanceFrustumSize[1] = (yEndIndex - yStartIndex) +1;
+      renderData.instanceOffset[0] = view.x;
+      renderData.instanceOffset[1] = view.y;
+      renderData.instanceFrustumSize[0] = (view.width - view.x) +1;
+      renderData.instanceFrustumSize[1] = (view.height - view.y) +1;
 
       renderer.map_buffer(_renderDataCBuffer, map);
       ((render_data_cbuffer*)(map.pData))[0] = renderData;
