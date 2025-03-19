@@ -24,21 +24,23 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
     }
 
     // dupe animation
-    dupe.frameCounter = ++dupe.frameCounter % _animMaxFrames;
+    _anims.headIdle.tick(perTickData.deltaTime, dupe.headstate);
+    auto headPoint = _anims.headIdle.get(dupe.headstate);
 
     instance_data_sbuffer data = { 0 };
     data.angle = dupe.lookAngle;
-    data.frameIndex = dupe.frameCounter;
+    data.frameIndex = headPoint.sprite;
 
     if (dupe.state == dupe_component::state::idle) {
       data.animIndex = (uint32_t)anim_index::idle;
     }
 
-
     data.position[0] = dupe.pos.x;
-    data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize;
+    data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize + headPoint.position[1];
 
     ((instance_data_sbuffer*)map[(uint32_t)part_index::head].pData)[i] = data;
+
+    data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize;
 
     ((instance_data_sbuffer*)map[(uint32_t)part_index::face].pData)[i] = data;
 

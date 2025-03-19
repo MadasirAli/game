@@ -19,6 +19,9 @@
     <Filter Include="systems">
       <UniqueIdentifier>{83780244-8490-4d27-aa64-06ccd394a2a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="animations">
+      <UniqueIdentifier>{27204a15-6ecc-4436-a7be-fac6618d5e0c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_app.h">
@@ -74,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="vector2.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dupe_animations.h">
+      <Filter>animations</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

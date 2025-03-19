@@ -2,6 +2,7 @@
 
 #include "data_component.h"
 #include "vector2.h"
+#include "anim_state.h"
 
 namespace game {
   struct dupe_component : public base::ecs::data_component {
@@ -17,7 +18,13 @@ namespace game {
     float lookAngle = 0;
 
     state state = state::undef;
-    uint16_t frameCounter = 0;
+    
+    anim::anim_state headstate = { 0 };
+    anim::anim_state facestate = { 0 };
+    anim::anim_state cheststate = { 0 };
+    anim::anim_state handsstate = { 0 };
+    anim::anim_state legsstate = { 0 };
+
 
     bool init = false;
     bool active = false;

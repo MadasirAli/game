@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "dupe_component.h"
 #include "world_per_tick_data.h"
+#include "dupe_animations.h"
 
 namespace game {
   class dupe_rendering_system : public base::ecs::system<world_per_tick_data>
@@ -92,5 +93,7 @@ namespace game {
       {1.5f, 1}, 
       {1, 1}
     };
+
+    const dupe_animations _anims;
   };
 }

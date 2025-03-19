@@ -209,6 +209,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="dupe_animations.h" />
     <ClInclude Include="dupe_component.h" />
     <ClInclude Include="dupe_rendering_system.h" />
     <ClInclude Include="dupe_system.h" />

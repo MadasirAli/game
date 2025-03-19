@@ -24,7 +24,6 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       dupe.pos.x = _worldWidth * _tileSize * 0.5f - 0.5f;
 
       dupe.state = dupe_component::state::idle;
-      dupe.frameCounter = 0;  // on state change
     }
 
     const auto tilemapPos = tilemap_ops.world_to_tilemap(dupe.pos);
