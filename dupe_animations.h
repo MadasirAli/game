@@ -5,17 +5,17 @@
 
 namespace game {
   struct dupe_animations {
-    const anim::anim_clip<100, 3> headIdle {
+    const anim::anim_clip<3, 100> headIdle {
       true,
       false,
       false,
       true,
       true,
-      1.0f,
+      2.0f,
       {
         anim::anim_point(0, 0.0f, 0.0f, 0.0f, 0, 0, 0),
-        anim::anim_point(1, 1.0f, 0.0f, 0.0f, 0, 0, 0),
-        anim::anim_point(2, 0.0f, 0.0f, 0.0f, 0, 0, 0)
+        anim::anim_point(50, 0.0f, 0.5f, 0.0f, 0, 0, 0),
+        anim::anim_point(100, 0.0f, 0.0f, 0.0f, 0, 0, 0)
       }
     };
   };

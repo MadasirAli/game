@@ -35,6 +35,7 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
       data.animIndex = (uint32_t)anim_index::idle;
     }
 
+
     data.position[0] = dupe.pos.x;
     data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize + headPoint.position[1];
 
