@@ -163,6 +163,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\anim\anim.vcxproj">
+      <Project>{93541024-4400-4bde-b27d-9560c66fc505}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\base\base.vcxproj">
       <Project>{c3bde5f9-5d2a-47f7-b597-96d52d62a8a1}</Project>
     </ProjectReference>

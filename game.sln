@@ -43,6 +43,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shaders", "..\shaders\shade
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "physics", "..\physics\physics.vcxproj", "{B146E3F6-1B42-4B77-9E6C-3B0AD9C707A0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "anim", "..\anim\anim.vcxproj", "{93541024-4400-4BDE-B27D-9560C66FC505}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -195,6 +197,14 @@ Global
 		{B146E3F6-1B42-4B77-9E6C-3B0AD9C707A0}.Release|x64.Build.0 = Release|x64
 		{B146E3F6-1B42-4B77-9E6C-3B0AD9C707A0}.Release|x86.ActiveCfg = Release|Win32
 		{B146E3F6-1B42-4B77-9E6C-3B0AD9C707A0}.Release|x86.Build.0 = Release|Win32
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Debug|x64.ActiveCfg = Debug|x64
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Debug|x64.Build.0 = Debug|x64
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Debug|x86.ActiveCfg = Debug|Win32
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Debug|x86.Build.0 = Debug|Win32
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Release|x64.ActiveCfg = Release|x64
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Release|x64.Build.0 = Release|x64
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Release|x86.ActiveCfg = Release|Win32
+		{93541024-4400-4BDE-B27D-9560C66FC505}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
