@@ -34,6 +34,7 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
       data.animIndex = (uint32_t)anim_index::idle;
     }
 
+
     data.position[0] = dupe.pos.x;
     data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize;
 
@@ -60,7 +61,7 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
 
     // indcies that are beign drawn
     renderer.map_buffer(_cullIndicesSBuffers[i], map[0]);
-    for (uint32_t x = 0; x < maxDupesChunk; ++i) {
+    for (uint32_t x = 0; x < maxDupesChunk; ++x) {
       ((uint32_t*)map[0].pData)[x] = x;
     }
     renderer.unmap_buffer(_cullIndicesSBuffers[i]);
@@ -108,7 +109,6 @@ dupe_rendering_system::dupe_rendering_system(base::ecs::system_name name,
   constexpr const auto maxDupes = game_world::maxDupesChunk;
 
   for (uint32_t i = 0; i < (uint32_t)part_index::Count; ++i) {
-
     _instanceDataSBuffers[i] = renderer.create_buffer(nullptr, sizeof(instance_data_sbuffer),
       buffer_type::structured, maxDupes, access_mode::write_discard);
 
@@ -118,9 +118,11 @@ dupe_rendering_system::dupe_rendering_system(base::ecs::system_name name,
     _cullIndicesSBuffers[i] = renderer.create_buffer(nullptr, sizeof(uint32_t), buffer_type::structured,
       maxDupes, access_mode::write_discard);
 
+    _mats[i] = *(std::make_unique<d3d_material>(shaders["quad_shader.hlsl"]).get());
     _mats[i].set_cbuffer("RenderDataCBuffer", _renderDataCBuffers[i]);
     _mats[i].set_sbuffer("InstanceDataSBuffer", _instanceDataSBuffers[i]);
     _mats[i].set_cbuffer("InstanceCullIndciesSBuffer", _cullIndicesSBuffers[i]);
+    _mats[i].set_cbuffer("CameraDataCBuffer", camera.get_data_cbuffer());
   }
 
   _mats[(uint32_t)part_index::head].set_texture("AnimationsTextureAtlas",
