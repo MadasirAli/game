@@ -61,7 +61,7 @@ namespace game {
     base::graphics::d3d_material _renderGridMat;
 
   public:
-    static constexpr const uint32_t maxDupes = 1;
+    static constexpr const uint32_t maxDupesChunk = 1;
     static constexpr const float maxZoom = 100;
   };
 }

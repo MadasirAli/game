@@ -33,7 +33,7 @@ void game_world::update(const world_per_tick_data& data)
     dupe_component dupe = {};
 
     _world.create_archtype<world_tile_component>((size_t)_worldHeight * _worldWidth, tile);
-    _world.create_archtype<dupe_component>(maxDupes, dupe);
+    _world.create_archtype<dupe_component>(maxDupesChunk, dupe);
 
     using namespace base::ecs;
 

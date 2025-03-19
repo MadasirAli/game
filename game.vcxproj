@@ -208,7 +208,6 @@
     <ClInclude Include="client.h" />
     <ClInclude Include="dupe_component.h" />
     <ClInclude Include="dupe_rendering_system.h" />
-    <ClInclude Include="dupe_instance_cull_sbuffer.h" />
     <ClInclude Include="dupe_system.h" />
     <ClInclude Include="game_app.h" />
     <ClInclude Include="game_world.h" />

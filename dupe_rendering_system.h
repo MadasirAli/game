@@ -16,25 +16,31 @@ namespace game {
   class dupe_rendering_system : public base::ecs::system<world_per_tick_data>
   {
   private:
+    enum class anim_index {
+      idle
+    };
+    enum class part_index {
+      head,
+      face,
+      chest,
+      hands,
+      legs,
+      Count
+    };
     struct instance_data_sbuffer {
       float position[2] = { 0 };
+      float angle = 0;
 
-      uint32_t legsIndex = 0;
-      uint32_t chestIndex = 0;
-      uint32_t handsIndex = 0;
-      uint32_t headIndex = 0;
-
-      uint32_t legFrameIndex;
-      uint32_t chestFrameIndex;
-      uint32_t handFrameIndex;
-      uint32_t headFrameIndex;
+      uint32_t frameIndex = 0;
+      uint32_t animIndex = 0;;
     };
     struct render_data_cbuffer {
-      uint32_t offset[2] = { 0 };
-      uint32_t frustumSize[2] = { 0 };
-    };
-    struct constant_data_cbuffer {
+      float animSliceDimensions[2] = {0};
+      uint32_t animSliceCellCount[2] = {0};
 
+      float scale[2] = { 0 };
+
+      float __padding[2] = { 0 };
     };
 
   public:
@@ -51,15 +57,11 @@ namespace game {
     std::reference_wrapper<const base::graphics::d3d_renderer> _rRenderer;
     std::reference_wrapper<const camera> _rCamera;
 
-    base::graphics::d3d_buffer _instanceDataSBuffer;
-    base::graphics::d3d_buffer _renderDataCBuffer;
-    base::graphics::d3d_buffer _constantDataCBuffer;
+    std::array<base::graphics::d3d_buffer, (uint32_t)part_index::Count> _instanceDataSBuffers;
+    std::array<base::graphics::d3d_buffer, (uint32_t)part_index::Count> _renderDataCBuffers;
+    std::array<base::graphics::d3d_buffer, (uint32_t)part_index::Count> _cullIndicesSBuffers;
 
-    base::graphics::d3d_material _legsMat;
-    base::graphics::d3d_material _chestMat;
-    base::graphics::d3d_material _handsMat;
-    base::graphics::d3d_material _headMat;
-    base::graphics::d3d_material _faceMat;
+    std::array<base::graphics::d3d_material, (uint32_t)part_index::Count> _mats;
 
     dupe_component* _pDupes = nullptr;
 
@@ -67,9 +69,28 @@ namespace game {
     const uint32_t _worldHeight;
     const float _tileSize;
 
-    static constexpr const float legsAnimation = 0;
+  private:
+    static constexpr const uint32_t _animSliceCellCountX = 1;
+    static constexpr const uint32_t _animSliceCellCountY = 1;
 
-  public:
-    static constexpr const uint32_t dupePartsCount = 5;
+    static constexpr const float _animSliceWidth = 512 * _animSliceCellCountX;
+    static constexpr const float _animSliceHeight = 512 * _animSliceCellCountY;
+
+    static constexpr const uint32_t _animMaxFrames = _animSliceCellCountX;
+
+    static constexpr const float _dupeHeight = 1.5f;
+
+    static constexpr const float _dupeHeadSize = 0.6f;
+    static constexpr const float _dupeChestSize = 0.5f;
+    static constexpr const float _dupeLegsSize = 0.4f;
+
+    static constexpr const float _dupeScales[(uint32_t)part_index::Count][2] =
+    { 
+      {1, 1},
+      {1, 1}, 
+      {1, 1},
+      {1, 1}, 
+      {1, 1}
+    };
   };
 }

@@ -10,7 +10,7 @@ using namespace game;
 
 void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, const world_per_tick_data& perTickData)
 {
-  constexpr const auto maxDupes = game_world::maxDupes;
+  constexpr const auto maxDupes = game_world::maxDupesChunk;
   const tilemap_ops tilemap_ops{};
 
   for (uint32_t i = 0; i < maxDupes; ++i) {
@@ -20,18 +20,21 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     if (dupe.init == false) {
       dupe.init = true;
 
-      dupe.y = _worldHeight * _tileSize - 0.5f;
-      dupe.x = _worldWidth * _tileSize * 0.5f - 0.5f;
+      dupe.pos.y = _worldHeight * _tileSize - 0.5f;
+      dupe.pos.x = _worldWidth * _tileSize * 0.5f - 0.5f;
+
+      dupe.state = dupe_component::state::idle;
+      dupe.frameCounter = 0;  // on state change
     }
 
-    const auto tilemapPos = tilemap_ops.world_to_tilemap(vector2(dupe.x, dupe.y));
+    const auto tilemapPos = tilemap_ops.world_to_tilemap(dupe.pos);
     const auto tileIndex = tilemap_ops.world_2d_to_1d(tilemapPos, _worldWidth);
 
     const auto& tile = _pTiles[tileIndex];
 
     // dupe gravity
     if (tile.type == world_tile_type::empty) {
-      dupe.y += perTickData.deltaTime * _gravity;
+      dupe.pos.y += perTickData.deltaTime * _gravity;
     }
 
     // dupes working here
