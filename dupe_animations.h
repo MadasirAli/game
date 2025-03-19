@@ -5,21 +5,18 @@
 
 namespace game {
   struct dupe_animations {
-    const anim::anim_clip<2, 100> headIdle {
+    const anim::anim_clip<3, 100> headIdle {
+      2.0f,         // duration
+      true,         // loop
       true,         // allow pos
       false,        // allow rot
       false,        // allow scale
       true,         // allow sprite
-      true,         // loop
-      2.0f,         // duration
-      anim::ease::quad_in_out,   // pos ease
-      anim::ease::linear,   // rot ease
-      anim::ease::linear,   // scale ease
       {
-        //             stemp,  x,   y,  sX,  sY, angle, sprite
-        anim::anim_point(0  , 0.0f, 0.0f, 0.0f, 0, 0, 0),
-        //anim::anim_point(50 , 0.0f, 0.5f, 0.0f, 0, 0, 0),
-        anim::anim_point(100, 0.0f, 1.0f, 0.0f, 0, 0, 0)
+        //             stemp,  x,   y,  sX,  sY, angle, sprite, pos_ease, scale_ease, rot_ease
+        anim::anim_point(0 , 0.0f, 1.0f, 0.0f, 0, 0, 0),
+        anim::anim_point(50 , 0.0f, 1.0f, 0.0f, 0, 0, 0, anim::ease::quad_in_out),
+        anim::anim_point(100, 0.0f, 0.0f, 0.0f, 0, 0, 0, anim::ease::quad_in_out)
       }
     };
   };
