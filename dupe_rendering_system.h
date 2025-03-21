@@ -21,11 +21,11 @@ namespace game {
       idle
     };
     enum class part_index {
+      legs,
+      hands,
+      chest,
       head,
       face,
-      chest,
-      hands,
-      legs,
       Count
     };
     struct instance_data_sbuffer {
@@ -81,18 +81,20 @@ namespace game {
 
     static constexpr const float _dupeHeight = 1.5f;
 
-    static constexpr const float _dupeHeadSize = 0.6f;
-    static constexpr const float _dupeChestSize = 0.5f;
-    static constexpr const float _dupeLegsSize = 0.4f;
+    static constexpr const float _dupeHeadSizeOffset = 0.25f;
+    static constexpr const float _dupeChestSizeOffset = 0.5f;
+    static constexpr const float _dupeLegsSizeOffset = 0.4f;
 
     static constexpr const float _dupeScales[(uint32_t)part_index::Count][2] =
     { 
-      {1, 1},
-      {1, 1}, 
-      {1, 1},
-      {1.5f, 1}, 
-      {1, 1}
+      {1, 1},       // legs
+      {1.5f, 1},    // hands
+      {1, 1},       // chest
+      {1, 1},       // head
+      {0.5f, 0.5}   // face
     };
+
+    static constexpr const vector2 _dupeRenderOffset = { 0, 0.09f };
 
     const dupe_animations _anims;
   };

@@ -1,6 +1,7 @@
 #include "dupe_rendering_system.h"
 
 #include "world.h"
+#include "imgui_inc.h"
 #include "game_world.h"
 
 using namespace game;
@@ -10,6 +11,7 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
   constexpr const auto maxDupesChunk = game_world::maxDupesChunk;
 
   const auto& renderer = _rRenderer.get();
+  const auto dt = perTickData.deltaTime;
 
   D3D11_MAPPED_SUBRESOURCE map[(uint32_t)part_index::Count] = {0};
   for (uint32_t i = 0; i < (uint32_t)part_index::Count; ++i) {
@@ -23,37 +25,84 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
       continue;
     }
 
-    // dupe animation
-    _anims.headIdle.tick(perTickData.deltaTime, dupe.headstate);
-    auto headPoint = _anims.headIdle.get(dupe.headstate);
+    // dupe animations
+    _anims.headIdle.tick(dt, dupe.headAnimState);
+    _anims.faceIdle.tick(dt, dupe.faceAnimState);
+    _anims.chestIdle.tick(dt, dupe.chestAnimState);
+    _anims.handsIdle.tick(dt, dupe.handsAnimState);
+    _anims.legsIdle.tick(dt, dupe.legsAnimState);
 
-    instance_data_sbuffer data = { 0 };
-    data.angle = dupe.lookAngle;
-    data.frameIndex = headPoint.sprite;
+    auto headAnim = _anims.headIdle.get(dupe.headAnimState);
+    auto faceAnim = _anims.faceIdle.get(dupe.faceAnimState);
+    auto chestAnim = _anims.chestIdle.get(dupe.chestAnimState);
+    auto handsAnim = _anims.handsIdle.get(dupe.handsAnimState);
+    auto legsAnim = _anims.legsIdle.get(dupe.legsAnimState);
 
-    if (dupe.state == dupe_component::state::idle) {
-      data.animIndex = (uint32_t)anim_index::idle;
-    }
+    vector2 headAnimPos = { 
+      headAnim.position[0] * _dupeScales[(uint32_t)(part_index::head)][0], 
+      headAnim.position[1] * _dupeScales[(uint32_t)(part_index::head)][1]
+    };
+    vector2 faceAnimPos = {
+      faceAnim.position[0] * _dupeScales[(uint32_t)(part_index::face)][0],
+      faceAnim.position[1] * _dupeScales[(uint32_t)(part_index::face)][1]
+    };
+    vector2 chestAnimPos = {
+      chestAnim.position[0] * _dupeScales[(uint32_t)(part_index::chest)][0],
+      chestAnim.position[1] * _dupeScales[(uint32_t)(part_index::chest)][1]
+    };
+    vector2 handsAnimPos = {
+      handsAnim.position[0] * _dupeScales[(uint32_t)(part_index::hands)][0],
+      handsAnim.position[1] * _dupeScales[(uint32_t)(part_index::hands)][1]
+    };
+    vector2 legsAnimPos = {
+      legsAnim.position[0] * _dupeScales[(uint32_t)(part_index::legs)][0],
+      legsAnim.position[1] * _dupeScales[(uint32_t)(part_index::legs)][1]
+    };
 
+    vector2 pos = dupe.pos + _dupeRenderOffset;
 
-    data.position[0] = dupe.pos.x;
-    data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize + headPoint.position[1];
+    ImGui::Text("Accumulation: %f", dupe.chestAnimState.accumulation);
+    ImGui::Text("Current Stemp: %d", dupe.chestAnimState.currentStemp);
+    ImGui::Text("Current Norm: %f", dupe.chestAnimState.norm);
 
-    ((instance_data_sbuffer*)map[(uint32_t)part_index::head].pData)[i] = data;
+    instance_data_sbuffer chestData = { 0 };
+    instance_data_sbuffer headData = { 0 };
+    instance_data_sbuffer faceData = { 0 };
+    instance_data_sbuffer handsData = { 0 };
+    instance_data_sbuffer legsData = { 0 };
 
-    data.position[1] = dupe.pos.y + _dupeLegsSize + _dupeChestSize;
+    const auto animIndex = (uint32_t)anim_index::idle;
 
-    ((instance_data_sbuffer*)map[(uint32_t)part_index::face].pData)[i] = data;
+    chestData.position[0] = pos.x + chestAnimPos.x;
+    chestData.position[1] = pos.y + _dupeLegsSizeOffset + chestAnimPos.y;
+    chestData.animIndex = animIndex;
+    chestData.frameIndex = chestAnim.sprite;
 
-    data.position[1] = dupe.pos.y + _dupeLegsSize;
+    headData.position[0] = chestData.position[0];
+    headData.position[1] = chestData.position[1] + _dupeChestSizeOffset;
+    headData.animIndex = animIndex;
+    headData.frameIndex = chestAnim.sprite;
 
-    ((instance_data_sbuffer*)map[(uint32_t)part_index::chest].pData)[i] = data;
+    faceData.position[0] = headData.position[0];
+    faceData.position[1] = headData.position[1] + _dupeHeadSizeOffset;
+    faceData.animIndex = animIndex;
+    faceData.frameIndex = chestAnim.sprite;
 
-    ((instance_data_sbuffer*)map[(uint32_t)part_index::hands].pData)[i] = data;
+    handsData.position[0] = chestData.position[0];
+    handsData.position[1] = chestData.position[1];
+    handsData.animIndex = animIndex;
+    handsData.frameIndex = chestAnim.sprite;
 
-    data.position[1] = dupe.pos.y;
+    legsData.position[0] = pos.x;
+    legsData.position[1] = pos.y;
+    legsData.animIndex = animIndex;
+    legsData.frameIndex = chestAnim.sprite;
 
-    ((instance_data_sbuffer*)map[(uint32_t)part_index::legs].pData)[i] = data;
+    ((instance_data_sbuffer*)map[(uint32_t)part_index::head].pData)[i] = headData;
+    ((instance_data_sbuffer*)map[(uint32_t)part_index::face].pData)[i] = faceData;
+    ((instance_data_sbuffer*)map[(uint32_t)part_index::chest].pData)[i] = chestData;
+    ((instance_data_sbuffer*)map[(uint32_t)part_index::hands].pData)[i] = handsData;
+    ((instance_data_sbuffer*)map[(uint32_t)part_index::legs].pData)[i] = legsData;
   }
   for (uint32_t i = 0; i < (uint32_t)part_index::Count; ++i) {
     renderer.unmap_buffer(_instanceDataSBuffers[i]);

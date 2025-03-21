@@ -19,11 +19,11 @@ namespace game {
 
     state state = state::undef;
     
-    anim::anim_state headstate = { 0 };
-    anim::anim_state facestate = { 0 };
-    anim::anim_state cheststate = { 0 };
-    anim::anim_state handsstate = { 0 };
-    anim::anim_state legsstate = { 0 };
+    anim::anim_state headAnimState = { 0 };
+    anim::anim_state faceAnimState = { 0 };
+    anim::anim_state chestAnimState = { 0 };
+    anim::anim_state handsAnimState = { 0 };
+    anim::anim_state legsAnimState = { 0 };
 
 
     bool init = false;
