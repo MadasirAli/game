@@ -35,6 +35,9 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
     if (tile.type == world_tile_type::empty) {
       dupe.pos.y += perTickData.deltaTime * _gravity;
     }
+    else {
+      //dupe.pos.y = tilemap_ops.tilemap_to_world(vector2_int{tilemapPos}).y;
+    }
 
     // dupes working here
   }

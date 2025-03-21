@@ -58,7 +58,12 @@ void game_app::update()
   _keyBuf = input::key_buf{};
 
   auto endTime = clock.now();
+
+#if _DEBUG
+  _deltaTime = 0.016f;
+#else
   _deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0f;
+#endif
 }
 
 void game_app::start()

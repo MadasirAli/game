@@ -67,6 +67,7 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
     ImGui::Text("Accumulation: %f", dupe.chestAnimState.accumulation);
     ImGui::Text("Current Stemp: %d", dupe.chestAnimState.currentStemp);
     ImGui::Text("Current Norm: %f", dupe.chestAnimState.norm);
+    ImGui::Text("Dupe Chest Anim Pos: %f", chestAnimPos.y);
 
     instance_data_sbuffer chestData = { 0 };
     instance_data_sbuffer headData = { 0 };
