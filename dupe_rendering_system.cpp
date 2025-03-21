@@ -3,6 +3,7 @@
 #include "world.h"
 #include "imgui_inc.h"
 #include "game_world.h"
+#include "dupe_animations.h"
 
 using namespace game;
 
@@ -12,6 +13,8 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
 
   const auto& renderer = _rRenderer.get();
   const auto dt = perTickData.deltaTime;
+
+  const dupe_animations anims{};
 
   D3D11_MAPPED_SUBRESOURCE map[(uint32_t)part_index::Count] = {0};
   for (uint32_t i = 0; i < (uint32_t)part_index::Count; ++i) {
@@ -26,17 +29,17 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
     }
 
     // dupe animations
-    _anims.headIdle.tick(dt, dupe.headAnimState);
-    _anims.faceIdle.tick(dt, dupe.faceAnimState);
-    _anims.chestIdle.tick(dt, dupe.chestAnimState);
-    _anims.handsIdle.tick(dt, dupe.handsAnimState);
-    _anims.legsIdle.tick(dt, dupe.legsAnimState);
+    anims.headIdle.tick(dt, dupe.headAnimState);
+    anims.faceIdle.tick(dt, dupe.faceAnimState);
+    anims.chestIdle.tick(dt, dupe.chestAnimState);
+    anims.handsIdle.tick(dt, dupe.handsAnimState);
+    anims.legsIdle.tick(dt, dupe.legsAnimState);
 
-    auto headAnim = _anims.headIdle.get(dupe.headAnimState);
-    auto faceAnim = _anims.faceIdle.get(dupe.faceAnimState);
-    auto chestAnim = _anims.chestIdle.get(dupe.chestAnimState);
-    auto handsAnim = _anims.handsIdle.get(dupe.handsAnimState);
-    auto legsAnim = _anims.legsIdle.get(dupe.legsAnimState);
+    auto headAnim = anims.headIdle.get(dupe.headAnimState);
+    auto faceAnim = anims.faceIdle.get(dupe.faceAnimState);
+    auto chestAnim = anims.chestIdle.get(dupe.chestAnimState);
+    auto handsAnim = anims.handsIdle.get(dupe.handsAnimState);
+    auto legsAnim = anims.legsIdle.get(dupe.legsAnimState);
 
     vector2 headAnimPos = { 
       headAnim.position[0] * _dupeScales[(uint32_t)(part_index::head)][0], 

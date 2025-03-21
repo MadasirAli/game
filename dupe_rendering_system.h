@@ -11,7 +11,6 @@
 #include "camera.h"
 #include "dupe_component.h"
 #include "world_per_tick_data.h"
-#include "dupe_animations.h"
 
 namespace game {
   class dupe_rendering_system : public base::ecs::system<world_per_tick_data>
@@ -94,8 +93,6 @@ namespace game {
       {0.5f, 0.5}   // face
     };
 
-    static constexpr const vector2 _dupeRenderOffset = { 0, 0.09f };
-
-    const dupe_animations _anims;
+    static constexpr const vector2 _dupeRenderOffset = { 0, 0.085f };
   };
 }
