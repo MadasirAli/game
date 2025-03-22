@@ -43,9 +43,9 @@ namespace game {
       {
         //             stemp,  x,   y,  sX,  sY, angle, sprite, pos_ease, scale_ease, rot_ease
         anim::anim_point(0 , 0.0f, 0.0f, 0.0f, 0, 0, 0),
-        anim::anim_point(250 , 0.0f, 0.1f, 0.0f, 0, 0, 0, anim::ease::sine_out),
+        anim::anim_point(250 , 0.0f, 0.05f, 0.0f, 0, 0, 0, anim::ease::sine_out),
         anim::anim_point(500, 0.0f, 0.0f, 0.0f, 0, 0, 0, anim::ease::sine_in),
-        anim::anim_point(750, 0.0f, -0.05f, 0.0f, 0, 0, 0, anim::ease::sine_out),
+        anim::anim_point(750, 0.0f, -0.03f, 0.0f, 0, 0, 0, anim::ease::sine_out),
         anim::anim_point(1000, 0.0f, 0.0f, 0.0f, 0, 0, 0, anim::ease::sine_in)
       }
     };
