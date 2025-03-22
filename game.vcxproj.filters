@@ -75,9 +75,6 @@
     <ClInclude Include="rect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vector2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dupe_animations.h">
       <Filter>animations</Filter>
     </ClInclude>

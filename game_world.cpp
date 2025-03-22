@@ -23,7 +23,7 @@ void game_world::update(const world_per_tick_data& data)
   if (_started == false) {
     _started = true;
 
-    vector2 camStartPos = 
+    base::vector2 camStartPos =
     { (_worldWidth * 0.5f) * _tileSize,
       (_worldHeight * 0.5f) * _tileSize };
     _rCamera.get().set_position(camStartPos);
@@ -75,7 +75,7 @@ void game_world::update(const world_per_tick_data& data)
   auto& camera = _rCamera.get();
   const auto deltaTime = data.deltaTime;
 
-  vector2 newPos = camera.get_position();
+  base::vector2 newPos = camera.get_position();
   // camera movement
   if (keyboard.get(key::RightArrow) == key_state::hold) {
     newPos.x = newPos.x + (_camMovSpeed * deltaTime);

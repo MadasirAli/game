@@ -93,6 +93,6 @@ namespace game {
       {0.5f, 0.5}   // face
     };
 
-    static constexpr const vector2 _dupeRenderOffset = { 0, 0 };
+    static constexpr const base::vector2 _dupeRenderOffset = { 0, 0 };
   };
 }

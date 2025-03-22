@@ -222,7 +222,6 @@
     <ClInclude Include="shader_collection.h" />
     <ClInclude Include="texture_collection.h" />
     <ClInclude Include="tilemap_ops.h" />
-    <ClInclude Include="vector2.h" />
     <ClInclude Include="world_per_tick_data.h" />
     <ClInclude Include="world_tile_component.h" />
     <ClInclude Include="world_sim_system.h" />

@@ -12,7 +12,7 @@ namespace game {
       moving
     };
 
-    vector2 pos = { 0,0 };
+    base::vector2 pos = { 0,0 };
 
 
     float lookAngle = 0;

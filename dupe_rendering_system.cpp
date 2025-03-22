@@ -28,6 +28,8 @@ void dupe_rendering_system::on_update(const base::ecs::world<world_per_tick_data
       continue;
     }
 
+    using namespace base;
+
     // dupe animations
     anims.headIdle.tick(dt, dupe.headAnimState);
     anims.faceIdle.tick(dt, dupe.faceAnimState);
