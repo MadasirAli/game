@@ -2,9 +2,9 @@
 
 using namespace game;
 
-rect tilemap_ops::get_map_view_box(const camera& cam, uint32_t worldWidth, uint32_t worldHeight) const
+base::rect tilemap_ops::get_map_view_box(const camera& cam, uint32_t worldWidth, uint32_t worldHeight) const
 {
-  rect result = { 0 };
+  base::rect result = { 0 };
 
   // calculation // culling here
   result.width = worldWidth;

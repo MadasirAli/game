@@ -72,9 +72,6 @@
     <ClInclude Include="tilemap_ops.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dupe_animations.h">
       <Filter>animations</Filter>
     </ClInclude>

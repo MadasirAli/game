@@ -8,7 +8,8 @@ namespace game {
   class tilemap_ops
   {
   public:
-    rect get_map_view_box(const camera& cam, uint32_t worldWidth, uint32_t worldHeight) const;
+    base::rect
+      get_map_view_box(const camera& cam, uint32_t worldWidth, uint32_t worldHeight) const;
 
     base::vector2_int world_to_tilemap(base::vector2 pos) const;
     base::vector2 tilemap_to_world(base::vector2_int coords) const;

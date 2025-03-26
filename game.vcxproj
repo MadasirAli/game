@@ -217,7 +217,6 @@
     <ClInclude Include="game_world.h" />
     <ClInclude Include="main_menu.h" />
     <ClInclude Include="map_generator.h" />
-    <ClInclude Include="rect.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_collection.h" />
     <ClInclude Include="texture_collection.h" />
