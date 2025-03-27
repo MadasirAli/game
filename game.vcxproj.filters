@@ -51,29 +51,44 @@
     <ClInclude Include="texture_collection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="world_sim_system.h">
-      <Filter>systems</Filter>
-    </ClInclude>
     <ClInclude Include="map_generator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="world_per_tick_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dupe_rendering_system.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dupe_component.h">
       <Filter>components</Filter>
-    </ClInclude>
-    <ClInclude Include="dupe_system.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tilemap_ops.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dupe_animations.h">
       <Filter>animations</Filter>
+    </ClInclude>
+    <ClInclude Include="matter_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matter_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dupe_rendering_system.h">
+      <Filter>systems</Filter>
+    </ClInclude>
+    <ClInclude Include="dupe_system.h">
+      <Filter>systems</Filter>
+    </ClInclude>
+    <ClInclude Include="sim_system.h">
+      <Filter>systems</Filter>
+    </ClInclude>
+    <ClInclude Include="matter_data.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="noise_gen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sim_rendering_system.h">
+      <Filter>systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,20 +122,26 @@
     <ClCompile Include="texture_collection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="world_sim_system.cpp">
-      <Filter>systems</Filter>
-    </ClCompile>
     <ClCompile Include="map_generator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dupe_rendering_system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dupe_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tilemap_ops.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sim_system.cpp">
+      <Filter>systems</Filter>
+    </ClCompile>
+    <ClCompile Include="dupe_rendering_system.cpp">
+      <Filter>systems</Filter>
+    </ClCompile>
+    <ClCompile Include="dupe_system.cpp">
+      <Filter>systems</Filter>
+    </ClCompile>
+    <ClCompile Include="noise_gen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sim_rendering_system.cpp">
+      <Filter>systems</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -5,11 +5,12 @@
 #include "imgui_inc.h"
 #include "world_tile_component.h"
 #include "world_tile_rendering_system.h"
-#include "world_sim_system.h"
 #include "map_generator.h"
 #include "dupe_component.h"
 #include "dupe_rendering_system.h"
 #include "dupe_system.h"
+#include "sim_rendering_system.h"
+#include "sim_system.h"
 
 using namespace game;
 
@@ -30,20 +31,29 @@ void game_world::update(const world_per_tick_data& data)
 
     // creating arch type
     world_tile_component tile = {};
+    matter_data matter = {};
     dupe_component dupe = {};
 
-    _world.create_archtype<world_tile_component>((size_t)_worldHeight * _worldWidth, tile);
+    _world.create_archtype<world_tile_component, matter_data>((size_t)_worldHeight * _worldWidth,
+      tile, matter);
     _world.create_archtype<dupe_component>(maxDupesChunk, dupe);
 
     using namespace base::ecs;
 
-    _world.register_system<world_sim_system>(system_name ::world_sim_system,
-      _worldWidth, _worldHeight);
+    _world.register_system<game::sim_system>(system_name::sim_system,
+      base::vector2_int(_worldWidth, _worldHeight));
+
     _world.register_system<world_tile_rendering_system>(system_name::world_tile_rendering_system,
       _rRenderer, _rCamera, _rShaders, _rTextures,
       _worldWidth, _worldHeight, _tileSize);
+
+    _world.register_system<sim_rendering_system>(system_name::sim_rendering_system,
+      _rRenderer, _rCamera, _rShaders, _rTextures,
+      _worldWidth, _worldHeight, _tileSize);
+
     _world.register_system<dupe_rendering_system>(system_name::dupe_rendering_system, _rCamera,
       _rRenderer, _rShaders, _rTextures, _worldWidth, _worldHeight, _tileSize);
+
     _world.register_system<dupe_system>(system_name::dupe_system, _rCamera,
       _worldWidth, _worldHeight, _tileSize);
 
@@ -53,7 +63,7 @@ void game_world::update(const world_per_tick_data& data)
       assert(query.size() == 1);
 
       _map_gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
-        _worldWidth, _worldHeight);
+        query[0].get().get_array_pointer_of<matter_data>(), _worldWidth, _worldHeight);
     }
   }
 
@@ -64,7 +74,7 @@ void game_world::update(const world_per_tick_data& data)
       assert(query.size() == 1);
 
       _map_gen.generate(query[0].get().get_array_pointer_of<world_tile_component>(),
-        _worldWidth, _worldHeight);
+        query[0].get().get_array_pointer_of<matter_data>(), _worldWidth, _worldHeight);
     });
 
   // controls
@@ -103,7 +113,7 @@ void game_world::update(const world_per_tick_data& data)
   ImGui::Text("Mouse X: %d, Mouse Y: %d", mouse.get_pos().x, mouse.get_pos().y));
 
   // system ticks
-  _world.tick(data, base::ecs::system_name::world_sim_system);
+  _world.tick(data, base::ecs::system_name::sim_system);
   _world.tick(data, base::ecs::system_name::dupe_system);
 }
 
@@ -111,6 +121,7 @@ void game_world::render(const world_per_tick_data& data)
 {
   const auto& renderer = _rRenderer.get();
 
+  _world.tick(data, base::ecs::system_name::sim_rendering_system);
   _world.tick(data, base::ecs::system_name::world_tile_rendering_system);
   _world.tick(data, base::ecs::system_name::dupe_rendering_system);
 

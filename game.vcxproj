@@ -199,9 +199,6 @@
     <ProjectReference Include="..\scene_graph\scene_graph.vcxproj">
       <Project>{b3bc2da8-4be0-41be-bf19-ab5c38ca2d2c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\sim\sim.vcxproj">
-      <Project>{92afe709-a8c7-40a5-8139-b5b9c36331b5}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\sound\sound.vcxproj">
       <Project>{a9b575d3-cd82-4906-9cee-3e562573c4cd}</Project>
     </ProjectReference>
@@ -217,13 +214,18 @@
     <ClInclude Include="game_world.h" />
     <ClInclude Include="main_menu.h" />
     <ClInclude Include="map_generator.h" />
+    <ClInclude Include="matter_data.h" />
+    <ClInclude Include="matter_state.h" />
+    <ClInclude Include="matter_type.h" />
+    <ClInclude Include="noise_gen.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_collection.h" />
+    <ClInclude Include="sim_rendering_system.h" />
+    <ClInclude Include="sim_system.h" />
     <ClInclude Include="texture_collection.h" />
     <ClInclude Include="tilemap_ops.h" />
     <ClInclude Include="world_per_tick_data.h" />
     <ClInclude Include="world_tile_component.h" />
-    <ClInclude Include="world_sim_system.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
@@ -234,13 +236,15 @@
     <ClCompile Include="game_world.cpp" />
     <ClCompile Include="main_menu.cpp" />
     <ClCompile Include="map_generator.cpp" />
+    <ClCompile Include="noise_gen.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="shader_collection.cpp" />
+    <ClCompile Include="sim_rendering_system.cpp" />
+    <ClCompile Include="sim_system.cpp" />
     <ClCompile Include="texture_collection.cpp" />
     <ClCompile Include="tilemap_ops.cpp" />
     <ClCompile Include="world_tile_rendering_system.cpp" />
     <ClCompile Include="world_tile_rendering_system.h" />
-    <ClCompile Include="world_sim_system.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
