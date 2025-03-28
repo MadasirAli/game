@@ -26,5 +26,7 @@ namespace game {
   private:
     matter_data* _pMatter = nullptr;
     const base::vector2_int _size;
+
+    std::unique_ptr<matter_data[]> _pTempMatterData;
   };
 }

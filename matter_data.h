@@ -11,6 +11,6 @@ namespace game {
   struct matter_data : public base::ecs::data_component {
     matter_state state = matter_state::undef;
     matter_type type = matter_type::vacuum;
-    uint32_t mass = 0;
+    int32_t mass = 0;
   };
 }
