@@ -5,10 +5,10 @@
 
 using namespace game;
 
-void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint32_t height)
+void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter, uint32_t width, uint32_t height)
 {
   // generate noises here
-  sim::noise_gen noise_gen{};
+  game::noise_gen noise_gen{};
 
   auto perlin = noise_gen.perlin(width, height, (width / (float) 128) * 20, _rRandom);
   auto fractal = noise_gen.fractal(width, height, (height / (float)128) * 10, 32, 0.5f, _rRandom);
@@ -22,12 +22,57 @@ void map_generator::generate(world_tile_component* pTiles, uint32_t width, uint3
 
       float altitude = i / (float)height;
       if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
+
+
+        //pMatter[z].mass = 000;
+        //pMatter[z].type = matter_type::oxygen;
+        //pMatter[z].state = matter_state::gas;
+
         pTiles[z].type = (world_tile_type)((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1));
+        pTiles[z].type = (world_tile_type)((uint32_t)world_tile_type::Count - (uint32_t)pTiles[z].type);
       }
       else {
         pTiles[z].type = world_tile_type::empty;
+
+        //pMatter[z].mass = 1000;
+        //pMatter[z].type = matter_type::oxygen;
+        //pMatter[z].state = matter_state::gas;
       }
-      //pTiles[z].type = world_tile_type::sand;
+
+
+
+      //if (i == height-1 && j == width-1) {
+      //  pMatter[z].mass = 100;
+      //  pMatter[z].type = matter_type::oxygen;
+      //  pMatter[z].state = matter_state::gas;
+      //}
+      //else {
+      //  pMatter[z].mass = 0;
+      //  pMatter[z].type = matter_type::vacuum;
+      //  pMatter[z].state = matter_state::undef;
+      //}
+      // 
+      if (i == height - 1) {
+        pMatter[z].mass = 10000;
+        pMatter[z].type = matter_type::oxygen;
+        pMatter[z].state = matter_state::gas;
+      }
+      else {
+        pMatter[z].mass = 0;
+        pMatter[z].type = matter_type::vacuum;
+        pMatter[z].state = matter_state::undef;
+      }
+
+
+      //if (i == 0) {
+      //  pTiles[z].type = world_tile_type::sand;
+      //}
+      //else if (i == 1) {
+      //  pTiles[z].type = world_tile_type::dirt;
+      //}
+      //else if(i == 2){
+      //  pTiles[z].type = world_tile_type::coal;
+      //}
     }
   }
 }

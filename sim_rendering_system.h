@@ -1,31 +1,32 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "system.h"
+#include "matter_data.h"
+#include "world_per_tick_data.h"
 #include "d3d_renderer.h"
 #include "camera.h"
 #include "shader_collection.h"
 #include "texture_collection.h"
-#include "world_tile_component.h"
-#include "world_per_tick_data.h"
 
 namespace game {
-  class world_tile_rendering_system : public base::ecs::system<world_per_tick_data> {
+  class sim_rendering_system : public base::ecs::system<world_per_tick_data>
+  {
   private:
-    enum class corner_bit_index {
-      bottom_left,
-      bottom_right,
-      top_right,
-      top_left
-    };
     struct instance_data_sbuffer {
+      uint32_t mass = 0;
+      uint32_t lastMass = 0;
+      float time = 0;
+      float alpha = 0;
+      uint32_t matterIndex = 0;
       uint32_t maskIndex = 0;
-      uint32_t fillIndex = 0;
     };
     struct render_data_cbuffer {
-      uint32_t instanceOffset[2] = {0};
+      uint32_t instanceOffset[2] = { 0 };
       uint32_t instanceFrustumSize[2] = { 0 };
+
+      float time = 0;
+
+      float __padding[3] = { 0 };
     };
     struct instance_data_cbuffer {
       uint32_t worldWidth = 0;
@@ -38,14 +39,13 @@ namespace game {
 
       float __padding[2] = { 0 };
     };
-
   public:
-    world_tile_rendering_system(base::ecs::system_name name, const base::graphics::d3d_renderer& renderer,
+    sim_rendering_system(base::ecs::system_name name, const base::graphics::d3d_renderer& renderer,
       const camera& camera, const shader_collection& shaders, const texture_collection& textures,
       uint32_t worldWidth, uint32_t worldHeight, float tileSize);
 
-    virtual ~world_tile_rendering_system() override = default;
-   
+    virtual ~sim_rendering_system() override = default;
+
     void on_update(const base::ecs::world<world_per_tick_data>& query, const world_per_tick_data& perTickData) override;
     void on_register(const base::ecs::world<world_per_tick_data>& query) override;
 
@@ -68,6 +68,8 @@ namespace game {
 
     static constexpr const uint32_t _fillMapAreaTilesCount = 4;
 
-    world_tile_component* _pTiles = nullptr;
+    matter_data* _pMatter = nullptr;
+    float _time = 0;
   };
 }
+

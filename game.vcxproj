@@ -163,6 +163,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\anim\anim.vcxproj">
+      <Project>{93541024-4400-4bde-b27d-9560c66fc505}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\base\base.vcxproj">
       <Project>{c3bde5f9-5d2a-47f7-b597-96d52d62a8a1}</Project>
     </ProjectReference>
@@ -187,14 +190,14 @@
     <ProjectReference Include="..\netcode\netcode.vcxproj">
       <Project>{103ffef2-fe3e-4af0-8863-617b1c04d640}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\physics\physics.vcxproj">
+      <Project>{b146e3f6-1b42-4b77-9e6c-3b0ad9c707a0}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\resource_std\resource_std.vcxproj">
       <Project>{0deba5b7-fe90-499c-9c10-c8c5e21aaa7f}</Project>
     </ProjectReference>
     <ProjectReference Include="..\scene_graph\scene_graph.vcxproj">
       <Project>{b3bc2da8-4be0-41be-bf19-ab5c38ca2d2c}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\sim\sim.vcxproj">
-      <Project>{92afe709-a8c7-40a5-8139-b5b9c36331b5}</Project>
     </ProjectReference>
     <ProjectReference Include="..\sound\sound.vcxproj">
       <Project>{a9b575d3-cd82-4906-9cee-3e562573c4cd}</Project>
@@ -203,30 +206,45 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="dupe_animations.h" />
+    <ClInclude Include="dupe_component.h" />
+    <ClInclude Include="dupe_rendering_system.h" />
+    <ClInclude Include="dupe_system.h" />
     <ClInclude Include="game_app.h" />
     <ClInclude Include="game_world.h" />
     <ClInclude Include="main_menu.h" />
     <ClInclude Include="map_generator.h" />
+    <ClInclude Include="matter_data.h" />
+    <ClInclude Include="matter_state.h" />
+    <ClInclude Include="matter_type.h" />
+    <ClInclude Include="noise_gen.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_collection.h" />
+    <ClInclude Include="sim_rendering_system.h" />
+    <ClInclude Include="sim_system.h" />
     <ClInclude Include="texture_collection.h" />
+    <ClInclude Include="tilemap_ops.h" />
     <ClInclude Include="world_per_tick_data.h" />
     <ClInclude Include="world_tile_component.h" />
-    <ClInclude Include="world_sim_system.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="dupe_rendering_system.cpp" />
+    <ClCompile Include="dupe_system.cpp" />
     <ClCompile Include="game_app.cpp" />
     <ClCompile Include="game_world.cpp" />
     <ClCompile Include="main_menu.cpp" />
     <ClCompile Include="map_generator.cpp" />
+    <ClCompile Include="noise_gen.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="shader_collection.cpp" />
+    <ClCompile Include="sim_rendering_system.cpp" />
+    <ClCompile Include="sim_system.cpp" />
     <ClCompile Include="texture_collection.cpp" />
+    <ClCompile Include="tilemap_ops.cpp" />
     <ClCompile Include="world_tile_rendering_system.cpp" />
     <ClCompile Include="world_tile_rendering_system.h" />
-    <ClCompile Include="world_sim_system.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

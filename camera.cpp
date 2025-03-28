@@ -29,8 +29,8 @@ void game::camera::update_buffer() const
   dataCBuffer.view[2][2] = 1;    // Third column, third row
   dataCBuffer.view[3][2] = 0;    // Third column, fourth row (homogeneous coordinate)
 
-  dataCBuffer.view[0][3] = -_position[0];    // Fourth column, first row (translation part)
-  dataCBuffer.view[1][3] = -_position[1];    // Fourth column, second row (translation part)
+  dataCBuffer.view[0][3] = -_position.x;    // Fourth column, first row (translation part)
+  dataCBuffer.view[1][3] = -_position.y;    // Fourth column, second row (translation part)
   dataCBuffer.view[2][3] = 0;    // Fourth column, third row (translation part)
   dataCBuffer.view[3][3] = 1;    // Fourth column, fourth row (homogeneous coordinate)
 
@@ -86,8 +86,8 @@ camera::camera(const base::graphics::d3d_renderer& renderer) :
   dataCBuffer.view[2][2] = 1;    // Third column, third row
   dataCBuffer.view[3][2] = 0;    // Third column, fourth row (homogeneous coordinate)
 
-  dataCBuffer.view[0][3] = -_position[0];    // Fourth column, first row (translation part)
-  dataCBuffer.view[1][3] = -_position[1];    // Fourth column, second row (translation part)
+  dataCBuffer.view[0][3] = -_position.x;    // Fourth column, first row (translation part)
+  dataCBuffer.view[1][3] = -_position.y;    // Fourth column, second row (translation part)
   dataCBuffer.view[2][3] = 0;    // Fourth column, third row (translation part)
   dataCBuffer.view[3][3] = 1;    // Fourth column, fourth row (homogeneous coordinate)
 

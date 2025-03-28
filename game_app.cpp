@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "imgui.h"
+#include "imgui_inc.h"
 #include "world_per_tick_data.h"
 #include "key.h"
 
@@ -25,9 +25,12 @@ void game_app::update()
   _renderer.imgui_new_frame();
 
   // draw calls.
-  ImGui::Text("FPS: %f", 1.0f / _deltaTime);
-  ImGui::Text("Delta Time: %f", _deltaTime);
-  ImGui::Checkbox("VSync", &_vsync);
+  IMGUI_CALL(
+  ImGui::Text("FPS: %f", 1.0f / _deltaTime));
+  IMGUI_CALL(
+  ImGui::Text("Delta Time: %f", _deltaTime));
+  IMGUI_CALL(
+  ImGui::Checkbox("VSync", &_vsync));
 
   if (_main_menu.is_play_clicked() == false) {
     _main_menu.update();
@@ -55,7 +58,12 @@ void game_app::update()
   _keyBuf = input::key_buf{};
 
   auto endTime = clock.now();
+
+#if _DEBUG
+  _deltaTime = 0.016f;
+#else
   _deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0f;
+#endif
 }
 
 void game_app::start()

@@ -2,6 +2,7 @@
 
 #include "random.h"
 #include "world_tile_component.h"
+#include "matter_data.h"
 #include <utility>
 
 namespace game {
@@ -10,7 +11,7 @@ namespace game {
   public:
     map_generator(base::random& rand);
 
-    void generate(world_tile_component* pTiles, uint32_t width, uint32_t height);
+    void generate(world_tile_component* pTiles, matter_data* pMatter, uint32_t width, uint32_t height);
 
   private:
 
