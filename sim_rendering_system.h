@@ -14,6 +14,9 @@ namespace game {
   private:
     struct instance_data_sbuffer {
       uint32_t mass = 0;
+      uint32_t lastMass = 0;
+      float time = 0;
+      float alpha = 0;
       uint32_t matterIndex = 0;
       uint32_t maskIndex = 0;
     };

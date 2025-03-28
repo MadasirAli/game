@@ -24,9 +24,9 @@ void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter,
       if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
 
 
-        pMatter[z].mass = 0;
-        pMatter[z].type = matter_type::vacuum;
-        pMatter[z].state = matter_state::undef;
+        //pMatter[z].mass = 000;
+        //pMatter[z].type = matter_type::oxygen;
+        //pMatter[z].state = matter_state::gas;
 
         pTiles[z].type = (world_tile_type)((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1));
         pTiles[z].type = (world_tile_type)((uint32_t)world_tile_type::Count - (uint32_t)pTiles[z].type);
@@ -34,10 +34,11 @@ void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter,
       else {
         pTiles[z].type = world_tile_type::empty;
 
-        pMatter[z].mass = 1000;
-        pMatter[z].type = matter_type::oxygen;
-        pMatter[z].state = matter_state::gas;
+        //pMatter[z].mass = 1000;
+        //pMatter[z].type = matter_type::oxygen;
+        //pMatter[z].state = matter_state::gas;
       }
+
 
 
       //if (i == height-1 && j == width-1) {
@@ -50,7 +51,17 @@ void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter,
       //  pMatter[z].type = matter_type::vacuum;
       //  pMatter[z].state = matter_state::undef;
       //}
-
+      // 
+      if (i == height - 1) {
+        pMatter[z].mass = 10000;
+        pMatter[z].type = matter_type::oxygen;
+        pMatter[z].state = matter_state::gas;
+      }
+      else {
+        pMatter[z].mass = 0;
+        pMatter[z].type = matter_type::vacuum;
+        pMatter[z].state = matter_state::undef;
+      }
 
 
       //if (i == 0) {

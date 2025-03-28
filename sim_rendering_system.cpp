@@ -19,6 +19,8 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
   const int32_t tilesInView = ((view.width - view.x) * (view.height - view.y));
   const int32_t drawCount = (view.width - view.x) * (view.height - view.y);
 
+  static int skips = 0;
+
   IMGUI_CALL(
     ImGui::Text("Sim Draw Count: %d", drawCount));
   if (tilesInView > 0)
@@ -36,7 +38,21 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
         auto& matter = _pMatter[z];
 
         auto& data = ((instance_data_sbuffer*)map.pData)[z];
-        data.mass = matter.mass;
+        if (skips > 1) {
+          skips = 0;
+
+          //data.lastMass = data.mass;
+          data.mass = matter.mass;
+        }
+        else {
+          skips++;
+
+
+          //data.mass = matter.mass;
+          data.lastMass = (uint32_t)((float)data.lastMass + ((float)data.mass - (float)data.lastMass) * perTickData.deltaTime);
+          data.alpha = data.lastMass / 1000.0f;
+        }
+        data.time = skips / 120.0f;
         data.maskIndex = 0;
         data.matterIndex = (uint32_t)matter.type;
 
@@ -96,8 +112,21 @@ sim_rendering_system::sim_rendering_system(system_name name,
   _instanceDataCBuffer = _rRenderer.get().create_buffer((char*)&instanceCData, sizeof(instance_data_cbuffer),
     buffer_type::constant, 1, access_mode::none);
 
+
   _instanceDataSBuffer = _rRenderer.get().create_buffer(nullptr, sizeof(instance_data_sbuffer),
-    buffer_type::structured, _renderWorldHeight * _renderWorldWidth, access_mode::write);
+    buffer_type::structured, _renderWorldHeight * _renderWorldWidth, access_mode::read_write);
+
+  {
+    instance_data_sbuffer buf = { 0 };
+    D3D11_MAPPED_SUBRESOURCE map = { 0 };
+
+    renderer.map_buffer(_instanceDataSBuffer, map);
+    for (size_t i = 0; i < (size_t)_worldWidth * _worldHeight; ++i) {
+      ((instance_data_sbuffer*)(map.pData))[i] = buf;
+    }
+    renderer.unmap_buffer(_instanceDataSBuffer);
+
+  }
 
   _renderDataCBuffer = _rRenderer.get().create_buffer(nullptr, sizeof(render_data_cbuffer),
     buffer_type::constant, 1, access_mode::write_discard);

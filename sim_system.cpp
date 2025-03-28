@@ -16,17 +16,6 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
   std::memcpy(_pTempMatterData.get(), _pMatter, _size.to_size() * sizeof(matter_data));
 
-  for (size_t p = 0; p < 4; ++p) {
-    auto one = _pMatter[p];
-    ImGui::Text("%d Mass: %d", p, one.mass);
-  }
-
-  for (size_t p = 0; p < 4; ++p) {
-    auto one = _pTempMatterData[p];
-    ImGui::Text("TEMP: %d Mass: %d", p, one.mass);
-  }
-
-
   for (size_t i = 0; i < count; ++i) {
     const vector2_int pos = vector2_int{ int(i % _size.x) , int(i / _size.x)};
 
@@ -46,6 +35,8 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
     if (matter.type == matter_type::vacuum) {
       continue;
     }
+
+
 
     // simulating gas
     if (matter.state == matter_state::gas) {
