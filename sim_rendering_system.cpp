@@ -3,6 +3,7 @@
 #include "world.h"
 #include "imgui_inc.h"
 #include "tilemap_ops.h"
+#include "easers.h"
 
 using namespace game;
 using namespace base::graphics;
@@ -41,22 +42,23 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
         auto& matter = _pMatter[z];
 
         auto& data = ((instance_data_sbuffer*)map.pData)[z];
-        if (skips > 60) {
+        if (skips > 20) {
           skips = 0;
 
           //data.lastMass = data.mass;
-          data.mass = matter.mass;
+          //data.mass = matter.mass;
         }
         else {
           skips++;
 
 
           data.mass = matter.mass;
-          data.lastMass = (uint32_t)((float)data.lastMass + ((float)data.mass - (float)data.lastMass) 
-            * perTickData.deltaTime);
+          data.lastMass = (uint32_t)anim::interpolator()((float)data.lastMass, (float)data.mass, 
+            perTickData.deltaTime, anim::ease::linear);
           data.alpha = data.lastMass / 1000.0f;
 
           if (_blockView) {
+
             data.alpha = data.mass / 1000.0f;
           }
         }

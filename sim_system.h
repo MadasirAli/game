@@ -12,7 +12,7 @@ namespace game {
   class sim_system : public base::ecs::system<world_per_tick_data>
   {
   private:
-
+    bool displace_left(base::vector2_int target);
 
   public:
     sim_system(base::ecs::system_name priority, base::vector2_int size);

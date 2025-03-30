@@ -23,20 +23,22 @@ void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter,
       float altitude = i / (float)height;
       if (altitude < ((altitudes[j] + 1.0f) * 0.5f)) {
 
-
-        //pMatter[z].mass = 000;
-        //pMatter[z].type = matter_type::oxygen;
-        //pMatter[z].state = matter_state::gas;
-
         pTiles[z].type = (world_tile_type)((((fractal[z] + 1.0f) * 0.5f) + 0.0f) * ((uint32_t)world_tile_type::Count -1));
         pTiles[z].type = (world_tile_type)((uint32_t)world_tile_type::Count - (uint32_t)pTiles[z].type);
+
+        if (pTiles[z].type != world_tile_type::empty) {
+          pMatter[z].mass = 1000;
+          pMatter[z].type = matter_type::toxic_gas;
+          pMatter[z].state = matter_state::solid;
+
+        }
       }
       else {
         pTiles[z].type = world_tile_type::empty;
 
-        //pMatter[z].mass = 1000;
-        //pMatter[z].type = matter_type::oxygen;
-        //pMatter[z].state = matter_state::gas;
+        pMatter[z].mass = 500;
+        pMatter[z].type = matter_type::oxygen;
+        pMatter[z].state = matter_state::gas;
       }
 
 
@@ -52,16 +54,21 @@ void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter,
       //  pMatter[z].state = matter_state::undef;
       //}
       // 
-      if (i >= height - 32) {
-        pMatter[z].mass = 1000;
-        pMatter[z].type = matter_type::oxygen;
-        pMatter[z].state = matter_state::gas;
-      }
-      else {
-        pMatter[z].mass = 0;
-        pMatter[z].type = matter_type::vacuum;
-        pMatter[z].state = matter_state::undef;
-      }
+      //if (i >= height - 32) {
+      //  pMatter[z].mass = 1000;
+      //  pMatter[z].type = matter_type::toxic_gas;
+      //  pMatter[z].state = matter_state::gas;
+      //}
+      //else if (i >= height - 36) {
+      //  pMatter[z].mass = 1000;
+      //  pMatter[z].type = matter_type::oxygen;
+      //  pMatter[z].state = matter_state::gas;
+      //}
+      //else {
+      //  pMatter[z].mass = 0;
+      //  pMatter[z].type = matter_type::vacuum;
+      //  pMatter[z].state = matter_state::undef;
+      //}
 
 
       //if (i == 0) {

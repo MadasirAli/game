@@ -148,6 +148,33 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   }
 }
 
+bool sim_system::displace_left(base::vector2_int target)
+{
+  auto& matter = _pMatter[target.to_index(_size.x)];
+  auto& leftMatter = _pMatter[target.to_left_index(_size.x)];
+
+  if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
+       matter.state == leftMatter.state) {
+    leftMatter.mass += matter.mass;
+
+    matter.mass == 0;
+    matter.type = matter_type::vacuum;
+    matter.state = matter_state::undef;
+
+    return true;
+  }
+  else {
+    if (target.x - 1 < 0) {
+      return false;
+    }
+    else {
+      return displace_left(base::vector2_int(target.x - 1, target.y));
+    }
+  }
+
+  return false;
+}
+
 void sim_system::on_register(const base::ecs::world<world_per_tick_data>& query)
 {
   auto arches = query.query<matter_data>();
