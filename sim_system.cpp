@@ -50,7 +50,8 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       bool validBottom = false;
 
       if (pLeft != nullptr) {
-        if (pLeft->mass < matter.mass && pLeft->state != matter_state::solid) {
+        if (pLeft->mass < matter.mass &&
+          pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
           partners++;
 
           validLeft = true;
@@ -59,7 +60,8 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
       if (pRight != nullptr) {
 
-        if (pRight->mass < matter.mass && pRight->state != matter_state::solid) {
+        if (pRight->mass < matter.mass && 
+          pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
           partners++;
 
           validRight = true;
@@ -67,7 +69,8 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       }
 
       if (pTop != nullptr) {
-        if (pTop->mass < matter.mass && pTop->state != matter_state::solid) {
+        if (pTop->mass < matter.mass && 
+          pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
           partners++;
 
           validTop = true;
@@ -75,7 +78,8 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       }
 
       if (pBottom != nullptr) {
-        if (pBottom->mass < matter.mass && pBottom->state != matter_state::solid) {
+        if (pBottom->mass < matter.mass && 
+          pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
           partners++;
 
           validBottom = true;
@@ -93,7 +97,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           pNewLeft->type = matter.type;
           pNewLeft->state = matter.state;
         }
-        else if ((matter.type == pLeft->type) && matter.state == pLeft->state) {
+        else if (matter.type == pLeft->type) {
 
           newMatter.mass -= part;
           pNewLeft->mass += part;
@@ -118,8 +122,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           pNewRight->type = matter.type;
           pNewRight->state = matter.state;
         }
-        else if ((matter.type == pRight->type) &&
-          matter.state == pRight->state) {
+        else if (matter.type == pRight->type) {
           newMatter.mass -= part;
           pNewRight->mass += part;
         }
@@ -144,8 +147,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           pNewTop->type = matter.type;
           pNewTop->state = matter.state;
         }
-        else if ((matter.type == pTop->type) &&
-          matter.state == pTop->state) {
+        else if (matter.type == pTop->type) {
           newMatter.mass -= part;
           pNewTop->mass += part;
         }
@@ -169,8 +171,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           pNewBottom->type = matter.type;
           pNewBottom->state = matter.state;
         }
-        else if ((matter.type == pBottom->type) &&
-          matter.state == pBottom->state) {
+        else if (matter.type == pBottom->type) {
           newMatter.mass -= part;
           pNewBottom->mass += part;
         }
@@ -200,12 +201,11 @@ bool sim_system::displace_liquid_left(base::vector2_int target)
 
     assert(x - 1 >= 0);
 
-    if (leftMatter.state == matter_state::solid) {
+    if (leftMatter.state != matter_state::gas && leftMatter.state != matter_state::undef) {
       break;
     }
 
-    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == leftMatter.state) {
+    if (matter.type == leftMatter.type || matter.type == matter_type::vacuum) {
       leftMatter.mass += matter.mass;
 
       matter.mass == 0;
@@ -233,12 +233,11 @@ bool sim_system::displace_liquid_right(base::vector2_int target)
     auto& rightMatter = _pMatter[vector2_int(x + 1, target.y).to_left_index(_size.x)];
     assert(x + 1 < _size.x);
 
-    if (rightMatter.state == matter_state::solid) {
+    if (rightMatter.state != matter_state::gas && rightMatter.state != matter_state::undef) {
       break;
     }
 
-    if ((matter.type == rightMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == rightMatter.state) {
+    if (matter.type == rightMatter.type || matter.type == matter_type::vacuum) {
 
       rightMatter.mass += matter.mass;
 
@@ -269,12 +268,11 @@ bool sim_system::displace_liquid_up(base::vector2_int target)
 
     assert(y + 1 < _size.y);
 
-    if (upMatter.state == matter_state::solid) {
+    if (upMatter.state != matter_state::gas && upMatter.state != matter_state::undef) {
       break;
     }
 
-    if ((matter.type == upMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == upMatter.state) {
+    if (matter.type == upMatter.type || matter.type == matter_type::vacuum) {
       upMatter.mass += matter.mass;
 
       matter.mass == 0;
@@ -303,12 +301,11 @@ bool sim_system::displace_liquid_down(base::vector2_int target)
 
     assert(y - 1 >= 0);
 
-    if (downMatter.state == matter_state::solid) {
+    if (downMatter.state != matter_state::gas && downMatter.state != matter_state::undef) {
       break;
     }
 
-    if ((matter.type == downMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == downMatter.state) {
+    if (matter.type == downMatter.type || matter.type == matter_type::vacuum) {
       downMatter.mass += matter.mass;
 
       matter.mass == 0;
