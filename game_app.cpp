@@ -18,9 +18,11 @@ void game_app::update()
   _keyboard.set(_keyBuf);
   _mouse.set(_keyBuf, _cursorPos);
 
+#ifndef _DEBUG
   const std::array<float, 4> color = { 1.0f, 1.0f, 1.0f, 0.0f };
   //const std::array<float, 4> color = { 0.0f, 0.0f, 0.0f, 0.0f };
   _renderer.clear_render_target(color);
+#endif
 
   _renderer.imgui_new_frame();
 
@@ -41,12 +43,30 @@ void game_app::update()
     worldPerTickData.windowWidth = _width;
     worldPerTickData.windowHeight = _height;
 
+    IMGUI_CALL(
+      ImGui::Checkbox("Keep Updating:", &_keepUpdating));
+    IMGUI_CALL(
+      if (ImGui::Button("Tick") || _keepUpdating) {
+        const std::array<float, 4> color = { 1.0f, 1.0f, 1.0f, 0.0f };
+        _renderer.clear_render_target(color);
+
+        _world.update(worldPerTickData);
+
+        _camera.update();
+        if (_culled == false) {
+          _world.render(worldPerTickData);
+        }
+      }
+    );
+
+#ifndef _DEBUG
     _world.update(worldPerTickData);
 
     _camera.update();
     if (_culled == false) {
       _world.render(worldPerTickData);
     }
+#endif
   }
 
   //

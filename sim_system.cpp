@@ -87,6 +87,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       }
 
       const int32_t part = matter.mass / partners;
+      //const int32_t pressurePart = get_pressure(matter) / partners;
 
       if (validLeft) {
 
@@ -104,12 +105,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_liquid_left(vector2_int(pos.x - 1, pos.y))) {
-            newMatter.mass -= part;
-            pNewLeft->mass += part;
+          if (pLeft->mass < matter.mass) {
+            if (displace_liquid_left(vector2_int(pos.x - 1, pos.y))) {
+              newMatter.mass -= part;
+              pNewLeft->mass += part;
 
-            pNewLeft->type = matter.type;
-            pNewLeft->state = matter.state;
+              pNewLeft->type = matter.type;
+              pNewLeft->state = matter.state;
+            }
           }
         }
       }
@@ -128,12 +131,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_liquid_right(vector2_int(pos.x + 1, pos.y))) {
-            newMatter.mass -= part;
-            pNewRight->mass += part;
+          if (pRight->mass < matter.mass) {
+            if (displace_liquid_right(vector2_int(pos.x + 1, pos.y))) {
+              newMatter.mass -= part;
+              pNewRight->mass += part;
 
-            pNewRight->type = matter.type;
-            pNewRight->state = matter.state;
+              pNewRight->type = matter.type;
+              pNewRight->state = matter.state;
+            }
           }
         }
       }
@@ -153,12 +158,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_liquid_up(vector2_int(pos.x, pos.y + 1))) {
-            newMatter.mass -= part;
-            pNewTop->mass += part;
+          if (pTop->mass < matter.mass) {
+            if (displace_liquid_up(vector2_int(pos.x, pos.y + 1))) {
+              newMatter.mass -= part;
+              pNewTop->mass += part;
 
-            pNewTop->type = matter.type;
-            pNewTop->state = matter.state;
+              pNewTop->type = matter.type;
+              pNewTop->state = matter.state;
+            }
           }
         }
       }
@@ -177,12 +184,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_liquid_down(vector2_int(pos.x, pos.y -1))) {
-            newMatter.mass -= part;
-            pNewBottom->mass += part;
+          if (pBottom->mass < matter.mass) {
+            if (displace_liquid_down(vector2_int(pos.x, pos.y - 1))) {
+              newMatter.mass -= part;
+              pNewBottom->mass += part;
 
-            pNewBottom->type = matter.type;
-            pNewBottom->state = matter.state;
+              pNewBottom->type = matter.type;
+              pNewBottom->state = matter.state;
+            }
           }
         }
       }
@@ -201,11 +210,20 @@ bool sim_system::displace_liquid_left(base::vector2_int target)
 
     assert(x - 1 >= 0);
 
+    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+      break;
+    }
+
     if (leftMatter.state != matter_state::gas && leftMatter.state != matter_state::undef) {
       break;
     }
 
+    //if (leftMatter.mass >= get_max_pressure(leftMatter)) {
+    //  continue;
+    //}
+
     if (matter.type == leftMatter.type || matter.type == matter_type::vacuum) {
+
       leftMatter.mass += matter.mass;
 
       matter.mass == 0;
@@ -231,11 +249,19 @@ bool sim_system::displace_liquid_right(base::vector2_int target)
   for (int x = target.x; x < _size.x -1; ++x) {
     auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
     auto& rightMatter = _pMatter[vector2_int(x + 1, target.y).to_left_index(_size.x)];
+
     assert(x + 1 < _size.x);
+
+    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+      break;
+    }
 
     if (rightMatter.state != matter_state::gas && rightMatter.state != matter_state::undef) {
       break;
     }
+    //if (rightMatter.mass >= get_max_pressure(rightMatter)) {
+    //  continue;
+    //}
 
     if (matter.type == rightMatter.type || matter.type == matter_type::vacuum) {
 
@@ -268,9 +294,16 @@ bool sim_system::displace_liquid_up(base::vector2_int target)
 
     assert(y + 1 < _size.y);
 
+    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+      break;
+    }
     if (upMatter.state != matter_state::gas && upMatter.state != matter_state::undef) {
       break;
     }
+
+    //if (upMatter.mass >= get_max_pressure(upMatter)) {
+    //  continue;
+    //}
 
     if (matter.type == upMatter.type || matter.type == matter_type::vacuum) {
       upMatter.mass += matter.mass;
@@ -301,9 +334,16 @@ bool sim_system::displace_liquid_down(base::vector2_int target)
 
     assert(y - 1 >= 0);
 
+    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+      break;
+    }
     if (downMatter.state != matter_state::gas && downMatter.state != matter_state::undef) {
       break;
     }
+
+    //if (downMatter.mass >= get_max_pressure(downMatter)) {
+    //  continue;
+    //}
 
     if (matter.type == downMatter.type || matter.type == matter_type::vacuum) {
       downMatter.mass += matter.mass;
@@ -340,6 +380,46 @@ void sim_system::swap_matter(base::vector2_int a, base::vector2_int b)
   o.mass = tempM.mass;
   o.state = tempM.state;
   o.type = tempM.type;
+}
+
+uint32_t sim_system::get_pressure(const matter_data& data) const
+{
+  if (data.type == matter_type::oxygen) {
+    return data.mass;
+  }
+  else if (data.type == matter_type::toxic_gas) {
+    return data.mass * 2;
+  }
+  else if (data.type == matter_type::water) {
+    return data.mass;
+  }
+  else if (data.type == matter_type::vacuum) {
+    return 0;
+  }
+
+  assert(false);
+
+  return 0;
+}
+
+uint32_t sim_system::get_max_pressure(const matter_data& data) const
+{
+  if (data.type == matter_type::oxygen) {
+    return 1000;
+  }
+  else if (data.type == matter_type::toxic_gas) {
+    return 1000;
+  }
+  else if (data.type == matter_type::water) {
+    return 1000;
+  }
+  else if (data.type == matter_type::vacuum) {
+    return 0;
+  }
+
+  assert(false);
+
+  return 0;
 }
 
 void sim_system::on_register(const base::ecs::world<world_per_tick_data>& query)

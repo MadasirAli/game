@@ -39,6 +39,8 @@ void dupe_system::on_update(const base::ecs::world<world_per_tick_data>& query, 
       //dupe.pos.y = tilemap_ops.tilemap_to_world(vector2_int{tilemapPos}).y;
     }
 
+    dupe.pos.y = dupe.pos.y < 0 ? 0 : dupe.pos.y;
+
     // dupes working here
   }
 }

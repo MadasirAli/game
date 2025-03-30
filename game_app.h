@@ -56,6 +56,7 @@ namespace game {
     main_menu _main_menu;
 
     bool _culled = false;
+    bool _keepUpdating = false;
   };
 }
 

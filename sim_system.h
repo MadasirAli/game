@@ -19,6 +19,9 @@ namespace game {
 
     void swap_matter(base::vector2_int a, base::vector2_int b);
 
+    uint32_t get_pressure(const matter_data& data) const;
+    uint32_t get_max_pressure(const matter_data& data) const;
+
   public:
     sim_system(base::ecs::system_name priority, base::vector2_int size);
     virtual ~sim_system() noexcept override = default;
