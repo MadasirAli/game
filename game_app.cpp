@@ -44,9 +44,13 @@ void game_app::update()
     worldPerTickData.windowHeight = _height;
 
     IMGUI_CALL(
-      ImGui::Checkbox("Keep Updating:", &_keepUpdating));
+      ImGui::Checkbox("Keep Updating", &_keepUpdating));
+    IMGUI_CALL(
+      ImGui::Text("Tick Count: %d", _tickCount);
+    );
     IMGUI_CALL(
       if (ImGui::Button("Tick") || _keepUpdating) {
+        ++_tickCount;
         const std::array<float, 4> color = { 1.0f, 1.0f, 1.0f, 0.0f };
         _renderer.clear_render_target(color);
 

@@ -38,6 +38,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
     if (matter.type == matter_type::vacuum) {
       assert(matter.state == matter_state::undef);
+      assert(matter.mass == 0);
     }
 
     // simulating gas
@@ -106,9 +107,12 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         else {
           // displacement here
           if (pLeft->mass < matter.mass) {
-            if (displace_liquid_left(vector2_int(pos.x - 1, pos.y))) {
+            if (displace_gas_left(vector2_int(pos.x - 1, pos.y))) {
+
+              assert(pNewLeft->type == matter_type::vacuum);
+
               newMatter.mass -= part;
-              pNewLeft->mass += part;
+              pNewLeft->mass = part;
 
               pNewLeft->type = matter.type;
               pNewLeft->state = matter.state;
@@ -132,9 +136,12 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         else {
           // displacement here
           if (pRight->mass < matter.mass) {
-            if (displace_liquid_right(vector2_int(pos.x + 1, pos.y))) {
+            if (displace_gas_right(vector2_int(pos.x + 1, pos.y))) {
+
+              assert(pNewRight->type == matter_type::vacuum);
+
               newMatter.mass -= part;
-              pNewRight->mass += part;
+              pNewRight->mass = part;
 
               pNewRight->type = matter.type;
               pNewRight->state = matter.state;
@@ -159,9 +166,12 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         else {
           // displacement here
           if (pTop->mass < matter.mass) {
-            if (displace_liquid_up(vector2_int(pos.x, pos.y + 1))) {
+            if (displace_gas_up(vector2_int(pos.x, pos.y + 1))) {
+
+              assert(pNewTop->type == matter_type::vacuum);
+
               newMatter.mass -= part;
-              pNewTop->mass += part;
+              pNewTop->mass = part;
 
               pNewTop->type = matter.type;
               pNewTop->state = matter.state;
@@ -185,9 +195,12 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         else {
           // displacement here
           if (pBottom->mass < matter.mass) {
-            if (displace_liquid_down(vector2_int(pos.x, pos.y - 1))) {
+            if (displace_gas_down(vector2_int(pos.x, pos.y - 1))) {
+
+              assert(pNewBottom->type == matter_type::vacuum);
+
               newMatter.mass -= part;
-              pNewBottom->mass += part;
+              pNewBottom->mass = part;
 
               pNewBottom->type = matter.type;
               pNewBottom->state = matter.state;
@@ -200,7 +213,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   }
 }
 
-bool sim_system::displace_liquid_left(base::vector2_int target)
+bool sim_system::displace_gas_left(base::vector2_int target)
 {
   using namespace base;
 
@@ -222,11 +235,19 @@ bool sim_system::displace_liquid_left(base::vector2_int target)
     //  continue;
     //}
 
-    if (matter.type == leftMatter.type || matter.type == matter_type::vacuum) {
+    if (matter.type == leftMatter.type || leftMatter.type == matter_type::vacuum) {
 
-      leftMatter.mass += matter.mass;
+      if (leftMatter.type == matter_type::vacuum) {
+        leftMatter.type = matter.type;
+        leftMatter.state = matter.state;
 
-      matter.mass == 0;
+        leftMatter.mass = matter.mass;
+      }
+      else {
+        leftMatter.mass += matter.mass;
+      }
+
+      matter.mass = 0;
       matter.type = matter_type::vacuum;
       matter.state = matter_state::undef;
 
@@ -242,7 +263,7 @@ bool sim_system::displace_liquid_left(base::vector2_int target)
 
   return false;
 }
-bool sim_system::displace_liquid_right(base::vector2_int target)
+bool sim_system::displace_gas_right(base::vector2_int target)
 {
   using namespace base;
 
@@ -263,11 +284,20 @@ bool sim_system::displace_liquid_right(base::vector2_int target)
     //  continue;
     //}
 
-    if (matter.type == rightMatter.type || matter.type == matter_type::vacuum) {
+    if (matter.type == rightMatter.type || rightMatter.type == matter_type::vacuum) {
 
-      rightMatter.mass += matter.mass;
 
-      matter.mass == 0;
+      if (rightMatter.type == matter_type::vacuum) {
+        rightMatter.type = matter.type;
+        rightMatter.state = matter.state;
+
+        rightMatter.mass = matter.mass;
+      }
+      else {
+        rightMatter.mass += matter.mass;
+      }
+
+      matter.mass = 0;
       matter.type = matter_type::vacuum;
       matter.state = matter_state::undef;
 
@@ -284,7 +314,7 @@ bool sim_system::displace_liquid_right(base::vector2_int target)
   return false;
 }
 
-bool sim_system::displace_liquid_up(base::vector2_int target)
+bool sim_system::displace_gas_up(base::vector2_int target)
 {
   using namespace base;
 
@@ -305,10 +335,19 @@ bool sim_system::displace_liquid_up(base::vector2_int target)
     //  continue;
     //}
 
-    if (matter.type == upMatter.type || matter.type == matter_type::vacuum) {
-      upMatter.mass += matter.mass;
+    if (matter.type == upMatter.type || upMatter.type == matter_type::vacuum) {
 
-      matter.mass == 0;
+      if (upMatter.type == matter_type::vacuum) {
+        upMatter.type = matter.type;
+        upMatter.state = matter.state;
+
+        upMatter.mass = matter.mass;
+      }
+      else {
+        upMatter.mass += matter.mass;
+      }
+
+      matter.mass = 0;
       matter.type = matter_type::vacuum;
       matter.state = matter_state::undef;
 
@@ -324,7 +363,7 @@ bool sim_system::displace_liquid_up(base::vector2_int target)
 
   return false;
 }
-bool sim_system::displace_liquid_down(base::vector2_int target)
+bool sim_system::displace_gas_down(base::vector2_int target)
 {
   using namespace base;
 
@@ -345,10 +384,19 @@ bool sim_system::displace_liquid_down(base::vector2_int target)
     //  continue;
     //}
 
-    if (matter.type == downMatter.type || matter.type == matter_type::vacuum) {
-      downMatter.mass += matter.mass;
+    if (matter.type == downMatter.type || downMatter.type == matter_type::vacuum) {
 
-      matter.mass == 0;
+      if (downMatter.type == matter_type::vacuum) {
+        downMatter.type = matter.type;
+        downMatter.state = matter.state;
+
+        downMatter.mass = matter.mass;
+      }
+      else {
+        downMatter.mass += matter.mass;
+      }
+
+      matter.mass = 0;
       matter.type = matter_type::vacuum;
       matter.state = matter_state::undef;
 
