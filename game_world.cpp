@@ -126,7 +126,7 @@ void game_world::render(const world_per_tick_data& data)
 
   _world.tick(data, base::ecs::system_name::sim_rendering_system);
   _world.tick(data, base::ecs::system_name::world_tile_rendering_system);
-  _world.tick(data, base::ecs::system_name::dupe_rendering_system);
+  //_world.tick(data, base::ecs::system_name::dupe_rendering_system);
 
   // rendering grids
   if (_drawDebugGrids) {
