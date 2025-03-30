@@ -100,7 +100,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_left(vector2_int(pos.x - 1, pos.y))) {
+          if (displace_liquid_left(vector2_int(pos.x - 1, pos.y))) {
             newMatter.mass -= part;
             pNewLeft->mass += part;
 
@@ -125,7 +125,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_right(vector2_int(pos.x + 1, pos.y))) {
+          if (displace_liquid_right(vector2_int(pos.x + 1, pos.y))) {
             newMatter.mass -= part;
             pNewRight->mass += part;
 
@@ -151,7 +151,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_up(vector2_int(pos.x, pos.y + 1))) {
+          if (displace_liquid_up(vector2_int(pos.x, pos.y + 1))) {
             newMatter.mass -= part;
             pNewTop->mass += part;
 
@@ -176,7 +176,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (displace_down(vector2_int(pos.x, pos.y -1))) {
+          if (displace_liquid_down(vector2_int(pos.x, pos.y -1))) {
             newMatter.mass -= part;
             pNewBottom->mass += part;
 
@@ -190,7 +190,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   }
 }
 
-bool sim_system::displace_left(base::vector2_int target)
+bool sim_system::displace_liquid_left(base::vector2_int target)
 {
   using namespace base;
 
@@ -199,6 +199,10 @@ bool sim_system::displace_left(base::vector2_int target)
     auto& leftMatter = _pMatter[vector2_int(x -1, target.y).to_left_index(_size.x)];
 
     assert(x - 1 >= 0);
+
+    if (leftMatter.state == matter_state::solid) {
+      break;
+    }
 
     if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
       matter.state == leftMatter.state) {
@@ -220,19 +224,23 @@ bool sim_system::displace_left(base::vector2_int target)
 
   return false;
 }
-bool sim_system::displace_right(base::vector2_int target)
+bool sim_system::displace_liquid_right(base::vector2_int target)
 {
   using namespace base;
 
   for (int x = target.x; x < _size.x -1; ++x) {
     auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
-    auto& leftMatter = _pMatter[vector2_int(x + 1, target.y).to_left_index(_size.x)];
-
+    auto& rightMatter = _pMatter[vector2_int(x + 1, target.y).to_left_index(_size.x)];
     assert(x + 1 < _size.x);
 
-    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == leftMatter.state) {
-      leftMatter.mass += matter.mass;
+    if (rightMatter.state == matter_state::solid) {
+      break;
+    }
+
+    if ((matter.type == rightMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == rightMatter.state) {
+
+      rightMatter.mass += matter.mass;
 
       matter.mass == 0;
       matter.type = matter_type::vacuum;
@@ -251,19 +259,23 @@ bool sim_system::displace_right(base::vector2_int target)
   return false;
 }
 
-bool sim_system::displace_up(base::vector2_int target)
+bool sim_system::displace_liquid_up(base::vector2_int target)
 {
   using namespace base;
 
   for (int y = target.y; y < _size.y -1; ++y) {
     auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
-    auto& leftMatter = _pMatter[vector2_int(target.x, y + 1).to_left_index(_size.x)];
+    auto& upMatter = _pMatter[vector2_int(target.x, y + 1).to_left_index(_size.x)];
 
     assert(y + 1 < _size.y);
 
-    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == leftMatter.state) {
-      leftMatter.mass += matter.mass;
+    if (upMatter.state == matter_state::solid) {
+      break;
+    }
+
+    if ((matter.type == upMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == upMatter.state) {
+      upMatter.mass += matter.mass;
 
       matter.mass == 0;
       matter.type = matter_type::vacuum;
@@ -281,19 +293,23 @@ bool sim_system::displace_up(base::vector2_int target)
 
   return false;
 }
-bool sim_system::displace_down(base::vector2_int target)
+bool sim_system::displace_liquid_down(base::vector2_int target)
 {
   using namespace base;
 
   for (int y = target.y; y > 0; --y) {
     auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
-    auto& leftMatter = _pMatter[vector2_int(target.x, y-1).to_left_index(_size.x)];
+    auto& downMatter = _pMatter[vector2_int(target.x, y-1).to_left_index(_size.x)];
 
     assert(y - 1 >= 0);
 
-    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
-      matter.state == leftMatter.state) {
-      leftMatter.mass += matter.mass;
+    if (downMatter.state == matter_state::solid) {
+      break;
+    }
+
+    if ((matter.type == downMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == downMatter.state) {
+      downMatter.mass += matter.mass;
 
       matter.mass == 0;
       matter.type = matter_type::vacuum;

@@ -12,10 +12,10 @@ namespace game {
   class sim_system : public base::ecs::system<world_per_tick_data>
   {
   private:
-    bool displace_left(base::vector2_int target);
-    bool displace_right(base::vector2_int target);
-    bool displace_up(base::vector2_int target);
-    bool displace_down(base::vector2_int target);
+    bool displace_liquid_left(base::vector2_int target);
+    bool displace_liquid_right(base::vector2_int target);
+    bool displace_liquid_up(base::vector2_int target);
+    bool displace_liquid_down(base::vector2_int target);
 
     void swap_matter(base::vector2_int a, base::vector2_int b);
 
