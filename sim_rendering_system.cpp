@@ -22,6 +22,9 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
   static int skips = 0;
 
   IMGUI_CALL(
+  ImGui::Checkbox("Sim Block View: ", &_blockView));
+
+  IMGUI_CALL(
     ImGui::Text("Sim Draw Count: %d", drawCount));
   if (tilesInView > 0)
   {
@@ -38,7 +41,7 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
         auto& matter = _pMatter[z];
 
         auto& data = ((instance_data_sbuffer*)map.pData)[z];
-        if (skips > 1) {
+        if (skips > 60) {
           skips = 0;
 
           //data.lastMass = data.mass;
@@ -48,9 +51,14 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
           skips++;
 
 
-          //data.mass = matter.mass;
-          data.lastMass = (uint32_t)((float)data.lastMass + ((float)data.mass - (float)data.lastMass) * perTickData.deltaTime);
+          data.mass = matter.mass;
+          data.lastMass = (uint32_t)((float)data.lastMass + ((float)data.mass - (float)data.lastMass) 
+            * perTickData.deltaTime);
           data.alpha = data.lastMass / 1000.0f;
+
+          if (_blockView) {
+            data.alpha = data.mass / 1000.0f;
+          }
         }
         data.time = skips / 120.0f;
         data.maskIndex = 0;

@@ -70,6 +70,8 @@ namespace game {
 
     matter_data* _pMatter = nullptr;
     float _time = 0;
+
+    bool _blockView = false;
   };
 }
 

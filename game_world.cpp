@@ -77,6 +77,9 @@ void game_world::update(const world_per_tick_data& data)
         query[0].get().get_array_pointer_of<matter_data>(), _worldWidth, _worldHeight);
     });
 
+  IMGUI_CALL(
+    ImGui::Checkbox("Debug Grids: ", &_drawDebugGrids));
+
   // controls
   using namespace base::input;
 
@@ -126,8 +129,10 @@ void game_world::render(const world_per_tick_data& data)
   _world.tick(data, base::ecs::system_name::dupe_rendering_system);
 
   // rendering grids
-  renderer.draw_quad(_worldGridMat);
-  renderer.draw_quad(_renderGridMat);
+  if (_drawDebugGrids) {
+    renderer.draw_quad(_worldGridMat);
+    renderer.draw_quad(_renderGridMat);
+  }
 }
 
 game_world::game_world(const base::graphics::d3d_renderer& renderer, const shader_collection& shaders,

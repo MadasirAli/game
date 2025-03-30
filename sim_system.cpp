@@ -40,116 +40,110 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
     // simulating gas
     if (matter.state == matter_state::gas) {
-
       int32_t partners = 1;
 
+      bool validLeft = false;
+      bool validRight = false;
+      bool validTop = false;
+      bool validBottom = false;
+
       if (pLeft != nullptr) {
-        if (pLeft->mass < matter.mass) {
+        if (pLeft->mass < matter.mass && pLeft->state != matter_state::solid) {
           partners++;
+
+          validLeft = true;
         }
       }
 
       if (pRight != nullptr) {
-        if (pRight->mass < matter.mass) {
+
+        if (pRight->mass < matter.mass && pRight->state != matter_state::solid) {
           partners++;
+
+          validRight = true;
         }
       }
 
       if (pTop != nullptr) {
-        if (pTop->mass < matter.mass) {
+        if (pTop->mass < matter.mass && pTop->state != matter_state::solid) {
           partners++;
+
+          validTop = true;
         }
       }
 
       if (pBottom != nullptr) {
-        if (pBottom->mass < matter.mass) {
+        if (pBottom->mass < matter.mass && pBottom->state != matter_state::solid) {
           partners++;
+
+          validBottom = true;
         }
       }
 
-      const int32_t part = matter.mass / partners;
+      const int32_t part = newMatter.mass / partners;
 
-      if (pLeft != nullptr) {
-        if (pLeft->mass < matter.mass) {
-          
-          if (pLeft->type == matter_type::vacuum) {
-            newMatter.mass -= part;
-            pNewLeft->mass += part;
+      if (validLeft) {
 
-            pNewLeft->type = matter.type;
-            pNewLeft->state = matter.state;
-          }
-          else if ((matter.type == pLeft->type) &&
-            matter.state == pLeft->state) {
-            newMatter.mass -= part;
-            pNewLeft->mass += part;
-          }
+        if (pLeft->type == matter_type::vacuum) {
+          newMatter.mass -= part;
+          pNewLeft->mass += part;
+
+          pNewLeft->type = matter.type;
+          pNewLeft->state = matter.state;
+        }
+        else if ((matter.type == pLeft->type) &&
+          matter.state == pLeft->state) {
+          newMatter.mass -= part;
+          pNewLeft->mass += part;
         }
       }
 
-      if (pRight != nullptr) {
-        if (pRight->mass < matter.mass) {
-          if (pRight->type == matter_type::vacuum) {
-            newMatter.mass -= part;
-            pNewRight->mass += part;
+      if (validRight) {
+        if (pRight->type == matter_type::vacuum) {
+          newMatter.mass -= part;
+          pNewRight->mass += part;
 
-            pNewRight->type = matter.type;
-            pNewRight->state = matter.state;
-          }
-          else if ((matter.type == pRight->type) &&
-            matter.state == pRight->state) {
-            newMatter.mass -= part;
-            pNewRight->mass += part;
-          }
+          pNewRight->type = matter.type;
+          pNewRight->state = matter.state;
+        }
+        else if ((matter.type == pRight->type) &&
+          matter.state == pRight->state) {
+          newMatter.mass -= part;
+          pNewRight->mass += part;
         }
       }
 
-      if (pTop != nullptr) {
-        if (pTop->mass < matter.mass) {
+      if (validTop) {
 
-          if (pTop->type == matter_type::vacuum) {
-            newMatter.mass -= part;
-            pNewTop->mass += part;
+        if (pTop->type == matter_type::vacuum) {
+          newMatter.mass -= part;
+          pNewTop->mass += part;
 
-            pNewTop->type = matter.type;
-            pNewTop->state = matter.state;
-          }
-          else if ((matter.type == pTop->type) &&
-            matter.state == pTop->state) {
-            newMatter.mass -= part;
-            pNewTop->mass += part;
-          }
+          pNewTop->type = matter.type;
+          pNewTop->state = matter.state;
+        }
+        else if ((matter.type == pTop->type) &&
+          matter.state == pTop->state) {
+          newMatter.mass -= part;
+          pNewTop->mass += part;
         }
       }
 
-      if (pBottom != nullptr) {
-        if (pBottom->mass < matter.mass) {
+      if (validBottom) {
+        if (pBottom->type == matter_type::vacuum) {
+          newMatter.mass -= part;
+          pNewBottom->mass += part;
 
-          if (pBottom->type == matter_type::vacuum) {
-              newMatter.mass -= part;
-              pNewBottom->mass += part;
-
-              pNewBottom->type = matter.type;
-              pNewBottom->state = matter.state;
-          }
-          else if ((matter.type == pBottom->type) &&
-            matter.state == pBottom->state) {
-            newMatter.mass -= part;
-            pNewBottom->mass += part;
-          }
+          pNewBottom->type = matter.type;
+          pNewBottom->state = matter.state;
+        }
+        else if ((matter.type == pBottom->type) &&
+          matter.state == pBottom->state) {
+          newMatter.mass -= part;
+          pNewBottom->mass += part;
         }
       }
 
-      //if(pNewLeft != nullptr)
-      //  pNewLeft->mass = pNewLeft->mass < 0 ? 0 : pNewLeft->mass;
-      //if(pNewTop != nullptr)
-      //  pNewTop->mass = pNewTop->mass < 0 ? 0 : pNewTop->mass;
-      //if(pNewRight != nullptr)
-      //  pNewRight->mass = pNewRight->mass < 0 ? 0 : pNewRight->mass;
-      //if(pNewBottom != nullptr)
-      //  pNewBottom->mass = pNewBottom->mass < 0 ? 0 : pNewBottom->mass;
-
-      //newMatter.mass = newMatter.mass < 0 ? 0 : newMatter.mass;
     }
   }
 }
