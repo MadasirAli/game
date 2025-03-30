@@ -13,6 +13,11 @@ namespace game {
   {
   private:
     bool displace_left(base::vector2_int target);
+    bool displace_right(base::vector2_int target);
+    bool displace_up(base::vector2_int target);
+    bool displace_down(base::vector2_int target);
+
+    void swap_matter(base::vector2_int a, base::vector2_int b);
 
   public:
     sim_system(base::ecs::system_name priority, base::vector2_int size);

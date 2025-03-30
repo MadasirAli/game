@@ -93,10 +93,20 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           pNewLeft->type = matter.type;
           pNewLeft->state = matter.state;
         }
-        else if ((matter.type == pLeft->type) &&
-          matter.state == pLeft->state) {
+        else if ((matter.type == pLeft->type) && matter.state == pLeft->state) {
+
           newMatter.mass -= part;
           pNewLeft->mass += part;
+        }
+        else {
+          // displacement here
+          if (displace_left(vector2_int(pos.x - 1, pos.y))) {
+            newMatter.mass -= part;
+            pNewLeft->mass += part;
+
+            pNewLeft->type = matter.type;
+            pNewLeft->state = matter.state;
+          }
         }
       }
 
@@ -112,6 +122,16 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           matter.state == pRight->state) {
           newMatter.mass -= part;
           pNewRight->mass += part;
+        }
+        else {
+          // displacement here
+          if (displace_right(vector2_int(pos.x + 1, pos.y))) {
+            newMatter.mass -= part;
+            pNewRight->mass += part;
+
+            pNewRight->type = matter.type;
+            pNewRight->state = matter.state;
+          }
         }
       }
 
@@ -129,6 +149,16 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           newMatter.mass -= part;
           pNewTop->mass += part;
         }
+        else {
+          // displacement here
+          if (displace_up(vector2_int(pos.x, pos.y + 1))) {
+            newMatter.mass -= part;
+            pNewTop->mass += part;
+
+            pNewTop->type = matter.type;
+            pNewTop->state = matter.state;
+          }
+        }
       }
 
       if (validBottom) {
@@ -144,6 +174,16 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           newMatter.mass -= part;
           pNewBottom->mass += part;
         }
+        else {
+          // displacement here
+          if (displace_down(vector2_int(pos.x, pos.y -1))) {
+            newMatter.mass -= part;
+            pNewBottom->mass += part;
+
+            pNewBottom->type = matter.type;
+            pNewBottom->state = matter.state;
+          }
+        }
       }
 
     }
@@ -152,29 +192,141 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
 bool sim_system::displace_left(base::vector2_int target)
 {
-  auto& matter = _pMatter[target.to_index(_size.x)];
-  auto& leftMatter = _pMatter[target.to_left_index(_size.x)];
+  using namespace base;
 
-  if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
-       matter.state == leftMatter.state) {
-    leftMatter.mass += matter.mass;
+  for (int x = target.x; x > 0; --x) {
+    auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
+    auto& leftMatter = _pMatter[vector2_int(x -1, target.y).to_left_index(_size.x)];
 
-    matter.mass == 0;
-    matter.type = matter_type::vacuum;
-    matter.state = matter_state::undef;
+    assert(x - 1 >= 0);
 
-    return true;
-  }
-  else {
-    if (target.x - 1 < 0) {
-      return false;
+    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == leftMatter.state) {
+      leftMatter.mass += matter.mass;
+
+      matter.mass == 0;
+      matter.type = matter_type::vacuum;
+      matter.state = matter_state::undef;
+
+
+      for (int i = x; i < target.x; ++i) {
+        swap_matter(vector2_int(i, target.y), vector2_int(i + 1, target.y));
+      }
+
+      return true;
     }
-    else {
-      return displace_left(base::vector2_int(target.x - 1, target.y));
-    }
+
   }
 
   return false;
+}
+bool sim_system::displace_right(base::vector2_int target)
+{
+  using namespace base;
+
+  for (int x = target.x; x < _size.x -1; ++x) {
+    auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
+    auto& leftMatter = _pMatter[vector2_int(x + 1, target.y).to_left_index(_size.x)];
+
+    assert(x + 1 < _size.x);
+
+    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == leftMatter.state) {
+      leftMatter.mass += matter.mass;
+
+      matter.mass == 0;
+      matter.type = matter_type::vacuum;
+      matter.state = matter_state::undef;
+
+
+      for (int i = x; i > target.x; --i) {
+        swap_matter(vector2_int(i, target.y), vector2_int(i - 1, target.y));
+      }
+
+      return true;
+    }
+
+  }
+
+  return false;
+}
+
+bool sim_system::displace_up(base::vector2_int target)
+{
+  using namespace base;
+
+  for (int y = target.y; y < _size.y -1; ++y) {
+    auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
+    auto& leftMatter = _pMatter[vector2_int(target.x, y + 1).to_left_index(_size.x)];
+
+    assert(y + 1 < _size.y);
+
+    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == leftMatter.state) {
+      leftMatter.mass += matter.mass;
+
+      matter.mass == 0;
+      matter.type = matter_type::vacuum;
+      matter.state = matter_state::undef;
+
+
+      for (int i = y; i > target.y; --i) {
+        swap_matter(vector2_int(target.x, i), vector2_int(target.x, i - 1));
+      }
+
+      return true;
+    }
+
+  }
+
+  return false;
+}
+bool sim_system::displace_down(base::vector2_int target)
+{
+  using namespace base;
+
+  for (int y = target.y; y > 0; --y) {
+    auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
+    auto& leftMatter = _pMatter[vector2_int(target.x, y-1).to_left_index(_size.x)];
+
+    assert(y - 1 >= 0);
+
+    if ((matter.type == leftMatter.type || matter.type == matter_type::vacuum) &&
+      matter.state == leftMatter.state) {
+      leftMatter.mass += matter.mass;
+
+      matter.mass == 0;
+      matter.type = matter_type::vacuum;
+      matter.state = matter_state::undef;
+
+
+      for (int i = y; i < target.y; ++i) {
+        swap_matter(vector2_int(target.x, i), vector2_int(target.x, i + 1));
+      }
+
+      return true;
+    }
+
+  }
+
+  return false;
+}
+
+
+void sim_system::swap_matter(base::vector2_int a, base::vector2_int b)
+{
+  auto& m = _pMatter[a.to_index(_size.x)];
+  auto& o = _pMatter[b.to_index(_size.x)];
+
+  const matter_data tempM = m;
+
+  m.mass = o.mass;
+  m.state = o.state;
+  m.type = o.type;
+
+  o.mass = tempM.mass;
+  o.state = tempM.state;
+  o.type = tempM.type;
 }
 
 void sim_system::on_register(const base::ecs::world<world_per_tick_data>& query)
