@@ -36,7 +36,9 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       continue;
     }
 
-
+    if (matter.type == matter_type::vacuum) {
+      assert(matter.state == matter_state::undef);
+    }
 
     // simulating gas
     if (matter.state == matter_state::gas) {
@@ -80,7 +82,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
       }
 
-      const int32_t part = newMatter.mass / partners;
+      const int32_t part = matter.mass / partners;
 
       if (validLeft) {
 

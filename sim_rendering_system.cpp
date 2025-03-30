@@ -54,7 +54,7 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
 
           data.mass = matter.mass;
           data.lastMass = (uint32_t)anim::interpolator()((float)data.lastMass, (float)data.mass, 
-            perTickData.deltaTime, anim::ease::linear);
+            perTickData.deltaTime * 2, anim::ease::linear);
           data.alpha = data.lastMass / 1000.0f;
 
           if (_blockView) {
