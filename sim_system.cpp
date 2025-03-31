@@ -16,6 +16,26 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
   std::memcpy(_pTempMatterData.get(), _pMatter, _size.to_size() * sizeof(matter_data));
 
+  static bool init = false;
+
+  static size_t sum = 0;
+  size_t currentSum = 0;
+  if (init == false) {
+    init = true;
+    for (size_t i = 0; i < count; ++i) {
+      sum += _pMatter[i].mass;
+    }
+
+    currentSum = sum;
+  }
+  else {
+    for (size_t i = 0; i < count; ++i) {
+      currentSum += _pMatter[i].mass;
+    }
+  }
+
+  assert(currentSum == sum);
+
   for (size_t i = 0; i < count; ++i) {
     const vector2_int pos = vector2_int{ int(i % _size.x) , int(i / _size.x)};
 
@@ -219,7 +239,7 @@ bool sim_system::displace_gas_left(base::vector2_int target)
 
   for (int x = target.x; x > 0; --x) {
     auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
-    auto& leftMatter = _pMatter[vector2_int(x -1, target.y).to_left_index(_size.x)];
+    auto& leftMatter = _pMatter[vector2_int(x, target.y).to_left_index(_size.x)];
 
     assert(x - 1 >= 0);
 
@@ -269,7 +289,7 @@ bool sim_system::displace_gas_right(base::vector2_int target)
 
   for (int x = target.x; x < _size.x -1; ++x) {
     auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
-    auto& rightMatter = _pMatter[vector2_int(x + 1, target.y).to_left_index(_size.x)];
+    auto& rightMatter = _pMatter[vector2_int(x, target.y).to_right_index(_size.x)];
 
     assert(x + 1 < _size.x);
 
@@ -320,7 +340,7 @@ bool sim_system::displace_gas_up(base::vector2_int target)
 
   for (int y = target.y; y < _size.y -1; ++y) {
     auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
-    auto& upMatter = _pMatter[vector2_int(target.x, y + 1).to_left_index(_size.x)];
+    auto& upMatter = _pMatter[vector2_int(target.x, y).to_top_index(_size.x)];
 
     assert(y + 1 < _size.y);
 
@@ -369,7 +389,7 @@ bool sim_system::displace_gas_down(base::vector2_int target)
 
   for (int y = target.y; y > 0; --y) {
     auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
-    auto& downMatter = _pMatter[vector2_int(target.x, y-1).to_left_index(_size.x)];
+    auto& downMatter = _pMatter[vector2_int(target.x, y).to_bottom_index(_size.x)];
 
     assert(y - 1 >= 0);
 
