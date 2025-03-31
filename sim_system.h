@@ -17,6 +17,8 @@ namespace game {
     bool displace_gas_up(base::vector2_int target);
     bool displace_gas_down(base::vector2_int target);
 
+    bool displace_gas(base::vector2_int target);
+
     void swap_matter(base::vector2_int a, base::vector2_int b);
 
     uint32_t get_pressure(const matter_data& data) const;

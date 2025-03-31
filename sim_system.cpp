@@ -31,6 +31,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   else {
     for (size_t i = 0; i < count; ++i) {
       currentSum += _pMatter[i].mass;
+      assert(_pMatter[i].mass >= 0);
     }
   }
 
@@ -453,10 +454,10 @@ void sim_system::swap_matter(base::vector2_int a, base::vector2_int b)
 uint32_t sim_system::get_pressure(const matter_data& data) const
 {
   if (data.type == matter_type::oxygen) {
-    return data.mass;
+    return data.mass * 2;
   }
   else if (data.type == matter_type::toxic_gas) {
-    return data.mass * 2;
+    return data.mass;
   }
   else if (data.type == matter_type::water) {
     return data.mass;
