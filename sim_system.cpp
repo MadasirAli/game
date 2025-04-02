@@ -138,7 +138,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
       }
 
-      int32_t part = matter.mass / partners;
+      const int32_t part = matter.mass / partners;
       //const int32_t part = newMatter.mass / 5;
       //const int32_t pressurePart = get_pressure(matter) / partners;
 
@@ -157,62 +157,59 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         else {
           // displacement here
           if (get_pressure(*pBottom, true, false) < get_pressure(matter, true, false)) {
-            if (
-              //displace_gas(vector2_int(pos.x, pos.y - 1), displace_exce::top)
-              true
-              ) {
+            if (displace_gas(vector2_int(pos.x, pos.y - 1), displace_exce::top)) {
 
-              //assert(pNewBottom->type == matter_type::vacuum);
+              assert(pNewBottom->type == matter_type::vacuum);
 
-              //newMatter.mass -= part;
-              //pNewBottom->mass = part;
+              newMatter.mass -= part;
+              pNewBottom->mass = part;
 
-              //pNewBottom->type = matter.type;
-              //pNewBottom->state = matter.state;
+              pNewBottom->type = matter.type;
+              pNewBottom->state = matter.state;
 
-              //assert(newMatter.mass >= 0);
+              assert(newMatter.mass >= 0);
 
-              swap_matter(pos, vector2_int(pos.x, pos.y - 1));
+              //swap_matter(pos, vector2_int(pos.x, pos.y - 1));
 
               {
-                if (pLeft != nullptr) {
-                  if (pLeft->mass < matter.mass &&
-                    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                    partners++;
+                //if (pLeft != nullptr) {
+                //  if (pLeft->mass < matter.mass &&
+                //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
+                //    partners++;
 
-                    validLeft = true;
-                  }
-                }
+                //    validLeft = true;
+                //  }
+                //}
 
-                if (pRight != nullptr) {
+                //if (pRight != nullptr) {
 
-                  if (pRight->mass < matter.mass &&
-                    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                    partners++;
+                //  if (pRight->mass < matter.mass &&
+                //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
+                //    partners++;
 
-                    validRight = true;
-                  }
-                }
+                //    validRight = true;
+                //  }
+                //}
 
-                if (pTop != nullptr) {
-                  if (pTop->mass < matter.mass &&
-                    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                    partners++;
+                //if (pTop != nullptr) {
+                //  if (pTop->mass < matter.mass &&
+                //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
+                //    partners++;
 
-                    validTop = true;
-                  }
-                }
+                //    validTop = true;
+                //  }
+                //}
 
-                if (pBottom != nullptr) {
-                  if (pBottom->mass < matter.mass &&
-                    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                    partners++;
+                //if (pBottom != nullptr) {
+                //  if (pBottom->mass < matter.mass &&
+                //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
+                //    partners++;
 
-                    validBottom = true;
-                  }
-                }
+                //    validBottom = true;
+                //  }
+                //}
 
-                part = matter.mass / partners;
+                //part = matter.mass / partners;
               }
             }
           }
@@ -274,44 +271,44 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
                 assert(newMatter.mass >= 0);
 
                 {
-                  if (pLeft != nullptr) {
-                    if (pLeft->mass < matter.mass &&
-                      pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                      partners++;
+                  //if (pLeft != nullptr) {
+                  //  if (pLeft->mass < matter.mass &&
+                  //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
+                  //    partners++;
 
-                      validLeft = true;
-                    }
-                  }
+                  //    validLeft = true;
+                  //  }
+                  //}
 
-                  if (pRight != nullptr) {
+                  //if (pRight != nullptr) {
 
-                    if (pRight->mass < matter.mass &&
-                      pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                      partners++;
+                  //  if (pRight->mass < matter.mass &&
+                  //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
+                  //    partners++;
 
-                      validRight = true;
-                    }
-                  }
+                  //    validRight = true;
+                  //  }
+                  //}
 
-                  if (pTop != nullptr) {
-                    if (pTop->mass < matter.mass &&
-                      pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                      partners++;
+                  //if (pTop != nullptr) {
+                  //  if (pTop->mass < matter.mass &&
+                  //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
+                  //    partners++;
 
-                      validTop = true;
-                    }
-                  }
+                  //    validTop = true;
+                  //  }
+                  //}
 
-                  if (pBottom != nullptr) {
-                    if (pBottom->mass < matter.mass &&
-                      pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                      partners++;
+                  //if (pBottom != nullptr) {
+                  //  if (pBottom->mass < matter.mass &&
+                  //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
+                  //    partners++;
 
-                      validBottom = true;
-                    }
-                  }
+                  //    validBottom = true;
+                  //  }
+                  //}
 
-                  part = matter.mass / partners;
+                  //part = matter.mass / partners;
                 }
               }
             }
@@ -373,44 +370,44 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
               assert(newMatter.mass >= 0);
 
               {
-                if (pLeft != nullptr) {
-                  if (pLeft->mass < matter.mass &&
-                    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                    partners++;
+                //if (pLeft != nullptr) {
+                //  if (pLeft->mass < matter.mass &&
+                //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
+                //    partners++;
 
-                    validLeft = true;
-                  }
-                }
+                //    validLeft = true;
+                //  }
+                //}
 
-                if (pRight != nullptr) {
+                //if (pRight != nullptr) {
 
-                  if (pRight->mass < matter.mass &&
-                    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                    partners++;
+                //  if (pRight->mass < matter.mass &&
+                //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
+                //    partners++;
 
-                    validRight = true;
-                  }
-                }
+                //    validRight = true;
+                //  }
+                //}
 
-                if (pTop != nullptr) {
-                  if (pTop->mass < matter.mass &&
-                    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                    partners++;
+                //if (pTop != nullptr) {
+                //  if (pTop->mass < matter.mass &&
+                //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
+                //    partners++;
 
-                    validTop = true;
-                  }
-                }
+                //    validTop = true;
+                //  }
+                //}
 
-                if (pBottom != nullptr) {
-                  if (pBottom->mass < matter.mass &&
-                    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                    partners++;
+                //if (pBottom != nullptr) {
+                //  if (pBottom->mass < matter.mass &&
+                //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
+                //    partners++;
 
-                    validBottom = true;
-                  }
-                }
+                //    validBottom = true;
+                //  }
+                //}
 
-                part = matter.mass / partners;
+                //part = matter.mass / partners;
               }
             }
           }
@@ -473,44 +470,44 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
               assert(newMatter.mass >= 0);
 
               {
-                if (pLeft != nullptr) {
-                  if (pLeft->mass < matter.mass &&
-                    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                    partners++;
+                //if (pLeft != nullptr) {
+                //  if (pLeft->mass < matter.mass &&
+                //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
+                //    partners++;
 
-                    validLeft = true;
-                  }
-                }
+                //    validLeft = true;
+                //  }
+                //}
 
-                if (pRight != nullptr) {
+                //if (pRight != nullptr) {
 
-                  if (pRight->mass < matter.mass &&
-                    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                    partners++;
+                //  if (pRight->mass < matter.mass &&
+                //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
+                //    partners++;
 
-                    validRight = true;
-                  }
-                }
+                //    validRight = true;
+                //  }
+                //}
 
-                if (pTop != nullptr) {
-                  if (pTop->mass < matter.mass &&
-                    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                    partners++;
+                //if (pTop != nullptr) {
+                //  if (pTop->mass < matter.mass &&
+                //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
+                //    partners++;
 
-                    validTop = true;
-                  }
-                }
+                //    validTop = true;
+                //  }
+                //}
 
-                if (pBottom != nullptr) {
-                  if (pBottom->mass < matter.mass &&
-                    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                    partners++;
+                //if (pBottom != nullptr) {
+                //  if (pBottom->mass < matter.mass &&
+                //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
+                //    partners++;
 
-                    validBottom = true;
-                  }
-                }
+                //    validBottom = true;
+                //  }
+                //}
 
-                part = matter.mass / partners;
+                //part = matter.mass / partners;
               }
             }
           }
@@ -760,21 +757,6 @@ void sim_system::swap_matter(base::vector2_int a, base::vector2_int b)
 
 uint32_t sim_system::get_pressure(const matter_data& data, bool down, bool up) const
 {
-  if (down) {
-    if (data.type == matter_type::oxygen) {
-      return data.mass;
-    }
-    else if (data.type == matter_type::toxic_gas) {
-      return data.mass * 2;
-    }
-    else if (data.type == matter_type::water) {
-      return data.mass;
-    }
-    else if (data.type == matter_type::vacuum) {
-      return 0;
-    }
-  }
-
   if (data.type == matter_type::oxygen) {
     return data.mass;
   }
