@@ -12,16 +12,19 @@ namespace game {
   class sim_system : public base::ecs::system<world_per_tick_data>
   {
   private:
-    bool displace_gas_left(base::vector2_int target);
-    bool displace_gas_right(base::vector2_int target);
-    bool displace_gas_up(base::vector2_int target);
-    bool displace_gas_down(base::vector2_int target);
-
-    bool displace_gas(base::vector2_int target);
+    enum class displace_exce {
+      undef,
+      top,
+      bottom,
+      right,
+      left
+    };
+  private:
+    bool displace_gas(base::vector2_int target, displace_exce exec);
 
     void swap_matter(base::vector2_int a, base::vector2_int b);
 
-    uint32_t get_pressure(const matter_data& data) const;
+    uint32_t get_pressure(const matter_data& data, bool down = false, bool up = false) const;
     uint32_t get_max_pressure(const matter_data& data) const;
 
   public:

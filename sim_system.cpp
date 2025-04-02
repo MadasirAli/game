@@ -19,34 +19,64 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   static bool init = false;
 
   static size_t sum = 0;
+  static size_t totalOxygen = 0;
+  static size_t totalToxocGas = 0;
+
   size_t currentSum = 0;
+  size_t currentOxygen = 0;
+  size_t currentToxicGas = 0;
   if (init == false) {
     init = true;
     for (size_t i = 0; i < count; ++i) {
       sum += _pMatter[i].mass;
+
+      if (_pMatter[i].type == matter_type::oxygen) {
+        totalOxygen += _pMatter[i].mass;
+      }
+      else if (_pMatter[i].type == matter_type::toxic_gas) {
+        totalToxocGas += _pMatter[i].mass;
+      }
     }
 
     currentSum = sum;
+    currentOxygen = totalOxygen;
+    currentToxicGas = totalToxocGas;
   }
   else {
     for (size_t i = 0; i < count; ++i) {
       currentSum += _pMatter[i].mass;
+
+      if (_pMatter[i].type == matter_type::oxygen) {
+        currentOxygen += _pMatter[i].mass;
+      }
+      else if (_pMatter[i].type == matter_type::toxic_gas) {
+        currentToxicGas += _pMatter[i].mass;
+      }
+
       assert(_pMatter[i].mass >= 0);
     }
   }
 
   assert(currentSum == sum);
+  assert(currentOxygen == totalOxygen);
+  assert(currentToxicGas == totalToxocGas);
 
   for (size_t i = 0; i < count; ++i) {
     const vector2_int pos = vector2_int{ int(i % _size.x) , int(i / _size.x)};
 
-    const auto& matter = _pTempMatterData[i];
+    const auto & matter = _pTempMatterData[i];
+   // const auto& matter = _pMatter[i];
     auto& newMatter = _pMatter[i];
 
     const matter_data* pLeft   = pos.x != 0 ? &_pTempMatterData[pos.to_left_index(_size.x)]   : nullptr;
     const matter_data* pRight  = pos.x != _size.x-1 ? &_pTempMatterData[pos.to_right_index(_size.x)]  : nullptr;
     const matter_data* pTop    = pos.y != _size.y-1 ? &_pTempMatterData[pos.to_top_index(_size.x)]    : nullptr;
     const matter_data* pBottom = pos.y != 0 ? &_pTempMatterData[pos.to_bottom_index(_size.x)] : nullptr;
+
+    //const matter_data* pLeft = pos.x != 0 ? &_pMatter[pos.to_left_index(_size.x)] : nullptr;
+    //const matter_data* pRight = pos.x != _size.x - 1 ? &_pMatter[pos.to_right_index(_size.x)] : nullptr;
+    //const matter_data* pTop = pos.y != _size.y - 1 ? &_pMatter[pos.to_top_index(_size.x)] : nullptr;
+    //const matter_data* pBottom = pos.y != 0 ? &_pMatter[pos.to_bottom_index(_size.x)] : nullptr;
 
     matter_data* pNewLeft = pos.x != 0 ? &_pMatter[pos.to_left_index(_size.x)] : nullptr;
     matter_data* pNewRight = pos.x != _size.x - 1 ? &_pMatter[pos.to_right_index(_size.x)] : nullptr;
@@ -72,7 +102,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       bool validBottom = false;
 
       if (pLeft != nullptr) {
-        if (pLeft->mass < matter.mass &&
+        if (
           pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
           partners++;
 
@@ -82,7 +112,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
       if (pRight != nullptr) {
 
-        if (pRight->mass < matter.mass && 
+        if (
           pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
           partners++;
 
@@ -91,7 +121,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       }
 
       if (pTop != nullptr) {
-        if (pTop->mass < matter.mass && 
+        if (
           pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
           partners++;
 
@@ -100,7 +130,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       }
 
       if (pBottom != nullptr) {
-        if (pBottom->mass < matter.mass && 
+        if (
           pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
           partners++;
 
@@ -108,98 +138,9 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
       }
 
-      const int32_t part = matter.mass / partners;
+      const int32_t part = matter.mass / 5;
+      //const int32_t part = newMatter.mass / 5;
       //const int32_t pressurePart = get_pressure(matter) / partners;
-
-      if (validLeft) {
-
-        if (pLeft->type == matter_type::vacuum) {
-          newMatter.mass -= part;
-          pNewLeft->mass += part;
-
-          pNewLeft->type = matter.type;
-          pNewLeft->state = matter.state;
-        }
-        else if (matter.type == pLeft->type) {
-
-          newMatter.mass -= part;
-          pNewLeft->mass += part;
-        }
-        else {
-          // displacement here
-          if (pLeft->mass < matter.mass) {
-            if (displace_gas_left(vector2_int(pos.x - 1, pos.y))) {
-
-              assert(pNewLeft->type == matter_type::vacuum);
-
-              newMatter.mass -= part;
-              pNewLeft->mass = part;
-
-              pNewLeft->type = matter.type;
-              pNewLeft->state = matter.state;
-            }
-          }
-        }
-      }
-
-      if (validRight) {
-        if (pRight->type == matter_type::vacuum) {
-          newMatter.mass -= part;
-          pNewRight->mass += part;
-
-          pNewRight->type = matter.type;
-          pNewRight->state = matter.state;
-        }
-        else if (matter.type == pRight->type) {
-          newMatter.mass -= part;
-          pNewRight->mass += part;
-        }
-        else {
-          // displacement here
-          if (pRight->mass < matter.mass) {
-            if (displace_gas_right(vector2_int(pos.x + 1, pos.y))) {
-
-              assert(pNewRight->type == matter_type::vacuum);
-
-              newMatter.mass -= part;
-              pNewRight->mass = part;
-
-              pNewRight->type = matter.type;
-              pNewRight->state = matter.state;
-            }
-          }
-        }
-      }
-
-      if (validTop) {
-
-        if (pTop->type == matter_type::vacuum) {
-          newMatter.mass -= part;
-          pNewTop->mass += part;
-
-          pNewTop->type = matter.type;
-          pNewTop->state = matter.state;
-        }
-        else if (matter.type == pTop->type) {
-          newMatter.mass -= part;
-          pNewTop->mass += part;
-        }
-        else {
-          // displacement here
-          if (pTop->mass < matter.mass) {
-            if (displace_gas_up(vector2_int(pos.x, pos.y + 1))) {
-
-              assert(pNewTop->type == matter_type::vacuum);
-
-              newMatter.mass -= part;
-              pNewTop->mass = part;
-
-              pNewTop->type = matter.type;
-              pNewTop->state = matter.state;
-            }
-          }
-        }
-      }
 
       if (validBottom) {
         if (pBottom->type == matter_type::vacuum) {
@@ -215,220 +156,417 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
         else {
           // displacement here
-          if (pBottom->mass < matter.mass) {
-            if (displace_gas_down(vector2_int(pos.x, pos.y - 1))) {
+          //if (get_pressure(*pBottom, true, false) < get_pressure(matter, true, false)) {
+          //  if (displace_gas(vector2_int(pos.x, pos.y - 1), displace_exce::top)) {
 
-              assert(pNewBottom->type == matter_type::vacuum);
+          //    assert(pNewBottom->type == matter_type::vacuum);
 
-              newMatter.mass -= part;
-              pNewBottom->mass = part;
+          //    newMatter.mass -= part;
+          //    pNewBottom->mass = part;
 
-              pNewBottom->type = matter.type;
-              pNewBottom->state = matter.state;
-            }
-          }
+          //    pNewBottom->type = matter.type;
+          //    pNewBottom->state = matter.state;
+
+          //    assert(newMatter.mass >= 0);
+          //  }
+          //}
         }
       }
 
+        //
+
+        //{
+        //  currentSum = 0;
+        //  currentOxygen = 0;
+        //  currentToxicGas = 0;
+
+        //  for (size_t i = 0; i < count; ++i) {
+        //    currentSum += _pMatter[i].mass;
+
+        //    if (_pMatter[i].type == matter_type::oxygen) {
+        //      currentOxygen += _pMatter[i].mass;
+        //    }
+        //    else if (_pMatter[i].type == matter_type::toxic_gas) {
+        //      currentToxicGas += _pMatter[i].mass;
+        //    }
+
+        //    assert(_pMatter[i].mass >= 0);
+        //  }
+
+        //  assert(currentSum == sum);
+        //  assert(currentOxygen == totalOxygen);
+        //  assert(currentToxicGas == totalToxocGas);
+        //}
+        //
+
+        if (validTop) {
+
+          if (pTop->type == matter_type::vacuum) {
+            newMatter.mass -= part;
+            pNewTop->mass += part;
+
+            pNewTop->type = matter.type;
+            pNewTop->state = matter.state;
+          }
+          else if (matter.type == pTop->type) {
+            newMatter.mass -= part;
+            pNewTop->mass += part;
+          }
+          else {
+            // displacement here
+            //if (get_pressure(*pTop, false, true) < get_pressure(matter, false, true)) {
+            //  if (displace_gas(vector2_int(pos.x, pos.y + 1), displace_exce::bottom)) {
+
+            //    assert(pNewTop->type == matter_type::vacuum);
+
+            //    newMatter.mass -= part;
+            //    pNewTop->mass = part;
+
+            //    pNewTop->type = matter.type;
+            //    pNewTop->state = matter.state;
+
+            //    assert(newMatter.mass >= 0);
+            //  }
+            //}
+          }
+        }
+
+        //
+
+        //{
+        //  currentSum = 0;
+        //  currentOxygen = 0;
+        //  currentToxicGas = 0;
+
+        //  for (size_t i = 0; i < count; ++i) {
+        //    currentSum += _pMatter[i].mass;
+
+        //    if (_pMatter[i].type == matter_type::oxygen) {
+        //      currentOxygen += _pMatter[i].mass;
+        //    }
+        //    else if (_pMatter[i].type == matter_type::toxic_gas) {
+        //      currentToxicGas += _pMatter[i].mass;
+        //    }
+
+        //    assert(_pMatter[i].mass >= 0);
+        //  }
+
+        //  assert(currentSum == sum);
+        //  assert(currentOxygen == totalOxygen);
+        //  assert(currentToxicGas == totalToxocGas);
+        //}
+        //
+
+      if (validLeft) {
+
+        if (pLeft->type == matter_type::vacuum) {
+          newMatter.mass -= part;
+          pNewLeft->mass += part;
+
+          pNewLeft->type = matter.type;
+          pNewLeft->state = matter.state;
+        }
+        else if (matter.type == pLeft->type) {
+          newMatter.mass -= part;
+          pNewLeft->mass += part;
+        }
+        else {
+          // displacement here
+          //if (get_pressure(*pLeft) < get_pressure(matter)) {
+          //  if (displace_gas(vector2_int(pos.x - 1, pos.y), displace_exce::right)) {
+
+          //    assert(pNewLeft->type == matter_type::vacuum);
+
+          //    newMatter.mass -= part;
+          //    pNewLeft->mass = part;
+
+          //    pNewLeft->type = matter.type;
+          //    pNewLeft->state = matter.state;
+
+          //    assert(newMatter.mass >= 0);
+          //  }
+          //}
+        }
+      }
+
+
+      //
+
+      //{
+      //  currentSum = 0;
+      //  currentOxygen = 0;
+      //  currentToxicGas = 0;
+
+      //  for (size_t i = 0; i < count; ++i) {
+      //    currentSum += _pMatter[i].mass;
+
+      //    if (_pMatter[i].type == matter_type::oxygen) {
+      //      currentOxygen += _pMatter[i].mass;
+      //    }
+      //    else if (_pMatter[i].type == matter_type::toxic_gas) {
+      //      currentToxicGas += _pMatter[i].mass;
+      //    }
+
+      //    assert(_pMatter[i].mass >= 0);
+      //  }
+
+      //  assert(currentSum == sum);
+      //  assert(currentOxygen == totalOxygen);
+      //  assert(currentToxicGas == totalToxocGas);
+      //}
+      //
+
+
+      if (validRight) {
+        if (pRight->type == matter_type::vacuum) {
+          newMatter.mass -= part;
+          pNewRight->mass += part;
+
+          pNewRight->type = matter.type;
+          pNewRight->state = matter.state;
+        }
+        else if (matter.type == pRight->type) {
+          newMatter.mass -= part;
+          pNewRight->mass += part;
+        }
+        else {
+          // displacement here
+          //if (get_pressure(*pRight) < get_pressure(matter)) {
+          //  if (displace_gas(vector2_int(pos.x + 1, pos.y), displace_exce::left)) {
+
+          //    assert(pNewRight->type == matter_type::vacuum);
+
+          //    newMatter.mass -= part;
+          //    pNewRight->mass = part;
+
+          //    pNewRight->type = matter.type;
+          //    pNewRight->state = matter.state;
+
+          //    assert(newMatter.mass >= 0);
+          //  }
+          //}
+        }
+      }
+
+      //
+
+      //{
+      //  currentSum = 0;
+      //  currentOxygen = 0;
+      //  currentToxicGas = 0;
+
+      //  for (size_t i = 0; i < count; ++i) {
+      //    currentSum += _pMatter[i].mass;
+
+      //    if (_pMatter[i].type == matter_type::oxygen) {
+      //      currentOxygen += _pMatter[i].mass;
+      //    }
+      //    else if (_pMatter[i].type == matter_type::toxic_gas) {
+      //      currentToxicGas += _pMatter[i].mass;
+      //    }
+
+      //    assert(_pMatter[i].mass >= 0);
+      //  }
+
+      //  assert(currentSum == sum);
+      //  assert(currentOxygen == totalOxygen);
+      //  assert(currentToxicGas == totalToxocGas);
+      //}
+      //
+
     }
   }
 }
 
-bool sim_system::displace_gas_left(base::vector2_int target)
+bool sim_system::displace_gas(base::vector2_int target, displace_exce exec)
 {
-  using namespace base;
+  assert(exec != displace_exce::undef);
 
-  for (int x = target.x; x > 0; --x) {
-    auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
-    auto& leftMatter = _pMatter[vector2_int(x, target.y).to_left_index(_size.x)];
+  if (exec != displace_exce::bottom) {
+    using namespace base;
 
-    assert(x - 1 >= 0);
+    for (int y = target.y; y > 0; --y) {
+      auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
+      auto& downMatter = _pMatter[vector2_int(target.x, y).to_bottom_index(_size.x)];
 
-    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
-      break;
-    }
+      assert(y - 1 >= 0);
 
-    if (leftMatter.state != matter_state::gas && leftMatter.state != matter_state::undef) {
-      break;
-    }
-
-    //if (leftMatter.mass >= get_max_pressure(leftMatter)) {
-    //  continue;
-    //}
-
-    if (matter.type == leftMatter.type || leftMatter.type == matter_type::vacuum) {
-
-      if (leftMatter.type == matter_type::vacuum) {
-        leftMatter.type = matter.type;
-        leftMatter.state = matter.state;
-
-        leftMatter.mass = matter.mass;
+      if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+        break;
       }
-      else {
-        leftMatter.mass += matter.mass;
+      if (downMatter.state != matter_state::gas && downMatter.state != matter_state::undef) {
+        break;
       }
 
-      matter.mass = 0;
-      matter.type = matter_type::vacuum;
-      matter.state = matter_state::undef;
-
-
-      for (int i = x; i < target.x; ++i) {
-        swap_matter(vector2_int(i, target.y), vector2_int(i + 1, target.y));
+      if (downMatter.mass >= get_max_pressure(downMatter)) {
+        //continue;
       }
 
-      return true;
-    }
+      if (matter.type == downMatter.type || downMatter.type == matter_type::vacuum) {
 
+        if (downMatter.type == matter_type::vacuum) {
+          downMatter.type = matter.type;
+          downMatter.state = matter.state;
+
+          downMatter.mass = matter.mass;
+        }
+        else {
+          downMatter.mass += matter.mass;
+        }
+
+        matter.mass = 0;
+        matter.type = matter_type::vacuum;
+        matter.state = matter_state::undef;
+
+
+        for (int i = y; i < target.y; ++i) {
+          swap_matter(vector2_int(target.x, i), vector2_int(target.x, i + 1));
+        }
+
+        return true;
+      }
+
+    }
   }
+  if (exec != displace_exce::top) {
+    using namespace base;
 
-  return false;
-}
-bool sim_system::displace_gas_right(base::vector2_int target)
-{
-  using namespace base;
+    for (int y = target.y; y < _size.y - 1; ++y) {
+      auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
+      auto& upMatter = _pMatter[vector2_int(target.x, y).to_top_index(_size.x)];
 
-  for (int x = target.x; x < _size.x -1; ++x) {
-    auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
-    auto& rightMatter = _pMatter[vector2_int(x, target.y).to_right_index(_size.x)];
+      assert(y + 1 < _size.y);
 
-    assert(x + 1 < _size.x);
-
-    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
-      break;
-    }
-
-    if (rightMatter.state != matter_state::gas && rightMatter.state != matter_state::undef) {
-      break;
-    }
-    //if (rightMatter.mass >= get_max_pressure(rightMatter)) {
-    //  continue;
-    //}
-
-    if (matter.type == rightMatter.type || rightMatter.type == matter_type::vacuum) {
-
-
-      if (rightMatter.type == matter_type::vacuum) {
-        rightMatter.type = matter.type;
-        rightMatter.state = matter.state;
-
-        rightMatter.mass = matter.mass;
+      if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+        break;
       }
-      else {
-        rightMatter.mass += matter.mass;
+      if (upMatter.state != matter_state::gas && upMatter.state != matter_state::undef) {
+        break;
       }
 
-      matter.mass = 0;
-      matter.type = matter_type::vacuum;
-      matter.state = matter_state::undef;
-
-
-      for (int i = x; i > target.x; --i) {
-        swap_matter(vector2_int(i, target.y), vector2_int(i - 1, target.y));
+      if (upMatter.mass >= get_max_pressure(upMatter)) {
+        //continue;
       }
 
-      return true;
-    }
+      if (matter.type == upMatter.type || upMatter.type == matter_type::vacuum) {
 
+        if (upMatter.type == matter_type::vacuum) {
+          upMatter.type = matter.type;
+          upMatter.state = matter.state;
+
+          upMatter.mass = matter.mass;
+        }
+        else {
+          upMatter.mass += matter.mass;
+        }
+
+        matter.mass = 0;
+        matter.type = matter_type::vacuum;
+        matter.state = matter_state::undef;
+
+
+        for (int i = y; i > target.y; --i) {
+          swap_matter(vector2_int(target.x, i), vector2_int(target.x, i - 1));
+        }
+
+        return true;
+      }
+
+    }
   }
+  if (exec != displace_exce::right) {
+    using namespace base;
 
-  return false;
-}
+    for (int x = target.x; x < _size.x - 1; ++x) {
+      auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
+      auto& rightMatter = _pMatter[vector2_int(x, target.y).to_right_index(_size.x)];
 
-bool sim_system::displace_gas_up(base::vector2_int target)
-{
-  using namespace base;
+      assert(x + 1 < _size.x);
 
-  for (int y = target.y; y < _size.y -1; ++y) {
-    auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
-    auto& upMatter = _pMatter[vector2_int(target.x, y).to_top_index(_size.x)];
-
-    assert(y + 1 < _size.y);
-
-    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
-      break;
-    }
-    if (upMatter.state != matter_state::gas && upMatter.state != matter_state::undef) {
-      break;
-    }
-
-    //if (upMatter.mass >= get_max_pressure(upMatter)) {
-    //  continue;
-    //}
-
-    if (matter.type == upMatter.type || upMatter.type == matter_type::vacuum) {
-
-      if (upMatter.type == matter_type::vacuum) {
-        upMatter.type = matter.type;
-        upMatter.state = matter.state;
-
-        upMatter.mass = matter.mass;
-      }
-      else {
-        upMatter.mass += matter.mass;
+      if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+        break;
       }
 
-      matter.mass = 0;
-      matter.type = matter_type::vacuum;
-      matter.state = matter_state::undef;
-
-
-      for (int i = y; i > target.y; --i) {
-        swap_matter(vector2_int(target.x, i), vector2_int(target.x, i - 1));
+      if (rightMatter.state != matter_state::gas && rightMatter.state != matter_state::undef) {
+        break;
+      }
+      if (rightMatter.mass >= get_max_pressure(rightMatter)) {
+        //continue;
       }
 
-      return true;
-    }
+      if (matter.type == rightMatter.type || rightMatter.type == matter_type::vacuum) {
 
+
+        if (rightMatter.type == matter_type::vacuum) {
+          rightMatter.type = matter.type;
+          rightMatter.state = matter.state;
+
+          rightMatter.mass = matter.mass;
+        }
+        else {
+          rightMatter.mass += matter.mass;
+        }
+
+        matter.mass = 0;
+        matter.type = matter_type::vacuum;
+        matter.state = matter_state::undef;
+
+
+        for (int i = x; i > target.x; --i) {
+          swap_matter(vector2_int(i, target.y), vector2_int(i - 1, target.y));
+        }
+
+        return true;
+      }
+
+    }
   }
+  if (exec != displace_exce::left) {
+    using namespace base;
 
-  return false;
-}
-bool sim_system::displace_gas_down(base::vector2_int target)
-{
-  using namespace base;
+    for (int x = target.x; x > 0; --x) {
+      auto& matter = _pMatter[vector2_int(x, target.y).to_index(_size.x)];
+      auto& leftMatter = _pMatter[vector2_int(x, target.y).to_left_index(_size.x)];
 
-  for (int y = target.y; y > 0; --y) {
-    auto& matter = _pMatter[vector2_int(target.x, y).to_index(_size.x)];
-    auto& downMatter = _pMatter[vector2_int(target.x, y).to_bottom_index(_size.x)];
+      assert(x - 1 >= 0);
 
-    assert(y - 1 >= 0);
-
-    if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
-      break;
-    }
-    if (downMatter.state != matter_state::gas && downMatter.state != matter_state::undef) {
-      break;
-    }
-
-    //if (downMatter.mass >= get_max_pressure(downMatter)) {
-    //  continue;
-    //}
-
-    if (matter.type == downMatter.type || downMatter.type == matter_type::vacuum) {
-
-      if (downMatter.type == matter_type::vacuum) {
-        downMatter.type = matter.type;
-        downMatter.state = matter.state;
-
-        downMatter.mass = matter.mass;
-      }
-      else {
-        downMatter.mass += matter.mass;
+      if (matter.state != matter_state::gas && matter.state != matter_state::undef) {
+        break;
       }
 
-      matter.mass = 0;
-      matter.type = matter_type::vacuum;
-      matter.state = matter_state::undef;
-
-
-      for (int i = y; i < target.y; ++i) {
-        swap_matter(vector2_int(target.x, i), vector2_int(target.x, i + 1));
+      if (leftMatter.state != matter_state::gas && leftMatter.state != matter_state::undef) {
+        break;
       }
 
-      return true;
-    }
+      if (leftMatter.mass >= get_max_pressure(leftMatter)) {
+        //continue;
+      }
 
+      if (matter.type == leftMatter.type || leftMatter.type == matter_type::vacuum) {
+
+        if (leftMatter.type == matter_type::vacuum) {
+          leftMatter.type = matter.type;
+          leftMatter.state = matter.state;
+
+          leftMatter.mass = matter.mass;
+        }
+        else {
+          leftMatter.mass += matter.mass;
+        }
+
+        matter.mass = 0;
+        matter.type = matter_type::vacuum;
+        matter.state = matter_state::undef;
+
+
+        for (int i = x; i < target.x; ++i) {
+          swap_matter(vector2_int(i, target.y), vector2_int(i + 1, target.y));
+        }
+
+        return true;
+      }
+
+    }
   }
 
   return false;
@@ -451,10 +589,40 @@ void sim_system::swap_matter(base::vector2_int a, base::vector2_int b)
   o.type = tempM.type;
 }
 
-uint32_t sim_system::get_pressure(const matter_data& data) const
+uint32_t sim_system::get_pressure(const matter_data& data, bool down, bool up) const
 {
+  if (down) {
+    if (data.type == matter_type::oxygen) {
+      return data.mass;
+    }
+    else if (data.type == matter_type::toxic_gas) {
+      return data.mass;
+    }
+    else if (data.type == matter_type::water) {
+      return data.mass;
+    }
+    else if (data.type == matter_type::vacuum) {
+      return 0;
+    }
+  }
+
+  if (down) {
+    if (data.type == matter_type::oxygen) {
+      return data.mass;
+    }
+    else if (data.type == matter_type::toxic_gas) {
+      return data.mass;
+    }
+    else if (data.type == matter_type::water) {
+      return data.mass;
+    }
+    else if (data.type == matter_type::vacuum) {
+      return 0;
+    }
+  }
+
   if (data.type == matter_type::oxygen) {
-    return data.mass * 2;
+    return data.mass;
   }
   else if (data.type == matter_type::toxic_gas) {
     return data.mass;
