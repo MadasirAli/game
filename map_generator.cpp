@@ -59,13 +59,13 @@ void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter,
       //}
       // 
       if (i >= height - 1) {
-        //pMatter[z].mass = 500;
-        //pMatter[z].type = matter_type::toxic_gas;
-        //pMatter[z].state = matter_state::gas;
+        pMatter[z].mass = 500;
+        pMatter[z].type = matter_type::toxic_gas;
+        pMatter[z].state = matter_state::gas;
 
-        pMatter[z].mass = 0;
-        pMatter[z].type = matter_type::vacuum;
-        pMatter[z].state = matter_state::undef;
+        //pMatter[z].mass = 0;
+        //pMatter[z].type = matter_type::vacuum;
+        //pMatter[z].state = matter_state::undef;
       }
       else if (i >= height - 2) {
         pMatter[z].mass = 1000;
