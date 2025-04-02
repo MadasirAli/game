@@ -57,10 +57,9 @@ void sim_rendering_system::on_update(const world<world_per_tick_data>& query, co
             perTickData.deltaTime * 2, anim::ease::linear);
           data.alpha = data.lastMass / 1000.0f;
 
-          data.alpha = 1;
+          data.alpha = data.mass / 1000.0f;
           if (_blockView) {
-            data.alpha = data.mass / 1000.0f;
-
+            data.alpha = 1;
           }
         }
         data.time = skips / 120.0f;

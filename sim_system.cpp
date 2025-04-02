@@ -64,19 +64,19 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   for (size_t i = 0; i < count; ++i) {
     const vector2_int pos = vector2_int{ int(i % _size.x) , int(i / _size.x)};
 
-   // const auto & matter = _pTempMatterData[i];
-    const auto& matter = _pMatter[i];
+    const auto & matter = _pTempMatterData[i];
+    //const auto& matter = _pMatter[i];
     auto& newMatter = _pMatter[i];
 
-    //const matter_data* pLeft   = pos.x != 0 ? &_pTempMatterData[pos.to_left_index(_size.x)]   : nullptr;
-    //const matter_data* pRight  = pos.x != _size.x-1 ? &_pTempMatterData[pos.to_right_index(_size.x)]  : nullptr;
-    //const matter_data* pTop    = pos.y != _size.y-1 ? &_pTempMatterData[pos.to_top_index(_size.x)]    : nullptr;
-    //const matter_data* pBottom = pos.y != 0 ? &_pTempMatterData[pos.to_bottom_index(_size.x)] : nullptr;
+    const matter_data* pLeft   = pos.x != 0 ? &_pTempMatterData[pos.to_left_index(_size.x)]   : nullptr;
+    const matter_data* pRight  = pos.x != _size.x-1 ? &_pTempMatterData[pos.to_right_index(_size.x)]  : nullptr;
+    const matter_data* pTop    = pos.y != _size.y-1 ? &_pTempMatterData[pos.to_top_index(_size.x)]    : nullptr;
+    const matter_data* pBottom = pos.y != 0 ? &_pTempMatterData[pos.to_bottom_index(_size.x)] : nullptr;
 
-    const matter_data* pLeft = pos.x != 0 ? &_pMatter[pos.to_left_index(_size.x)] : nullptr;
-    const matter_data* pRight = pos.x != _size.x - 1 ? &_pMatter[pos.to_right_index(_size.x)] : nullptr;
-    const matter_data* pTop = pos.y != _size.y - 1 ? &_pMatter[pos.to_top_index(_size.x)] : nullptr;
-    const matter_data* pBottom = pos.y != 0 ? &_pMatter[pos.to_bottom_index(_size.x)] : nullptr;
+    //const matter_data* pLeft = pos.x != 0 ? &_pMatter[pos.to_left_index(_size.x)] : nullptr;
+    //const matter_data* pRight = pos.x != _size.x - 1 ? &_pMatter[pos.to_right_index(_size.x)] : nullptr;
+    //const matter_data* pTop = pos.y != _size.y - 1 ? &_pMatter[pos.to_top_index(_size.x)] : nullptr;
+    //const matter_data* pBottom = pos.y != 0 ? &_pMatter[pos.to_bottom_index(_size.x)] : nullptr;
 
     matter_data* pNewLeft = pos.x != 0 ? &_pMatter[pos.to_left_index(_size.x)] : nullptr;
     matter_data* pNewRight = pos.x != _size.x - 1 ? &_pMatter[pos.to_right_index(_size.x)] : nullptr;
@@ -138,21 +138,103 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         }
       }
 
-      const int32_t part = matter.mass / partners;
-      //const int32_t part = newMatter.mass / 5;
-      //const int32_t pressurePart = get_pressure(matter) / partners;
+      const int32_t fullPart = matter.mass / partners;
+
+      if (fullPart == 0) {
+        continue;
+      }
+
+      int32_t bottomPart = 0;
+      int32_t topPart = 0;
+      int32_t leftPart = 0;
+      int32_t rightPart = 0;
 
       if (validBottom) {
+        bottomPart = (fullPart * (100 - ((pBottom->mass * 100) / matter.mass))) / 100;
+      }
+      if (validTop) {
+        topPart = (fullPart * (100 - ((pTop->mass * 100) / matter.mass))) / 100;
+      }
+      if (validLeft) {
+
+        leftPart = (fullPart * (100 - ((pLeft->mass * 100) / matter.mass))) / 100;
+      }
+      if (validRight) {
+        rightPart = (fullPart * (100 - ((pRight->mass * 100) / matter.mass))) / 100;
+      }
+
+      const int32_t extraBottom = fullPart - bottomPart;
+      const int32_t extraTop    = fullPart - topPart;
+      const int32_t extraLeft    = fullPart - leftPart;
+      const int32_t extraRight  = fullPart - rightPart;
+
+      //const int32_t extraBottom = 0;
+      //const int32_t extraTop = 0;
+      //const int32_t extraLeft = 0;
+      //const int32_t extraRight = 0;
+
+      if (validBottom) {
+        int32_t extra = 0;
+
+        if (validTop) {
+          extra = extraBottom;
+        }
+
+        bottomPart = ((fullPart + extra) * (100 - ((pBottom->mass * 100) / matter.mass))) / 100;
+      }
+      if (validTop) {
+        int32_t extra = 0;
+
+        if (validBottom) {
+          extra = extraTop;
+        }
+
+        topPart = ((fullPart + extra)* (100 - ((pTop->mass * 100) / matter.mass))) / 100;
+      }
+      if (validLeft) {
+        int32_t extra = 0;
+
+        if (validRight) {
+          extra = extraRight;
+        }
+
+
+        leftPart = ((fullPart + extra) * (100 - ((pLeft->mass * 100) / matter.mass))) / 100;
+      }
+      if (validRight) {
+        int32_t extra = 0;
+
+        if (validLeft) {
+          extra = extraLeft;
+        }
+
+        rightPart = ((fullPart + extra) * (100 - ((pRight->mass * 100) / matter.mass))) / 100;
+      }
+
+      assert(extraBottom >= 0);
+      assert(extraTop >= 0);
+      assert(extraLeft >= 0);
+      assert(extraRight >= 0);
+
+      //const int32_t part = newMatter.mass / 5;
+      //const int32_t pressurePart = get_pressure(matter) / partners;
+      if (validBottom) {
+        const int32_t part = (fullPart * (100 - ((pBottom->mass * 100) / matter.mass))) / 100;
+
         if (pBottom->type == matter_type::vacuum) {
           newMatter.mass -= part;
           pNewBottom->mass += part;
 
           pNewBottom->type = matter.type;
           pNewBottom->state = matter.state;
+
+          assert(newMatter.mass >= 0);
         }
         else if (matter.type == pBottom->type) {
           newMatter.mass -= part;
           pNewBottom->mass += part;
+
+          assert(newMatter.mass >= 0);
         }
         else {
           // displacement here
@@ -243,6 +325,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         
 
         if (validTop) {
+          const int32_t part = (fullPart * (100 - ((pTop->mass * 100) / matter.mass))) / 100;
 
           if (pTop->type == matter_type::vacuum) {
             newMatter.mass -= part;
@@ -250,10 +333,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
             pNewTop->type = matter.type;
             pNewTop->state = matter.state;
+
+            assert(newMatter.mass >= 0);
           }
           else if (matter.type == pTop->type) {
             newMatter.mass -= part;
             pNewTop->mass += part;
+
+            assert(newMatter.mass >= 0);
           }
           else {
             // displacement here
@@ -342,6 +429,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         //
 
       if (validLeft) {
+        const int32_t part = (fullPart * (100 - ((pLeft->mass * 100) / matter.mass))) / 100;
 
         if (pLeft->type == matter_type::vacuum) {
           newMatter.mass -= part;
@@ -349,10 +437,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
           pNewLeft->type = matter.type;
           pNewLeft->state = matter.state;
+
+          assert(newMatter.mass >= 0);
         }
         else if (matter.type == pLeft->type) {
           newMatter.mass -= part;
           pNewLeft->mass += part;
+
+          assert(newMatter.mass >= 0);
         }
         else {
           // displacement here
@@ -443,16 +535,22 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
 
       if (validRight) {
+        const int32_t part = (fullPart * (100 - ((pRight->mass * 100) / matter.mass))) / 100;
+
         if (pRight->type == matter_type::vacuum) {
           newMatter.mass -= part;
           pNewRight->mass += part;
 
           pNewRight->type = matter.type;
           pNewRight->state = matter.state;
+
+          assert(newMatter.mass >= 0);
         }
         else if (matter.type == pRight->type) {
           newMatter.mass -= part;
           pNewRight->mass += part;
+
+          assert(newMatter.mass >= 0);
         }
         else {
           // displacement here
@@ -539,7 +637,25 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       //  assert(currentToxicGas == totalToxocGas);
       //}
       
+      //currentSum = 0;
+      //currentToxicGas = 0;
+      //currentOxygen = 0;
+      //for (size_t i = 0; i < count; ++i) {
+      //  currentSum += _pMatter[i].mass;
 
+      //  if (_pMatter[i].type == matter_type::oxygen) {
+      //    currentOxygen += _pMatter[i].mass;
+      //  }
+      //  else if (_pMatter[i].type == matter_type::toxic_gas) {
+      //    currentToxicGas += _pMatter[i].mass;
+      //  }
+
+      //  assert(_pMatter[i].mass >= 0);
+      //}
+
+      //assert(currentSum == sum);
+      //assert(currentOxygen == totalOxygen);
+      //assert(currentToxicGas == totalToxocGas);
     }
   }
 }
