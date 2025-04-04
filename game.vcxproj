@@ -199,6 +199,9 @@
     <ProjectReference Include="..\scene_graph\scene_graph.vcxproj">
       <Project>{b3bc2da8-4be0-41be-bf19-ab5c38ca2d2c}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\sim\sim.vcxproj">
+      <Project>{92afe709-a8c7-40a5-8139-b5b9c36331b5}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\sound\sound.vcxproj">
       <Project>{a9b575d3-cd82-4906-9cee-3e562573c4cd}</Project>
     </ProjectReference>

@@ -12,6 +12,9 @@ namespace game {
   class sim_system : public base::ecs::system<world_per_tick_data>
   {
   private:
+    enum class molar_mass {
+
+    };
     enum class displace_exce {
       undef,
       top,
