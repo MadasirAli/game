@@ -66,9 +66,6 @@
     <ClInclude Include="dupe_animations.h">
       <Filter>animations</Filter>
     </ClInclude>
-    <ClInclude Include="matter_type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="matter_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>

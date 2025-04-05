@@ -8,6 +8,7 @@
 using namespace game;
 using namespace base::graphics;
 using namespace base::ecs;
+using namespace sim;
 
 void sim_rendering_system::on_update(const world<world_per_tick_data>& query, const world_per_tick_data& perTickData)
 {

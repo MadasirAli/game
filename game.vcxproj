@@ -219,7 +219,6 @@
     <ClInclude Include="map_generator.h" />
     <ClInclude Include="matter_data.h" />
     <ClInclude Include="matter_state.h" />
-    <ClInclude Include="matter_type.h" />
     <ClInclude Include="noise_gen.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_collection.h" />

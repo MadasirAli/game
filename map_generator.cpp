@@ -7,6 +7,8 @@ using namespace game;
 
 void map_generator::generate(world_tile_component* pTiles, matter_data* pMatter, uint32_t width, uint32_t height)
 {
+  using namespace sim;
+
   // generate noises here
   game::noise_gen noise_gen{};
 

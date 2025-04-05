@@ -1,11 +1,13 @@
 #include "sim_system.h"
 
 #include <assert.h>
+
 #include "world.h"
 #include "matter_type.h"
 #include "imgui_inc.h"
 
 using namespace game;
+using namespace sim;
 
 void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   const world_per_tick_data& data)
@@ -20,11 +22,11 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
   static size_t sum = 0;
   static size_t totalOxygen = 0;
-  static size_t totalToxocGas = 0;
+  static size_t totalNitrogen = 0;
 
   size_t currentSum = 0;
   size_t currentOxygen = 0;
-  size_t currentToxicGas = 0;
+  size_t currentNitrogenGas = 0;
   if (init == false) {
     init = true;
     for (size_t i = 0; i < count; ++i) {
@@ -33,14 +35,14 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       if (_pMatter[i].type == matter_type::oxygen) {
         totalOxygen += _pMatter[i].mass;
       }
-      else if (_pMatter[i].type == matter_type::toxic_gas) {
-        totalToxocGas += _pMatter[i].mass;
+      else if (_pMatter[i].type == matter_type::nitrogen) {
+        totalNitrogen += _pMatter[i].mass;
       }
     }
 
     currentSum = sum;
     currentOxygen = totalOxygen;
-    currentToxicGas = totalToxocGas;
+    currentNitrogenGas = totalNitrogen;
   }
   else {
     for (size_t i = 0; i < count; ++i) {
@@ -49,8 +51,8 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       if (_pMatter[i].type == matter_type::oxygen) {
         currentOxygen += _pMatter[i].mass;
       }
-      else if (_pMatter[i].type == matter_type::toxic_gas) {
-        currentToxicGas += _pMatter[i].mass;
+      else if (_pMatter[i].type == matter_type::nitrogen) {
+        currentNitrogenGas += _pMatter[i].mass;
       }
 
       assert(_pMatter[i].mass >= 0);
@@ -59,7 +61,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
   assert(currentSum == sum);
   assert(currentOxygen == totalOxygen);
-  assert(currentToxicGas == totalToxocGas);
+  assert(currentNitrogenGas == totalNitrogen);
 
   for (size_t i = 0; i < count; ++i) {
     const vector2_int pos = vector2_int{ int(i % _size.x) , int(i / _size.x)};
@@ -876,7 +878,7 @@ uint32_t sim_system::get_pressure(const matter_data& data, bool down, bool up) c
   if (data.type == matter_type::oxygen) {
     return data.mass;
   }
-  else if (data.type == matter_type::toxic_gas) {
+  else if (data.type == matter_type::nitrogen) {
     return data.mass;
   }
   else if (data.type == matter_type::water) {
@@ -896,7 +898,7 @@ uint32_t sim_system::get_max_pressure(const matter_data& data) const
   if (data.type == matter_type::oxygen) {
     return 1000;
   }
-  else if (data.type == matter_type::toxic_gas) {
+  else if (data.type == matter_type::nitrogen) {
     return 1000;
   }
   else if (data.type == matter_type::water) {
