@@ -12,9 +12,6 @@ namespace game {
   class sim_system : public base::ecs::system<world_per_tick_data>
   {
   private:
-    enum class molar_mass {
-
-    };
     enum class displace_exce {
       undef,
       top,
@@ -23,6 +20,10 @@ namespace game {
       left
     };
   private:
+    sim::mass get_diffusion_flux(const matter_data& a, const matter_data& b,
+      double dt, sim::mass part) const;
+
+
     bool displace_gas(base::vector2_int target, displace_exce exec);
 
     void swap_matter(base::vector2_int a, base::vector2_int b);

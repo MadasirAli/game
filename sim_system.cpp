@@ -5,6 +5,7 @@
 #include "world.h"
 #include "matter_type.h"
 #include "imgui_inc.h"
+#include "sim_solver.h"
 
 using namespace game;
 using namespace sim;
@@ -104,40 +105,45 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
       bool validBottom = false;
 
       if (pLeft != nullptr) {
-        if (pLeft->mass < matter.mass &&
-          pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-          partners++;
+        //if (pLeft->mass < matter.mass &&
+        //  pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
+        //  partners++;
 
-          validLeft = true;
-        }
+        //  validLeft = true;
+        //}
+        validLeft = true;
       }
 
       if (pRight != nullptr) {
 
-        if (pRight->mass < matter.mass &&
-          pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-          partners++;
+        //if (pRight->mass < matter.mass &&
+        //  pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
+        //  partners++;
 
-          validRight = true;
-        }
+        //  validRight = true;
+        //}
+
+        validRight = true;
       }
 
       if (pTop != nullptr) {
-        if (pTop->mass < matter.mass &&
-          pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-          partners++;
+        //if (pTop->mass < matter.mass &&
+        //  pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
+        //  partners++;
 
-          validTop = true;
-        }
+        //  validTop = true;
+        //}
+        validTop = true;
       }
 
       if (pBottom != nullptr) {
-        if (pBottom->mass < matter.mass &&
-          pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-          partners++;
+        //if (pBottom->mass < matter.mass &&
+        //  pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
+        //  partners++;
 
-          validBottom = true;
-        }
+        //  validBottom = true;
+        //}
+        validBottom = true;
       }
 
       const int32_t fullPart = matter.mass / partners;
@@ -213,15 +219,16 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
         rightPart = ((fullPart + extra) * (100 - ((pRight->mass * 100) / matter.mass))) / 100;
       }
 
-      assert(extraBottom >= 0);
-      assert(extraTop >= 0);
-      assert(extraLeft >= 0);
-      assert(extraRight >= 0);
+      //assert(extraBottom >= 0);
+      //assert(extraTop >= 0);
+      //assert(extraLeft >= 0);
+      //assert(extraRight >= 0);
 
       //const int32_t part = newMatter.mass / 5;
       //const int32_t pressurePart = get_pressure(matter) / partners;
       if (validBottom) {
         const int32_t part = (fullPart * (100 - ((pBottom->mass * 100) / matter.mass))) / 100;
+        //const auto part = get_diffusion_flux(matter, *pBottom, data.deltaTime, mass(fullPart));
 
         if (pBottom->type == matter_type::vacuum) {
           newMatter.mass -= part;
@@ -233,6 +240,7 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
           assert(newMatter.mass >= 0);
         }
         else if (matter.type == pBottom->type) {
+
           newMatter.mass -= part;
           pNewBottom->mass += part;
 
@@ -252,82 +260,16 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
               pNewBottom->state = matter.state;
 
               assert(newMatter.mass >= 0);
-
-              //swap_matter(pos, vector2_int(pos.x, pos.y - 1));
-
-              {
-                //if (pLeft != nullptr) {
-                //  if (pLeft->mass < matter.mass &&
-                //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                //    partners++;
-
-                //    validLeft = true;
-                //  }
-                //}
-
-                //if (pRight != nullptr) {
-
-                //  if (pRight->mass < matter.mass &&
-                //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                //    partners++;
-
-                //    validRight = true;
-                //  }
-                //}
-
-                //if (pTop != nullptr) {
-                //  if (pTop->mass < matter.mass &&
-                //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                //    partners++;
-
-                //    validTop = true;
-                //  }
-                //}
-
-                //if (pBottom != nullptr) {
-                //  if (pBottom->mass < matter.mass &&
-                //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                //    partners++;
-
-                //    validBottom = true;
-                //  }
-                //}
-
-                //part = matter.mass / partners;
-              }
             }
           }
         }
       }
 
-        //
-
-        //{
-        //  currentSum = 0;
-        //  currentOxygen = 0;
-        //  currentToxicGas = 0;
-
-        //  for (size_t i = 0; i < count; ++i) {
-        //    currentSum += _pMatter[i].mass;
-
-        //    if (_pMatter[i].type == matter_type::oxygen) {
-        //      currentOxygen += _pMatter[i].mass;
-        //    }
-        //    else if (_pMatter[i].type == matter_type::toxic_gas) {
-        //      currentToxicGas += _pMatter[i].mass;
-        //    }
-
-        //    assert(_pMatter[i].mass >= 0);
-        //  }
-
-        //  assert(currentSum == sum);
-        //  assert(currentOxygen == totalOxygen);
-        //  assert(currentToxicGas == totalToxocGas);
-        //}
-        
 
         if (validTop) {
           const int32_t part = (fullPart * (100 - ((pTop->mass * 100) / matter.mass))) / 100;
+
+          //const auto part = get_diffusion_flux(matter, *pTop, data.deltaTime, mass(fullPart));
 
           if (pTop->type == matter_type::vacuum) {
             newMatter.mass -= part;
@@ -358,80 +300,15 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
                 pNewTop->state = matter.state;
 
                 assert(newMatter.mass >= 0);
-
-                {
-                  //if (pLeft != nullptr) {
-                  //  if (pLeft->mass < matter.mass &&
-                  //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                  //    partners++;
-
-                  //    validLeft = true;
-                  //  }
-                  //}
-
-                  //if (pRight != nullptr) {
-
-                  //  if (pRight->mass < matter.mass &&
-                  //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                  //    partners++;
-
-                  //    validRight = true;
-                  //  }
-                  //}
-
-                  //if (pTop != nullptr) {
-                  //  if (pTop->mass < matter.mass &&
-                  //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                  //    partners++;
-
-                  //    validTop = true;
-                  //  }
-                  //}
-
-                  //if (pBottom != nullptr) {
-                  //  if (pBottom->mass < matter.mass &&
-                  //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                  //    partners++;
-
-                  //    validBottom = true;
-                  //  }
-                  //}
-
-                  //part = matter.mass / partners;
-                }
               }
             }
           }
         }
 
-        //
-
-        //{
-        //  currentSum = 0;
-        //  currentOxygen = 0;
-        //  currentToxicGas = 0;
-
-        //  for (size_t i = 0; i < count; ++i) {
-        //    currentSum += _pMatter[i].mass;
-
-        //    if (_pMatter[i].type == matter_type::oxygen) {
-        //      currentOxygen += _pMatter[i].mass;
-        //    }
-        //    else if (_pMatter[i].type == matter_type::toxic_gas) {
-        //      currentToxicGas += _pMatter[i].mass;
-        //    }
-
-        //    assert(_pMatter[i].mass >= 0);
-        //  }
-
-        //  assert(currentSum == sum);
-        //  assert(currentOxygen == totalOxygen);
-        //  assert(currentToxicGas == totalToxocGas);
-        //}
-        //
-
       if (validLeft) {
         const int32_t part = (fullPart * (100 - ((pLeft->mass * 100) / matter.mass))) / 100;
+
+        //const auto part = get_diffusion_flux(matter, *pLeft, data.deltaTime, mass(fullPart));
 
         if (pLeft->type == matter_type::vacuum) {
           newMatter.mass -= part;
@@ -462,82 +339,15 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
               pNewLeft->state = matter.state;
 
               assert(newMatter.mass >= 0);
-
-              {
-                //if (pLeft != nullptr) {
-                //  if (pLeft->mass < matter.mass &&
-                //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                //    partners++;
-
-                //    validLeft = true;
-                //  }
-                //}
-
-                //if (pRight != nullptr) {
-
-                //  if (pRight->mass < matter.mass &&
-                //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                //    partners++;
-
-                //    validRight = true;
-                //  }
-                //}
-
-                //if (pTop != nullptr) {
-                //  if (pTop->mass < matter.mass &&
-                //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                //    partners++;
-
-                //    validTop = true;
-                //  }
-                //}
-
-                //if (pBottom != nullptr) {
-                //  if (pBottom->mass < matter.mass &&
-                //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                //    partners++;
-
-                //    validBottom = true;
-                //  }
-                //}
-
-                //part = matter.mass / partners;
-              }
             }
           }
         }
       }
 
-
-      //
-
-      //{
-      //  currentSum = 0;
-      //  currentOxygen = 0;
-      //  currentToxicGas = 0;
-
-      //  for (size_t i = 0; i < count; ++i) {
-      //    currentSum += _pMatter[i].mass;
-
-      //    if (_pMatter[i].type == matter_type::oxygen) {
-      //      currentOxygen += _pMatter[i].mass;
-      //    }
-      //    else if (_pMatter[i].type == matter_type::toxic_gas) {
-      //      currentToxicGas += _pMatter[i].mass;
-      //    }
-
-      //    assert(_pMatter[i].mass >= 0);
-      //  }
-
-      //  assert(currentSum == sum);
-      //  assert(currentOxygen == totalOxygen);
-      //  assert(currentToxicGas == totalToxocGas);
-      //}
-      //
-
-
       if (validRight) {
         const int32_t part = (fullPart * (100 - ((pRight->mass * 100) / matter.mass))) / 100;
+
+        //const auto part = get_diffusion_flux(matter, *pRight, data.deltaTime, mass(fullPart));
 
         if (pRight->type == matter_type::vacuum) {
           newMatter.mass -= part;
@@ -568,47 +378,6 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
               pNewRight->state = matter.state;
 
               assert(newMatter.mass >= 0);
-
-              {
-                //if (pLeft != nullptr) {
-                //  if (pLeft->mass < matter.mass &&
-                //    pLeft->state == matter_state::gas || pLeft->state == matter_state::undef) {
-                //    partners++;
-
-                //    validLeft = true;
-                //  }
-                //}
-
-                //if (pRight != nullptr) {
-
-                //  if (pRight->mass < matter.mass &&
-                //    pRight->state == matter_state::gas || pRight->state == matter_state::undef) {
-                //    partners++;
-
-                //    validRight = true;
-                //  }
-                //}
-
-                //if (pTop != nullptr) {
-                //  if (pTop->mass < matter.mass &&
-                //    pTop->state == matter_state::gas || pTop->state == matter_state::undef) {
-                //    partners++;
-
-                //    validTop = true;
-                //  }
-                //}
-
-                //if (pBottom != nullptr) {
-                //  if (pBottom->mass < matter.mass &&
-                //    pBottom->state == matter_state::gas || pBottom->state == matter_state::undef) {
-                //    partners++;
-
-                //    validBottom = true;
-                //  }
-                //}
-
-                //part = matter.mass / partners;
-              }
             }
           }
         }
@@ -616,50 +385,29 @@ void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
 
       //
 
-      //{
-      //  currentSum = 0;
-      //  currentOxygen = 0;
-      //  currentToxicGas = 0;
-
-      //  for (size_t i = 0; i < count; ++i) {
-      //    currentSum += _pMatter[i].mass;
-
-      //    if (_pMatter[i].type == matter_type::oxygen) {
-      //      currentOxygen += _pMatter[i].mass;
-      //    }
-      //    else if (_pMatter[i].type == matter_type::toxic_gas) {
-      //      currentToxicGas += _pMatter[i].mass;
-      //    }
-
-      //    assert(_pMatter[i].mass >= 0);
-      //  }
-
-      //  assert(currentSum == sum);
-      //  assert(currentOxygen == totalOxygen);
-      //  assert(currentToxicGas == totalToxocGas);
-      //}
-      
-      //currentSum = 0;
-      //currentToxicGas = 0;
-      //currentOxygen = 0;
-      //for (size_t i = 0; i < count; ++i) {
-      //  currentSum += _pMatter[i].mass;
-
-      //  if (_pMatter[i].type == matter_type::oxygen) {
-      //    currentOxygen += _pMatter[i].mass;
-      //  }
-      //  else if (_pMatter[i].type == matter_type::toxic_gas) {
-      //    currentToxicGas += _pMatter[i].mass;
-      //  }
-
-      //  assert(_pMatter[i].mass >= 0);
-      //}
-
-      //assert(currentSum == sum);
-      //assert(currentOxygen == totalOxygen);
-      //assert(currentToxicGas == totalToxocGas);
     }
   }
+}
+
+sim::mass sim_system::get_diffusion_flux(
+  const matter_data& a, const matter_data& b, double dt, mass part) const
+{
+  assert(a.type != matter_type::vacuum);
+  //assert(b.type != matter_type::vacuum);
+
+  sim_solver solver{};
+  const auto conGradient = concentration_gradient(
+    moles(a.mass, a.type), moles(b.mass, b.type), 1.0);
+  const auto data = empirical_database::get(a.type);
+
+  const auto pressure = sim::pressure(
+    moles(a.mass, a.type), a.temp, 1.0);
+
+  const auto dE = solver.solve_diffusion_coefficient(a.temp, pressure, data);
+  const auto mass = solver.solve_diffusion_flux(data,
+    dE, conGradient, 1.0, dt, part);
+
+  return mass;
 }
 
 bool sim_system::displace_gas(base::vector2_int target, displace_exce exec)
