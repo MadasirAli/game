@@ -13,6 +13,8 @@ using namespace sim;
 void sim_system::on_update(const base::ecs::world<world_per_tick_data>& query,
   const world_per_tick_data& data)
 {
+  return;
+
   using namespace base;
 
   const auto count = _size.to_size();
